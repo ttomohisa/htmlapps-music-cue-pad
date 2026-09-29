@@ -1,0 +1,26 @@
+{
+  "$schema": "./schemas/app-config.schema.json",
+  "name": "Music Cue Pad",
+  "nameJa": "Music Cue Pad",
+  "slug": "music-cue-pad",
+  "version": "1.0.0",
+  "description": "A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.",
+  "descriptionJa": "複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。",
+  "defaultLanguage": "auto",
+  "repository": {
+    "owner": "ttomohisa",
+    "name": "htmlapps-music-cue-pad"
+  },
+  "build": {
+    "output": "dist/index.html",
+    "blockRuntimeNetwork": true,
+    "selfExtract": {
+      "enabled": true,
+      "output": "dist/index.self-extract.html"
+    },
+    "sizeBudget": {
+      "readableWarningMb": 5,
+      "selfExtractWarningMb": 3
+    }
+  }
+}
