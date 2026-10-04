@@ -325,6 +325,18 @@ Required behavior:
 - Stop pauses playback, resets the playback position, and leaves the cue available for replay.
 - Ended audio remains identified as the most recently selected cue, but the player state becomes ended.
 
+### Manual Play next
+
+- The bottom transport names the immediate next cue in current board order and offers a native Play next button in both the app and exported playback HTML.
+- With no selected cue, Next starts the first cue. Selection changes synchronously, so rapid presses advance through successive cues while only the newest playback intent may complete.
+- Stop, pause, and Finished retain the selection; Next advances from it. Reaching an end or looping never advances the board automatically.
+- The final cue disables Next and shows End of board; no wrapping. An empty board has no available transport.
+- If the immediate next cue is loading or failed, its name and unavailable reason remain visible and Next is disabled. No implicit skipping.
+- Reorder, duplicate, rename, delete/Undo, and board import recompute from cue identity. Deleting the selected cue clears selection, so Next targets the first remaining cue. Undo restores that cue selected and stopped, cancelling any newer playback. Board replacement/reload starts unselected.
+- Existing cue bounds, volume, fades, loops, and one-at-a-time audio remain authoritative. Stop, deletion, board replacement, and a newer selection cancel older metadata/play continuations.
+- No extra shortcut is reserved; N remains assignable to a cue. Next supports native Tab, Enter, and Space activation.
+- Labels and guidance are bilingual; narrow layouts keep Next and Stop reachable. No schema, persistence, dependency, or network change.
+
 ## 8. Error behavior
 
 Never collapse multi-file import into all-or-nothing behavior.
@@ -572,7 +584,7 @@ Fix RC issues only. Re-run complete release regression including small and near-
 
 Not part of the v1.0 commitment:
 
-- Setlist / NEXT mode.
+- Advanced setlists (manual Play next is supported).
 - Waveform cue editor.
 - Crossfade between cues.
 - Simultaneous multi-cue playback.
