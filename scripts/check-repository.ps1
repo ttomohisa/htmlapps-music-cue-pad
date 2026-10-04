@@ -250,3 +250,7 @@ if (-not $webrtcReadyText.Contains("options.requireReadyChannelOpen!==false&&(!r
   throw "WebRTC application-ready must wait for the designated DataChannel to open."
 }
 
+
+# Playback behavior regression tests (Node.js is a development-only requirement).
+& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Playback regression tests failed." }

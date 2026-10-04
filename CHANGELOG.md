@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add manual Play next with the next cue name and explicit loading, unavailable, and end-of-board states in the app and exported playback HTML.
+- Recompute the next target after board edits while keeping Stop/Finished at the selected cue; preserve N for cue shortcuts.
+- Cancel superseded metadata/play continuations so rapid Next, Stop, direct selection, deletion, and Undo cannot revive stale playback.
+- Add dependency-free Node regression tests for both runtimes and run them in repository verification.
+
 ## v1.0.0 — 2026-09-29
 
 ### Stable release

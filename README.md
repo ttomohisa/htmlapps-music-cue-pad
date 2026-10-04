@@ -23,6 +23,7 @@ GitHub Pages delivers the initial HTML. After it loads, audio import, cue editin
 - **Tune each cue without editing the source file** — Set per-cue volume, Fade In, Fade Out, Loop, and an optional trigger key.
 - **Reorder visually** — Drag cards to change the order while the insertion position and temporary numbering update on screen.
 - **Stay focused during playback** — Switch to a playback-only view that hides editing controls, enlarges the buttons, shows remaining time, and can use Fullscreen / Keep Screen On where supported.
+- **Play the next cue manually** — The bottom player names the next cue in board order. Start with the first when nothing is selected; Stop/Finished retain the position. No automatic advance, wrap, or skipped unavailable cues. The exported player works the same way.
 - **Control playback quickly** — Pause/Resume, Restart, Fade Stop, Stop, Master volume, per-cue shortcuts, and desktop keyboard controls are available.
 - **Keep the board on this device** — Audio, cue settings, board name, and Master volume are saved in IndexedDB and restored on reload.
 - **Move an editable board between devices** — Export and import `.bkcue` backups containing the board settings and audio assets.
@@ -112,6 +113,9 @@ The repository includes a workflow that builds the standalone HTML and deploys i
 The deployed page still performs user-audio processing locally in the browser.
 
 ## Development and build layout
+
+Repository validation requires Node.js 22 or newer for dependency-free playback regression tests. Normal app use and standalone building do not require Node.js.
+
 
 ```text
 .
