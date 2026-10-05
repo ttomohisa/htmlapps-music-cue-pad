@@ -451,6 +451,15 @@ if ($appConfig.build.PSObject.Properties.Name -contains "sizeBudget" -and $appCo
   }
 }
 
+# The catalog publishes this tracked alias. Custom-output builds must not change it.
+if (-not $OutputPathWasSpecified) {
+  $releasePath = Join-Path $Root "music-cue-pad.html"
+  if ([System.IO.Path]::GetFullPath($OutputPath) -ne [System.IO.Path]::GetFullPath($releasePath)) {
+    Copy-Item -LiteralPath $OutputPath -Destination $releasePath -Force
+  }
+  Write-Step "Synchronized tracked release: $releasePath"
+}
+
 $outputHash = Get-Sha256FileHex $OutputPath
 $outputSizeMb = [Math]::Round($readableBytes / 1MB, 2)
 Write-Host ""

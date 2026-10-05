@@ -21,7 +21,7 @@ GitHub Pages delivers the initial HTML. After it loads, audio import, cue editin
 - **Trigger registered audio immediately** — Add multiple audio files and play the track you need from large numbered buttons.
 - **Set the exact playback range** — Adjust Start and End with a two-handle range bar, seek while previewing, or enter precise times such as `1:23.500`.
 - **Tune each cue without editing the source file** — Set per-cue volume, Fade In, Fade Out, Loop, and an optional trigger key.
-- **Reorder visually** — Drag cards to change the order while the insertion position and temporary numbering update on screen.
+- **Reorder by pointer or keyboard** — Drag the handle with visible insertion numbering, or focus it with Tab and press ArrowUp / ArrowDown to move one position.
 - **Stay focused during playback** — Switch to a playback-only view that hides editing controls, enlarges the buttons, shows remaining time, and can use Fullscreen / Keep Screen On where supported.
 - **Play the next cue manually** — The bottom player names the next cue in board order. Start with the first when nothing is selected; Stop/Finished retain the position. No automatic advance, wrap, or skipped unavailable cues. The exported player works the same way.
 - **Control playback quickly** — Pause/Resume, Restart, Fade Stop, Stop, Master volume, per-cue shortcuts, and desktop keyboard controls are available.
@@ -50,6 +50,8 @@ Just [open the demo](https://ttomohisa.github.io/htmlapps-music-cue-pad/). No in
 3. Copy the generated `dist/index.html` or `dist/index.self-extract.html` wherever you need it.
 4. Open the file later without installing Music Cue Pad.
 
+The default build also refreshes the tracked `music-cue-pad.html` release. Builds with an explicit `-OutputPath` leave it unchanged. After editing source, run the default build before `scripts/check-repository.ps1`; the check rejects stale root releases and runs the Node.js development tests.
+
 The current app has no third-party runtime dependency. Python, Node.js, and a local web server are not required for normal use.
 
 ## Usage
@@ -58,7 +60,7 @@ The current app has no third-party runtime dependency. Python, Node.js, and a lo
 2. Each audio file becomes a numbered playback button. Press a button to play it; selecting another button switches playback to that cue.
 3. Use **Edit cue** to change the display name and set Start / End. In the preview section, drag the two handles to adjust the playback range or type an exact time.
 4. Set cue volume, Fade In, Fade Out, Loop, and an optional trigger key when needed.
-5. Drag cards to reorder them. The temporary numbering and insertion position update while you drag.
+5. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
 6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop.
 7. Use **Playback view** when you want only the large playback controls on screen. Remaining time is shown, and non-looping cues display an ending-soon notice during the final 10 seconds.
 8. The board is saved automatically in the browser. Use the storage panel to review usage, request persistent storage where supported, retry a failed save, or delete all saved app data.
@@ -95,8 +97,9 @@ Use `.bkcue` when you want to continue editing. Use playback HTML when you want 
 | `Space` | Play / Pause |
 | `R` | Restart the active cue from its Start point |
 | `F` | Fade Stop |
-| `Esc` | Stop immediately |
-| `←` / `→` / `↑` / `↓` | Move focus between cue buttons |
+| `Esc` | Cancel a pending drag and stop the selected cue immediately |
+| `←` / `→` / `↑` / `↓` on a playback button | Move focus between cue buttons |
+| `↑` / `↓` on a reorder handle | Move that cue one position (editing view only) |
 | `Home` / `End` | Move focus to the first / last cue |
 
 `R` and `F` are reserved and cannot be assigned as cue trigger keys. Shortcuts are ignored while typing in fields or using IME composition.
