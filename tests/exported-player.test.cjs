@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync('src/index.template.html','utf8');
+const source = fs.readFileSync(process.env.MUSIC_CUE_SOURCE || 'src/index.template.html','utf8');
 const start=source.indexOf('      function playerExportDocument('),end=source.indexOf('      async function exportPlaybackHtml',start);
 function deferred(){let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b});return {promise,resolve,reject};}
 class Element {

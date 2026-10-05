@@ -731,7 +731,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M12 15v2"/></svg>
             <span data-i18n="enterLiveMode">再生専用表示</span>
           </button>
-          <span class="cue-reorder-hint" id="reorderHint" hidden data-i18n="reorderHint">グリップをドラッグして並べ替えできます</span>
+          <span class="cue-reorder-hint" id="reorderHint" hidden data-i18n="reorderHint">グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます</span>
           <div class="master-volume">
             <label for="masterVolumeSlider" data-i18n="masterVolume">マスター音量</label>
             <input id="masterVolumeSlider" type="range" min="0" max="100" step="1" value="100" data-i18n-aria-label="masterVolume" aria-label="マスター音量">
@@ -1029,7 +1029,7 @@
         <li data-i18n="helpStep1">「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。</li>
         <li data-i18n="helpStep2">追加されたキューボタンを押すと再生します。別のキューを押すと、前の曲を止めてその曲へ切り替わります。</li>
         <li data-i18n="helpStep3">画面下部のプレイヤーから一時停止・再開・停止できます。</li>
-        <li data-i18n="helpStep4">各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグします。</li>
+        <li data-i18n="helpStep4">各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグするか、Tabでグリップを選択して↑ / ↓キーを押します。Escでドラッグを取り消せます。選択中のキューがあれば即時停止も行います。</li>
         <li data-i18n="helpStep5">「再生専用表示」にすると編集操作を隠し、曲を鳴らす操作だけに集中できます。編集へ戻るには解除ボタンを長押しします。</li>
       </ol>
       <h3 data-i18n="helpLiveTitle">再生専用表示</h3>
@@ -1170,7 +1170,7 @@
           chooseFiles: 'ファイルを選択',
           cueSectionTitle: '再生ボタン',
           cueSectionBody: '左上の番号が再生順です。カード下部から再生区間・音量・フェード・ループ・ショートカット・表示名を編集できます。',
-          reorderHint: 'グリップをドラッグして並べ替えできます',
+          reorderHint: 'グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます',
           keyboardHint: '<kbd>Space</kbd> 再生/一時停止 · <kbd>R</kbd> 最初から · <kbd>F</kbd> フェード停止 · <kbd>Esc</kbd> 停止',
           emptyTitle: 'まだ曲がありません',
           emptyBody: '上の「ファイルを選択」から音声を追加すると、ここに再生ボタンが並びます。',
@@ -1193,7 +1193,7 @@
           backupTitle: '持ち出し・バックアップ', backupBody: '編集を続けるなら .bkcue、再生だけなら音源込みの単一HTMLとして持ち出せます。', boardNameLabel: 'ボード名', boardNamePlaceholder: '例: 2026 夏祭り', exportBackup: 'バックアップを書き出す', importBackup: 'バックアップを読み込む', playerExportTitle: '再生用HTMLを書き出す', playerExportBody: '現在の音源とキューを1つのHTMLにまとめます。別端末でもファイルを開くだけで再生できます。', playerFilenameLabel: '出力ファイル名', playerFilenameHint: '拡張子は自動で .html が付きます', exportPlayer: '再生用HTMLを書き出す', playerExportNote: '音源もHTML内に含めます。音源合計100 MiBを超える場合は確認し、250 MiBを超える場合は .bkcue を利用してください。', playerExportEstimate: '音源 {audio} → HTML 約 {html}。100 MiB超は確認、250 MiB超は .bkcue を利用してください。', playerExportPreparing: '再生用HTMLを準備中…', playerExportEncoding: '音源をHTMLへ埋め込み中 {current}/{total}', playerExportWriting: 'HTMLを作成中…', playerExported: '再生用HTMLを書き出しました。', playerExportTooLarge: '音源合計が250 MiBを超えるため、単一HTMLには書き出せません。.bkcue バックアップを利用してください。', playerExportLargeTitle: '大きなHTMLを書き出しますか？', playerExportLargeMessage: '音源合計が100 MiBを超えています。生成するHTMLはさらに大きくなり、端末によっては作成や起動に時間がかかります。', playerExportLargeConfirm: '書き出す', backupNote: '.bkcue はMusic Cue Pad用のZIPコンテナです。読み込み前に内容を検証し、問題がある場合は現在のボードを変更しません。', backupPreparing: 'バックアップを準備中…', backupHashing: '音源を確認中 {current}/{total}', backupWriting: 'バックアップを作成中…', backupExported: '「{name}」のバックアップを書き出しました。', backupEmpty: 'バックアップするキューがありません。', backupReading: 'バックアップを確認中…', backupVerifying: '音源を検証中 {current}/{total}', backupInvalid: 'このバックアップを読み込めません。ファイルが破損しているか、Music Cue Padの対応形式ではありません。', backupUnsupportedVersion: 'このバックアップの形式は、このバージョンでは読み込めません。', backupReplaceTitle: '現在のボードを置き換えますか？', backupReplaceMessage: '「{name}」を読み込むと、現在の音源とキュー設定を置き換えます。現在のボードが必要な場合は先にバックアップしてください。', backupReplaceConfirm: '置き換える', backupImported: '「{name}」を読み込みました。', backupImportFailed: 'バックアップを読み込めませんでした。現在のボードは変更していません。', backupSaveFailed: '読み込んだボードを端末へ保存できなかったため、現在のボードは変更していません。', backupNoManifest: 'manifest.json がありません。', backupNoAudio: 'バックアップ内の音源が見つかりません。', backupChecksumFailed: 'バックアップ内の音源が破損しています。', backupStoreOnly: 'この .bkcue の圧縮方式には対応していません。', backupNameFallback: 'Music Cue Pad Board', backupProgressDone: '完了', boardNameSaved: 'ボード名を保存しました。',
           restoringSaved: '保存したデータを読み込み中…', restoredSaved: '{count}個の再生ボタンを復元しました。', storageTitle: '端末保存', storageBody: '音源とキュー設定は、このブラウザに自動保存されます。', storageLoading: '保存データを確認中', storageSaved: '保存済み', storageSaving: '保存中…', storageSessionOnly: 'このセッションのみ', storageError: '保存に問題があります', storageUsageLabel: 'このサイトの使用量', storageProtectionLabel: '保存の保護', storageProtected: '保護されています', storageNotProtected: '通常のブラウザ管理', storageUnavailable: '利用できません', requestPersistence: '保存を保護する', persistenceGranted: 'ブラウザに保存の保護を依頼しました。', persistenceDenied: 'このブラウザでは保存を保護できませんでした。通常の保存は引き続き利用できます。', retrySave: '保存を再試行', retrySaveSuccess: '保存を再試行しました。', resetAll: 'すべて削除', resetTitle: '保存した音源と設定を削除しますか？', resetMessage: 'このブラウザに保存した音源・キュー・音量設定をすべて削除します。この操作は元に戻せません。', resetConfirm: 'すべて削除', resetDone: '保存した音源と設定を削除しました。', resetFailed: '保存データを削除できませんでした。現在の内容はそのまま残しています。', persistenceUnavailableWarning: 'このブラウザでは端末保存を利用できません。このまま再生できますが、ページを閉じると追加内容は失われます。', persistenceQuotaWarning: '保存領域が不足しているため、一部の変更を端末へ保存できませんでした。このまま再生できますが、再読み込みすると未保存分は失われます。', persistenceWriteWarning: '端末への保存に失敗しました。このまま再生できますが、再読み込みすると未保存分は失われる可能性があります。',
           cueEditTitle: '再生ボタンを編集', cueNameLabel: '表示名', cueNameHelp: '再生ボタンに表示する名前です。元の音声ファイル名は変更されません。', save: '保存',
-          renameCue: '編集', duplicateCue: '複製', deleteCue: '削除', moveUp: '上へ移動', moveDown: '下へ移動', dragCue: 'ドラッグして並べ替え', dragMoveHere: 'ここに移動', dragMoved: '並び順を変更しました。',
+          renameCue: '編集', duplicateCue: '複製', deleteCue: '削除', moveUp: '上へ移動', moveDown: '下へ移動', dragCue: '並べ替え', dragMoveHere: 'ここに移動', dragMoved: '並び順を変更しました。',
           renamedCue: '再生ボタンを更新しました。', duplicatedCue: '「{name}」を複製しました。', deletedCue: '「{name}」を削除しました。', undo: '元に戻す', emptyCueName: '表示名を入力してください。', copySuffix: '{name} のコピー',
           shortcutTitle: 'キーボードショートカット', shortcutLabel: 'この再生ボタンを呼び出すキー', shortcutPlaceholder: '未設定', shortcutClear: 'クリア', shortcutHelp: '欄を選んで 0–9 / A–Z のいずれかを押します。R と F は共通操作で使用するため割り当てできません。', shortcutCapture: 'キーを押してください', shortcutReserved: 'R と F は共通操作で使用するため割り当てできません。', shortcutConflict: 'このキーは「{name}」ですでに使われています。', shortcutInvalid: '0–9 または A–Z の1キーを指定してください。', shortcutAssigned: 'ショートカット {key}',
           previewTitle: '位置を確認', previewPlay: '試聴', previewPause: '試聴を一時停止', previewPosition: '試聴位置', previewRangeLabel: '再生区間をバーで調整', cueRangeStartAria: '再生区間の開始位置', cueRangeEndAria: '再生区間の終了位置', previewHelp: '上のバーで試聴位置、下の2つのつまみで再生区間を調整できます。時刻入力とも同期します。',
@@ -1206,7 +1206,7 @@
           helpStep1: '「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。',
           helpStep2: '追加された再生ボタンを押すと音源を再生します。別のボタンを押すと、前の音源を止めて切り替わります。',
           helpStep3: '画面下部で一時停止・再開・フェード停止・即時停止できます。「次を再生」は表示中の次の曲を手動で再生します。未選択なら先頭、停止・終了後は次の曲へ進みます。自動送り・末尾からの折り返し・再生できない曲のスキップはしません。選択中の曲を削除すると先頭に戻り、取り消すとその曲が停止状態で選択されます。マスター音量は一覧の上で調整できます。',
-          helpStep4: '各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグします。', helpStep5: '「再生専用表示」にすると編集操作を隠し、曲を鳴らす操作だけに集中できます。編集へ戻るには解除ボタンを長押しします。', helpLiveTitle: '再生専用表示', helpLiveBody: '再生専用表示では、必要に応じて全画面表示と画面の点灯維持を有効にできます。どちらもブラウザが対応している場合だけ利用できます。',
+          helpStep4: '各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグするか、Tabでグリップを選択して↑ / ↓キーを押します。Escでドラッグを取り消せます。選択中のキューがあれば即時停止も行います。', helpStep5: '「再生専用表示」にすると編集操作を隠し、曲を鳴らす操作だけに集中できます。編集へ戻るには解除ボタンを長押しします。', helpLiveTitle: '再生専用表示', helpLiveBody: '再生専用表示では、必要に応じて全画面表示と画面の点灯維持を有効にできます。どちらもブラウザが対応している場合だけ利用できます。',
           helpPrivacyTitle: 'プライバシー',
           helpPrivacyBody: '追加した音声はこのブラウザ内だけで読み込まれ、このアプリから外部サーバーへ送信されません。実行時の外部通信も行いません。',
           helpNotesTitle: 'v1.0.0 の注意事項',
@@ -1230,7 +1230,7 @@
           chooseFiles: 'Choose files',
           cueSectionTitle: 'Playback buttons',
           cueSectionBody: 'The number at top left shows playback order. Use the controls below each button to edit its range, volume, fades, loop, shortcut, and label.',
-          reorderHint: 'Drag the handle to reorder buttons',
+          reorderHint: 'Drag the handle, or focus it and press ArrowUp / ArrowDown to reorder',
           keyboardHint: '<kbd>Space</kbd> play/pause · <kbd>R</kbd> restart · <kbd>F</kbd> fade stop · <kbd>Esc</kbd> stop',
           emptyTitle: 'No tracks yet',
           emptyBody: 'Add audio with Choose files above and its playback buttons will appear here.',
@@ -1253,7 +1253,7 @@
           backupTitle: 'Export & backup', backupBody: 'Use .bkcue when you want to keep editing, or export one self-contained HTML file when you only need playback.', boardNameLabel: 'Board name', boardNamePlaceholder: 'Example: Summer Festival 2026', exportBackup: 'Export backup', importBackup: 'Import backup', playerExportTitle: 'Export playback HTML', playerExportBody: 'Bundle the current audio and cues into one HTML file that can be opened on another device for playback.', playerFilenameLabel: 'Output filename', playerFilenameHint: 'The .html extension is added automatically', exportPlayer: 'Export playback HTML', playerExportNote: 'Audio is embedded in the HTML. Above 100 MiB of source audio you will be asked to confirm; above 250 MiB use a .bkcue backup instead.', playerExportEstimate: 'Audio {audio} → about {html} HTML. Confirm above 100 MiB; use .bkcue above 250 MiB.', playerExportPreparing: 'Preparing playback HTML…', playerExportEncoding: 'Embedding audio {current}/{total}', playerExportWriting: 'Creating HTML…', playerExported: 'Exported the playback HTML.', playerExportTooLarge: 'The source audio exceeds 250 MiB, so it cannot be exported as one HTML file. Use a .bkcue backup instead.', playerExportLargeTitle: 'Export a large HTML file?', playerExportLargeMessage: 'The source audio exceeds 100 MiB. The generated HTML will be even larger and may take time to create or open on some devices.', playerExportLargeConfirm: 'Export', backupNote: '.bkcue is a ZIP container for Music Cue Pad. Its contents are validated before import, and the current board is left unchanged if validation fails.', backupPreparing: 'Preparing backup…', backupHashing: 'Checking audio {current}/{total}', backupWriting: 'Creating backup…', backupExported: 'Exported a backup of “{name}”.', backupEmpty: 'There are no cues to back up.', backupReading: 'Checking backup…', backupVerifying: 'Verifying audio {current}/{total}', backupInvalid: 'This backup could not be read. It may be damaged or not use a Music Cue Pad format supported by this version.', backupUnsupportedVersion: 'This backup format is not supported by this version.', backupReplaceTitle: 'Replace the current board?', backupReplaceMessage: 'Importing “{name}” replaces the current audio and cue settings. Export a backup first if you need the current board.', backupReplaceConfirm: 'Replace', backupImported: 'Imported “{name}”.', backupImportFailed: 'The backup could not be imported. The current board was left unchanged.', backupSaveFailed: 'The imported board could not be saved on this device, so the current board was left unchanged.', backupNoManifest: 'manifest.json is missing.', backupNoAudio: 'Audio referenced by the backup is missing.', backupChecksumFailed: 'Audio in this backup is damaged.', backupStoreOnly: 'This .bkcue uses a ZIP compression method that is not supported.', backupNameFallback: 'Music Cue Pad Board', backupProgressDone: 'Done', boardNameSaved: 'Board name saved.',
           restoringSaved: 'Loading saved data…', restoredSaved: 'Restored {count} playback buttons.', storageTitle: 'On-device storage', storageBody: 'Audio and cue settings are saved automatically in this browser.', storageLoading: 'Checking saved data', storageSaved: 'Saved', storageSaving: 'Saving…', storageSessionOnly: 'This session only', storageError: 'Storage needs attention', storageUsageLabel: 'Site storage usage', storageProtectionLabel: 'Storage protection', storageProtected: 'Protected', storageNotProtected: 'Normal browser management', storageUnavailable: 'Unavailable', requestPersistence: 'Protect saved data', persistenceGranted: 'Asked the browser to protect this saved data.', persistenceDenied: 'This browser did not grant protected storage. Normal local storage still works.', retrySave: 'Retry save', retrySaveSuccess: 'Retried saving the current board.', resetAll: 'Delete all', resetTitle: 'Delete saved audio and settings?', resetMessage: 'This deletes all audio, cues, and volume settings saved by Music Cue Pad in this browser. This cannot be undone.', resetConfirm: 'Delete all', resetDone: 'Deleted the saved audio and settings.', resetFailed: 'Saved data could not be deleted. The current board was left unchanged.', persistenceUnavailableWarning: 'On-device storage is unavailable in this browser. Playback still works, but added content will be lost when this page is closed.', persistenceQuotaWarning: 'Browser storage is full, so some changes could not be saved on this device. Playback still works, but unsaved changes will be lost after reload.', persistenceWriteWarning: 'Saving to this device failed. Playback still works, but unsaved changes may be lost after reload.',
           cueEditTitle: 'Edit playback button', cueNameLabel: 'Button label', cueNameHelp: 'This is the label shown on the playback button. The source audio filename is not changed.', save: 'Save',
-          renameCue: 'Edit', duplicateCue: 'Duplicate', deleteCue: 'Delete', moveUp: 'Move up', moveDown: 'Move down', dragCue: 'Drag to reorder', dragMoveHere: 'Move here', dragMoved: 'Order updated.',
+          renameCue: 'Edit', duplicateCue: 'Duplicate', deleteCue: 'Delete', moveUp: 'Move up', moveDown: 'Move down', dragCue: 'Reorder cue', dragMoveHere: 'Move here', dragMoved: 'Order updated.',
           renamedCue: 'Cue updated.', duplicatedCue: 'Duplicated “{name}”.', deletedCue: 'Deleted “{name}”.', undo: 'Undo', emptyCueName: 'Enter a cue name.', copySuffix: '{name} copy',
           shortcutTitle: 'Keyboard shortcut', shortcutLabel: 'Key to play this cue', shortcutPlaceholder: 'Not set', shortcutClear: 'Clear', shortcutHelp: 'Focus this field and press one key from 0–9 or A–Z. R and F are reserved for global playback controls.', shortcutCapture: 'Press a key', shortcutReserved: 'R and F are reserved for global playback controls.', shortcutConflict: 'This key is already assigned to “{name}”.', shortcutInvalid: 'Choose one key from 0–9 or A–Z.', shortcutAssigned: 'Shortcut {key}',
           previewTitle: 'Check position', previewPlay: 'Preview', previewPause: 'Pause preview', previewPosition: 'Preview position', previewRangeLabel: 'Adjust playback range', cueRangeStartAria: 'Playback range start', cueRangeEndAria: 'Playback range end', previewHelp: 'Use the upper bar to preview a position and the two handles below to adjust the playback range. Time fields stay in sync.',
@@ -1266,7 +1266,7 @@
           helpStep1: 'Use Choose files or Drag & Drop to add audio. You can add multiple files at once.',
           helpStep2: 'Press a cue button to play it. Pressing another cue stops the previous track and switches to the new one.',
           helpStep3: 'Use the bottom player to pause, resume, fade-stop, or stop. Play next manually starts the named next cue: the first when unselected, or the following cue after Stop or Finished. It never auto-advances, wraps, or skips unavailable cues. Deleting the selected cue resets Next to the first; Undo restores that selection stopped. Master volume is above the playback buttons.',
-          helpStep4: 'Edit each playback button to set its label, start, end, volume, fades, loop behavior, and keyboard shortcut. Drag the handle below a card to reorder it.', helpStep5: 'Playback view hides editing controls so you can focus on triggering audio. Hold the exit button to return to editing.', helpLiveTitle: 'Playback view', helpLiveBody: 'In Playback view, enable Fullscreen or Keep Screen On when useful. These controls appear only when the browser supports the required APIs.',
+          helpStep4: 'Edit each playback button to set its label, start, end, volume, fades, loop behavior, and keyboard shortcut. Drag the handle below a card, or focus it with Tab and press ArrowUp / ArrowDown to reorder. Escape cancels a drag and also immediately stops any selected cue.', helpStep5: 'Playback view hides editing controls so you can focus on triggering audio. Hold the exit button to return to editing.', helpLiveTitle: 'Playback view', helpLiveBody: 'In Playback view, enable Fullscreen or Keep Screen On when useful. These controls appear only when the browser supports the required APIs.',
           helpPrivacyTitle: 'Privacy',
           helpPrivacyBody: 'Added audio is read only inside this browser and is not sent to an external server by this app. The app also makes no runtime network requests.',
           helpNotesTitle: 'v1.0.0 notes',
@@ -2572,12 +2572,23 @@
       function moveCue(cueId, delta) {
         const index = cueIndex(cueId);
         const target = index + delta;
-        if (index < 0 || target < 0 || target >= state.cues.length) return;
+        if (index < 0 || target < 0 || target >= state.cues.length || target === index) return false;
         const [cue] = state.cues.splice(index, 1);
         state.cues.splice(target, 0, cue);
         reindexCues();
         renderCues();
         enqueuePersistence(putAllCueMetadata);
+        return true;
+      }
+      function onCueReorderKeydown(cueId, event) {
+        if (event.defaultPrevented || event.isComposing || event.keyCode === 229 || event.repeat) return;
+        if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
+        if (state.liveMode || anyDialogOpen() || cueDragSession) return;
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+        event.preventDefault();
+        if (moveCue(cueId, event.key === 'ArrowUp' ? -1 : 1)) {
+          showToast(translate('dragMoved'), { tone: 'success', duration: 1800 });
+        }
       }
       function reorderCue(sourceId, targetId, after = false) {
         if (!sourceId || !targetId || sourceId === targetId) return;
@@ -2933,13 +2944,13 @@
         window.removeEventListener('pointermove', onCuePointerMove, true); window.removeEventListener('pointerup', onCuePointerUp, true); window.removeEventListener('pointercancel', onCuePointerCancel, true);
         const insertAt = cancelled ? -1 : d.insertIndex;
         d.ghost.remove(); d.placeholder.remove(); d.card.classList.remove('is-drag-source'); document.body.classList.remove('cue-drag-active'); state.dragCueId = null; cueDragSession = null;
-        if (!cancelled && insertAt >= 0) {
-          const oldIndex = state.cues.findIndex(cue => cue.id === d.cueId);
-          if (oldIndex >= 0) {
-            const [moved] = state.cues.splice(oldIndex,1);
-            state.cues.splice(Math.min(insertAt,state.cues.length),0,moved);
-            reindexCues(); enqueuePersistence(putAllCueMetadata); renderCues(); showToast(translate('dragMoved'), { tone:'success', duration:1800 });
-          }
+        const oldIndex = cueIndex(d.cueId);
+        const target = Math.min(insertAt, state.cues.length - 1);
+        // A cancelled or unchanged drop must not replace an existing Delete Undo toast.
+        if (!cancelled && target >= 0 && oldIndex >= 0 && target !== oldIndex) {
+          const [moved] = state.cues.splice(oldIndex,1);
+          state.cues.splice(target,0,moved);
+          reindexCues(); enqueuePersistence(putAllCueMetadata); renderCues(); showToast(translate('dragMoved'), { tone:'success', duration:1800 });
         } else renderCues();
       }
       function onCuePointerMove(event) { if (!cueDragSession || event.pointerId !== cueDragSession.pointerId) return; event.preventDefault(); moveCueDragGhost(event.clientX,event.clientY); }
@@ -3025,6 +3036,9 @@
           const tools = document.createElement('div');
           tools.className = 'cue-tools';
           const drag = cueToolButton({ className: 'cue-drag-handle', label: translate('dragCue'), icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 7h.01M8 12h.01M8 17h.01M16 7h.01M16 12h.01M16 17h.01"/></svg>' });
+          drag.setAttribute('aria-describedby', 'reorderHint');
+          drag.setAttribute('aria-keyshortcuts', 'ArrowUp ArrowDown');
+          drag.addEventListener('keydown', event => onCueReorderKeydown(cue.id, event));
           drag.addEventListener('pointerdown', event => startCuePointerDrag(cue.id, card, event));
 
           const rename = cueToolButton({ label: translate('renameCue'), icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/></svg>' });
@@ -3648,6 +3662,11 @@
 
       document.addEventListener('keydown', event => {
         if (event.defaultPrevented || event.isComposing || event.repeat) return;
+        if (event.key === 'Escape' && cueDragSession) {
+          finishCuePointerDrag(true);
+          event.preventDefault();
+          // Continue to the existing Escape transport rule so emergency Stop still works.
+        }
         if (anyDialogOpen() || isTypingTarget(event.target)) return;
         if (event.ctrlKey || event.metaKey || event.altKey) return;
 

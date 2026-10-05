@@ -38,6 +38,8 @@ $required = @(
   "scripts\update-dependency.ps1",
   "scripts\verify-standalone.ps1",
   "scripts\verify-self-extract.ps1",
+  "scripts\check-release-parity.cjs",
+  "tests\release-parity.test.cjs",
   "README.md",
   "README.ja.md",
   "LICENSE",
@@ -231,9 +233,18 @@ if ([string]::IsNullOrWhiteSpace([string]$app.version)) { throw "app.config.json
 
 $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
-& (Join-Path $Root "build-standalone.ps1") @buildArguments
+# Compare against a custom-output build before the default build can repair stale tracked HTML.
+$parityRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("music-cue-release-parity-" + [Guid]::NewGuid().ToString("N"))
+try {
+  $freshReleasePath = Join-Path $parityRoot "index.html"
+  & (Join-Path $Root "build-standalone.ps1") @buildArguments -OutputPath $freshReleasePath -SkipSelfExtract
+  & node (Join-Path $Root "scripts\check-release-parity.cjs") $freshReleasePath (Join-Path $Root "music-cue-pad.html")
+  if ($LASTEXITCODE -ne 0) { throw "Tracked release is stale; run build-standalone.ps1 and commit music-cue-pad.html." }
+} finally {
+  Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $parityRoot
+}
 
-Write-Host "[OK] Repository check passed." -ForegroundColor Green
+& (Join-Path $Root "build-standalone.ps1") @buildArguments
 
 # WebRTC readiness DataChannel regression
 $webrtcReadyText = Get-Content -Raw -Encoding UTF8 (Join-Path $Root "components\webrtc-qr-pairing.html")
@@ -252,5 +263,15 @@ if (-not $webrtcReadyText.Contains("options.requireReadyChannelOpen!==false&&(!r
 
 
 # Playback behavior regression tests (Node.js is a development-only requirement).
-& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs")
+& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs") (Join-Path $Root "tests/cue-reorder.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Playback regression tests failed." }
+
+# Release synchronization and pre-build drift regression tests (isolated temporary copies).
+& node --test (Join-Path $Root "tests/release-parity.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Release parity regression tests failed." }
+
+# Run the same behavioral contracts on every distributed runtime, including decoded gzip.
+& node --test (Join-Path $Root "tests/runtime-artifacts.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "Distributed runtime regression tests failed." }
+
+Write-Host "[OK] Repository check passed." -ForegroundColor Green

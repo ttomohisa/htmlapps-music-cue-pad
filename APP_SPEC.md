@@ -136,7 +136,11 @@ Required behavior:
 - Deleting the active cue stops playback and clears the active selection safely.
 - Undo restores a deleted cue to its previous list position; if it had been active, it returns in a stopped state and does not autoplay.
 - Reorder cues with Drag & Drop on desktop.
-- Reordering uses the drag handle only. Do not show separate Move up / Move down buttons. The handle must work with pointer/touch input, and the UI must make the target order obvious with visible sequence numbers and a numbered placeholder.
+- Reordering uses the drag handle only. Do not show separate Move up / Move down buttons. The handle must work with pointer/touch input and focused unmodified ArrowUp / ArrowDown keys, and the UI must make the target order obvious with visible sequence numbers and a numbered placeholder.
+- Focus the existing handle with Tab, then press ArrowUp / ArrowDown to move that cue one position without wrapping. Keep focus on that cue's handle and preserve its identity, asset, settings, current selection, and audio transport. Recompute manual Next from the new order.
+- Ignore reorder keys during composition (including keyCode 229), repeat, modifier combinations, Live Mode, open dialogs, or a pending pointer drag. Cue-play arrow/Home/End focus navigation remains unchanged.
+- Edge keys and pointer drops at the original position are true no-ops: no metadata write or replacement of an existing Delete Undo toast or its original six-second expiry.
+- Escape cancels a pending pointer drag before release can commit it; existing immediate Stop remains available for a selected cue. Pointer cancellation leaves cue order unchanged.
 - Drag hit-testing must be local to the pointer: moving through empty grid space must not select a distant card. During dragging, surrounding cards and their preview sequence numbers update to match the pending order.
 - Reindex the `order` field after duplicate, delete/Undo, or reorder.
 - Cue-management controls must be separate from the large playback button so edit actions cannot accidentally trigger audio.
@@ -472,7 +476,8 @@ Future dependencies should be added only if they materially reduce implementatio
 - Delete removes a cue immediately and exposes Undo; Undo restores its prior relative position.
 - Deleting the currently active cue stops playback without leaving hidden audio playing.
 - Drag reordering works with mouse and touch from the dedicated handle; no separate up/down reorder buttons are shown.
-- Desktop Drag & Drop reorder works without triggering playback.
+- Desktop Drag & Drop and keyboard handle reorder work without triggering playback, seeking, changing volume, or changing selection. No-op and cancelled drags preserve Delete Undo and its expiry.
+- Default builds refresh tracked `music-cue-pad.html` from the readable release. Explicit custom output paths do not overwrite that root artifact. Repository checks reject stale root releases before a build can repair them.
 - Cue management remains usable at 320–390 px with no horizontal page scrolling.
 - Long cue names do not break the card grid.
 - Help copy describes v0.2.0 behavior and still states that reload clears the session.

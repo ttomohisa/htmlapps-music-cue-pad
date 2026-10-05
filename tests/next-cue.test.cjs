@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const test = require('node:test');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync('src/index.template.html', 'utf8');
+const source = fs.readFileSync(process.env.MUSIC_CUE_SOURCE || 'src/index.template.html', 'utf8');
 function fn(name) {
   const start = source.search(new RegExp('^      (?:async )?function ' + name + '\\(', 'm'));
   assert.notEqual(start, -1, `runtime function ${name} exists`);

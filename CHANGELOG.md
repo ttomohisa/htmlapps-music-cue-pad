@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add ArrowUp / ArrowDown reordering on the existing cue handle, with localized guidance, focus retention, and input/editing guards.
+- Preserve Delete Undo and its original expiry when a pointer drop or edge key leaves cue order unchanged; skip needless persistence writes.
+- Cancel pending pointer reorders with Escape while preserving the existing immediate audio Stop.
+- Synchronize the tracked root HTML in default builds, restore the merged manual Next transport there, and check release drift/custom-output isolation.
+
 - Add manual Play next with the next cue name and explicit loading, unavailable, and end-of-board states in the app and exported playback HTML.
 - Recompute the next target after board edits while keeping Stop/Finished at the selected cue; preserve N for cue shortcuts.
 - Cancel superseded metadata/play continuations so rapid Next, Stop, direct selection, deletion, and Undo cannot revive stale playback.
