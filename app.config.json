@@ -3,7 +3,7 @@
   "name": "Music Cue Pad",
   "nameJa": "Music Cue Pad",
   "slug": "music-cue-pad",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.",
   "descriptionJa": "複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。",
   "defaultLanguage": "auto",

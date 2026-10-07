@@ -671,12 +671,12 @@
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><img id="appBrandIcon" src="__APP_ICON_DATA_URI__" alt=""></div>
         <div class="brand-copy">
-          <p class="brand-name"><span id="brandName">Music Cue Pad</span><span class="version-badge" id="versionBadge">v1.0.0</span></p>
+          <p class="brand-name"><span id="brandName">Music Cue Pad</span><span class="version-badge" id="versionBadge">v1.0.1</span></p>
           <p class="brand-meta" data-i18n="brandMeta">曲を登録・ボタンですぐ再生</p>
         </div>
       </div>
       <div class="header-actions">
-        <button class="language-button" id="languageButton" type="button" aria-label="Switch language">EN</button>
+        <button class="language-button" id="languageButton" type="button" title="英語に切り替え" aria-label="英語に切り替え">EN</button>
         <button class="icon-button header-icon-button" id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.35 2.35 0 1 1 3.72 1.9c-.92.67-1.52 1.12-1.52 2.1"/><path d="M12 17h.01"/></svg>
         </button>
@@ -1023,7 +1023,7 @@
       </button>
     </div>
     <div class="dialog-body">
-      <!-- APP:HELP:BEGIN Music Cue Pad v1.0.0 help. -->
+      <!-- APP:HELP:BEGIN Music Cue Pad v1.0.1 help. -->
       <h3 data-i18n="helpBasicsTitle">基本操作</h3>
       <ol>
         <li data-i18n="helpStep1">「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。</li>
@@ -1038,7 +1038,7 @@
       <p data-i18n="helpKeyboardBody">入力欄やダイアログを操作していないときは、Spaceで再生/一時停止、Rで最初から再生、Fでフェード停止、Escで即時停止できます。キューごとに0–9 / A–Zの1キーも割り当てられます。</p>
       <h3 data-i18n="helpPrivacyTitle">プライバシー</h3>
       <p data-i18n="helpPrivacyBody">追加した音声はこのブラウザ内だけで読み込まれ、このアプリから外部サーバーへ送信されません。実行時の外部通信も行いません。</p>
-      <h3 data-i18n="helpNotesTitle">v1.0.0 の注意事項</h3>
+      <h3 data-i18n="helpNotesTitle">v1.0.1 の注意事項</h3>
       <ul>
         <li data-i18n="helpNoteSession">音源とキュー設定はこのブラウザへ自動保存され、次回の起動時に復元されます。ブラウザのサイトデータを削除すると保存内容も削除されます。</li>
         <li data-i18n="helpNoteStorage">「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。バックアップは音源を含みます。</li>
@@ -1209,7 +1209,7 @@
           helpStep4: '各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグするか、Tabでグリップを選択して↑ / ↓キーを押します。Escでドラッグを取り消せます。選択中のキューがあれば即時停止も行います。', helpStep5: '「再生専用表示」にすると編集操作を隠し、曲を鳴らす操作だけに集中できます。編集へ戻るには解除ボタンを長押しします。', helpLiveTitle: '再生専用表示', helpLiveBody: '再生専用表示では、必要に応じて全画面表示と画面の点灯維持を有効にできます。どちらもブラウザが対応している場合だけ利用できます。',
           helpPrivacyTitle: 'プライバシー',
           helpPrivacyBody: '追加した音声はこのブラウザ内だけで読み込まれ、このアプリから外部サーバーへ送信されません。実行時の外部通信も行いません。',
-          helpNotesTitle: 'v1.0.0 の注意事項',
+          helpNotesTitle: 'v1.0.1 の注意事項',
           helpNoteSession: '音源とキュー設定はこのブラウザへ自動保存され、次回の起動時に復元されます。ブラウザのサイトデータを削除すると保存内容も削除されます。',
           helpNoteStorage: '「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。バックアップは音源を含むため、ファイルサイズは登録音源の合計に近くなります。',
           helpNoteFormat: '再生できる形式はブラウザによって異なります。MP3 / WAV / M4A / OGG / WebM / FLAC など、ブラウザが対応する音声を利用できます。',
@@ -1269,7 +1269,7 @@
           helpStep4: 'Edit each playback button to set its label, start, end, volume, fades, loop behavior, and keyboard shortcut. Drag the handle below a card, or focus it with Tab and press ArrowUp / ArrowDown to reorder. Escape cancels a drag and also immediately stops any selected cue.', helpStep5: 'Playback view hides editing controls so you can focus on triggering audio. Hold the exit button to return to editing.', helpLiveTitle: 'Playback view', helpLiveBody: 'In Playback view, enable Fullscreen or Keep Screen On when useful. These controls appear only when the browser supports the required APIs.',
           helpPrivacyTitle: 'Privacy',
           helpPrivacyBody: 'Added audio is read only inside this browser and is not sent to an external server by this app. The app also makes no runtime network requests.',
-          helpNotesTitle: 'v1.0.0 notes',
+          helpNotesTitle: 'v1.0.1 notes',
           helpNoteSession: 'Audio and cue settings are saved automatically in this browser and restored on the next launch. Clearing browser site data also removes this saved content.',
           helpNoteStorage: 'Protect saved data is not a backup guarantee. Keep a .bkcue backup for important boards. Backups include the audio itself, so their size is close to the total source audio size.',
           helpNoteFormat: 'Playable formats depend on the browser. Use browser-supported audio such as MP3, WAV, M4A, OGG, WebM, or FLAC.',
@@ -2693,8 +2693,9 @@
         document.querySelectorAll('[data-i18n-title]').forEach(element => { element.title = translate(element.dataset.i18nTitle); });
         document.querySelectorAll('[data-i18n-aria-label]').forEach(element => { element.setAttribute('aria-label', translate(element.dataset.i18nAriaLabel)); });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(element => { element.placeholder = translate(element.dataset.i18nPlaceholder); });
-        $('#languageButton').textContent = language === 'ja' ? 'EN' : '日本語';
-        $('#languageButton').setAttribute('aria-label', language === 'ja' ? '英語に切り替え' : 'Switch to Japanese');
+        $('#languageButton').textContent = language === 'ja' ? 'EN' : 'JA';
+        $('#languageButton').title = language === 'ja' ? '英語に切り替え' : 'Switch to Japanese';
+        $('#languageButton').setAttribute('aria-label', $('#languageButton').title);
         document.title = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
         $('#brandName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;
         $('#footerName').textContent = language === 'ja' ? APP_CONFIG.nameJa : APP_CONFIG.name;

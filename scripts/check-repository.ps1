@@ -263,7 +263,7 @@ if (-not $webrtcReadyText.Contains("options.requireReadyChannelOpen!==false&&(!r
 
 
 # Playback behavior regression tests (Node.js is a development-only requirement).
-& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs") (Join-Path $Root "tests/cue-reorder.test.cjs")
+& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs") (Join-Path $Root "tests/cue-reorder.test.cjs") (Join-Path $Root "tests/header.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Playback regression tests failed." }
 
 # Release synchronization and pre-build drift regression tests (isolated temporary copies).

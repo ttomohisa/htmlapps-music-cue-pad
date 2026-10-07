@@ -24,7 +24,7 @@ for (const artifact of ['dist/index.html', 'music-cue-pad.html', 'dist/index.sel
     // Node's runner marks child tests; do not let that suppress this independent test run.
     const env = { ...process.env, MUSIC_CUE_SOURCE: sourcePath };
     delete env.NODE_TEST_CONTEXT;
-    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', 'tests/next-cue.test.cjs', 'tests/exported-player.test.cjs', 'tests/cue-reorder.test.cjs'], {
+    const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', 'tests/next-cue.test.cjs', 'tests/exported-player.test.cjs', 'tests/cue-reorder.test.cjs', 'tests/header.test.cjs'], {
       cwd: root, env, encoding: 'utf8', timeout: 120000
     });
     assert.ifError(result.error);

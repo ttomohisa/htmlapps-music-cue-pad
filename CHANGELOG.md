@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### v1.0.1 header consistency
+
+- Standardize the language switcher to EN / JA, with localized target-language labels and tooltips; retain localized Help and fully local processing copy.
+- Add executable header, repeated-toggle and preference-reload regressions for source and all distributed runtimes.
+
 - Add ArrowUp / ArrowDown reordering on the existing cue handle, with localized guidance, focus retention, and input/editing guards.
 - Preserve Delete Undo and its original expiry when a pointer drop or edge key leaves cue order unchanged; skip needless persistence writes.
 - Cancel pending pointer reorders with Escape while preserving the existing immediate audio Stop.
