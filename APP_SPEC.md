@@ -6,7 +6,7 @@ This file is the product contract for Music Cue Pad. User instructions override 
 
 - **Name:** Music Cue Pad
 - **Repository:** `ttomohisa/htmlapps-music-cue-pad`
-- **Current stable version:** v1.0.0
+- **Current stable version:** v1.0.1
 - **Initial stable release:** v1.0.0
 - **One-sentence purpose:** Register multiple local audio files and trigger the needed track immediately from large cue buttons.
 - **Primary users:** Event operators, presenters, teachers, performers, coaches, creators, and anyone who needs to trigger prepared audio quickly.
@@ -453,7 +453,7 @@ Future dependencies should be added only if they materially reduce implementatio
 
 ## 16. Acceptance criteria
 
-- `app.config.json` identifies Music Cue Pad v1.0.0.
+- `app.config.json` identifies Music Cue Pad v1.0.1.
 - Source is based on the current provided htmlapps-template and preserves its build placeholders/contracts.
 - At least 10 valid local audio files can be added in one selection.
 - Each accepted file receives a visible cue button.
@@ -464,7 +464,7 @@ Future dependencies should be added only if they materially reduce implementatio
 - Playback progress and elapsed / total time update.
 - Unsupported/decode-failed files do not break valid cues.
 - The interface works at 320–390 px without horizontal page scrolling.
-- Japanese and English can be switched without reload.
+- Japanese and English can be switched without reload. The header shows EN in Japanese and JA in English, with the target language named in a localized accessible label and tooltip; Help and the local-processing badge remain localized.
 - `connect-src 'none'` remains present.
 - No runtime external resource is introduced.
 - Generated release HTML has no unresolved build placeholders.
