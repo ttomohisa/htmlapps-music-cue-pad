@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Clarify Japanese and English help by removing internal layout, implementation, and audit commentary while preserving usage guidance and cautions.
+
 ## v1.0.2 — 2026-10-11
 
 - Cap and internally scroll the fixed player on narrow, short screens so loaded cues cannot cover Help or place Undo above the viewport; preserve all transport controls and compact Live landscape layout.

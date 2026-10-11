@@ -275,3 +275,7 @@ if ($LASTEXITCODE -ne 0) { throw "Release parity regression tests failed." }
 if ($LASTEXITCODE -ne 0) { throw "Distributed runtime regression tests failed." }
 
 Write-Host "[OK] Repository check passed." -ForegroundColor Green
+
+# Keep internal QA/implementation prose out of user-facing help.
+& node (Join-Path $Root "tests/help-copy.test.cjs")
+if ($LASTEXITCODE -ne 0) { throw "User-facing help copy regression failed." }
