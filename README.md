@@ -56,6 +56,11 @@ The current app has no third-party runtime dependency. Python, Node.js, and a lo
 
 ## Usage
 
+Help, cue editing and confirmation dialogs keep the background page still while open. Closing a dialog lets you continue at the same page position.
+
+On narrow, short screens, scroll inside the bottom player or use Tab to reach every playback control while keeping the page header and Undo accessible.
+After a keyboard-started export, continue with Tab from the export button unless you have moved to another control.
+
 1. Add one or more audio files with the file picker or Drag & Drop.
 2. Each audio file becomes a numbered playback button. Press a button to play it; selecting another button switches playback to that cue.
 3. Use **Edit cue** to change the display name and set Start / End. In the preview section, drag the two handles to adjust the playback range or type an exact time.

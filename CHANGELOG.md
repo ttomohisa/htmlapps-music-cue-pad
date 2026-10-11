@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.0.2 — 2026-10-11
+
+- Cap and internally scroll the fixed player on narrow, short screens so loaded cues cannot cover Help or place Undo above the viewport; preserve all transport controls and compact Live landscape layout.
+- Restore keyboard focus after backup/player export only to the initiating, still-available button when no newer focus or open dialog takes precedence; keep import focus behavior unchanged.
+- Keep the background page still while a native modal is open, preserving the existing Help/editor/confirmation layouts and local-processing shield.
+- Add bilingual Help guidance and CSS contracts for root/body modal scroll locking, wired into repository and distributed-runtime checks. Native wheel, dismissal, focus and content-reachability checks remain separate.
+
 ## Unreleased
 
 ### v1.0.1 header consistency

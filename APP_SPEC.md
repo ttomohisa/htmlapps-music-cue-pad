@@ -6,7 +6,7 @@ This file is the product contract for Music Cue Pad. User instructions override 
 
 - **Name:** Music Cue Pad
 - **Repository:** `ttomohisa/htmlapps-music-cue-pad`
-- **Current stable version:** v1.0.1
+- **Current stable version:** v1.0.2
 - **Initial stable release:** v1.0.0
 - **One-sentence purpose:** Register multiple local audio files and trigger the needed track immediately from large cue buttons.
 - **Primary users:** Event operators, presenters, teachers, performers, coaches, creators, and anyone who needs to trigger prepared audio quickly.
@@ -419,6 +419,7 @@ The implementation may use Base64-encoded embedded audio because HTML is a text 
 - Cue buttons must have comfortable touch targets.
 - Long filenames and cue names must wrap or truncate safely without widening the page.
 - The active-player bar may be fixed to the bottom, but body padding must prevent content from being covered.
+- At widths up to 620 CSS px and heights up to 480 CSS px, the fixed player is capped at half the dynamic viewport height and scrolls internally without hiding controls. Page and toast clearance use the same cap; compact Live landscape keeps its smaller 134px cap when applicable.
 - v0.6.0 Live Mode should emphasize large cue buttons and hide editing controls.
 - Landscape must remain usable.
 
@@ -426,6 +427,7 @@ The implementation may use Base64-encoded embedded audio because HTML is a text 
 
 - Native buttons for cues and player actions.
 - Visible keyboard focus.
+- After backup or playback-HTML export releases its busy state, return keyboard focus to the initiating export button only if it owned focus, no newer control took focus, no dialog is open, and the button remains visible, connected and enabled. Success and failure follow the same rule; import behavior is unchanged.
 - State is not communicated by color alone.
 - `aria-live` for meaningful playback/import status changes.
 - Accessible names for icon-only buttons.
@@ -453,7 +455,7 @@ Future dependencies should be added only if they materially reduce implementatio
 
 ## 16. Acceptance criteria
 
-- `app.config.json` identifies Music Cue Pad v1.0.1.
+- `app.config.json` identifies Music Cue Pad v1.0.2.
 - Source is based on the current provided htmlapps-template and preserves its build placeholders/contracts.
 - At least 10 valid local audio files can be added in one selection.
 - Each accepted file receives a visible cue button.
@@ -464,6 +466,7 @@ Future dependencies should be added only if they materially reduce implementatio
 - Playback progress and elapsed / total time update.
 - Unsupported/decode-failed files do not break valid cues.
 - The interface works at 320–390 px without horizontal page scrolling.
+- With ready cues at 393 × 252 CSS px, Help remains clickable above the player, every transport control is reachable by inner scrolling and Tab, and Delete Undo stays within the viewport. Tall/desktop layouts and compact Live landscape controls retain their existing arrangement.
 - Japanese and English can be switched without reload. The header shows EN in Japanese and JA in English, with the target language named in a localized accessible label and tooltip; Help and the local-processing badge remain localized.
 - `connect-src 'none'` remains present.
 - No runtime external resource is introduced.
@@ -610,3 +613,5 @@ The upper-right help dialog must always describe the current released behavior, 
 - important data-loss risks once persistence is added.
 
 The final help item and close control must remain reachable on narrow/short smartphone viewports.
+
+An open native modal locks background scrolling on both the document root and body. Closing it restores page scrolling without changing the page position. Preserve the existing Help, cue-editor and confirmation geometry and independently scrolling content.
