@@ -6,7 +6,7 @@ This file is the product contract for Music Cue Pad. User instructions override 
 
 - **Name:** Music Cue Pad
 - **Repository:** `ttomohisa/htmlapps-music-cue-pad`
-- **Current stable version:** v1.0.1
+- **Current stable version:** v1.0.2
 - **Initial stable release:** v1.0.0
 - **One-sentence purpose:** Register multiple local audio files and trigger the needed track immediately from large cue buttons.
 - **Primary users:** Event operators, presenters, teachers, performers, coaches, creators, and anyone who needs to trigger prepared audio quickly.
@@ -453,7 +453,7 @@ Future dependencies should be added only if they materially reduce implementatio
 
 ## 16. Acceptance criteria
 
-- `app.config.json` identifies Music Cue Pad v1.0.1.
+- `app.config.json` identifies Music Cue Pad v1.0.2.
 - Source is based on the current provided htmlapps-template and preserves its build placeholders/contracts.
 - At least 10 valid local audio files can be added in one selection.
 - Each accepted file receives a visible cue button.
@@ -610,3 +610,5 @@ The upper-right help dialog must always describe the current released behavior, 
 - important data-loss risks once persistence is added.
 
 The final help item and close control must remain reachable on narrow/short smartphone viewports.
+
+An open native modal locks background scrolling on both the document root and body. Closing it restores page scrolling without changing the page position. Preserve the existing Help, cue-editor and confirmation geometry and independently scrolling content.

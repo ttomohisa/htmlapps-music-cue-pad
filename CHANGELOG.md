@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.0.2 — 2026-10-11
+
+- Keep the background page still while a native modal is open, preserving the existing Help/editor/confirmation layouts and local-processing shield.
+- Add bilingual Help guidance and CSS contracts for root/body modal scroll locking, wired into repository and distributed-runtime checks. Native wheel, dismissal, focus and content-reachability checks remain separate.
+
 ## Unreleased
 
 ### v1.0.1 header consistency
