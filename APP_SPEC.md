@@ -419,6 +419,7 @@ The implementation may use Base64-encoded embedded audio because HTML is a text 
 - Cue buttons must have comfortable touch targets.
 - Long filenames and cue names must wrap or truncate safely without widening the page.
 - The active-player bar may be fixed to the bottom, but body padding must prevent content from being covered.
+- At widths up to 620 CSS px and heights up to 480 CSS px, the fixed player is capped at half the dynamic viewport height and scrolls internally without hiding controls. Page and toast clearance use the same cap; compact Live landscape keeps its smaller 134px cap when applicable.
 - v0.6.0 Live Mode should emphasize large cue buttons and hide editing controls.
 - Landscape must remain usable.
 
@@ -426,6 +427,7 @@ The implementation may use Base64-encoded embedded audio because HTML is a text 
 
 - Native buttons for cues and player actions.
 - Visible keyboard focus.
+- After backup or playback-HTML export releases its busy state, return keyboard focus to the initiating export button only if it owned focus, no newer control took focus, no dialog is open, and the button remains visible, connected and enabled. Success and failure follow the same rule; import behavior is unchanged.
 - State is not communicated by color alone.
 - `aria-live` for meaningful playback/import status changes.
 - Accessible names for icon-only buttons.
@@ -464,6 +466,7 @@ Future dependencies should be added only if they materially reduce implementatio
 - Playback progress and elapsed / total time update.
 - Unsupported/decode-failed files do not break valid cues.
 - The interface works at 320–390 px without horizontal page scrolling.
+- With ready cues at 393 × 252 CSS px, Help remains clickable above the player, every transport control is reachable by inner scrolling and Tab, and Delete Undo stays within the viewport. Tall/desktop layouts and compact Live landscape controls retain their existing arrangement.
 - Japanese and English can be switched without reload. The header shows EN in Japanese and JA in English, with the target language named in a localized accessible label and tooltip; Help and the local-processing badge remain localized.
 - `connect-src 'none'` remains present.
 - No runtime external resource is introduced.
