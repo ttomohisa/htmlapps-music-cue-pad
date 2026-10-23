@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — mobile Help layout
+
+- Hide the informational footer at 620px and below; move existing build information to the end of Help without changing functional bottom controls.
+- Preserve localized build values, keyboard access, and existing visibility policies; standardize the exact local-processing label.
+
 ## Unreleased
 
 - Clarify Japanese and English help by removing internal layout, implementation, and audit commentary while preserving usage guidance and cautions.
