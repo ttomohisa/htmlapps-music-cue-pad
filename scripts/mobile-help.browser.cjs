@@ -88,8 +88,14 @@ async function main() {
               await page.locator('#enterLiveModeButton:not([disabled])').waitFor();
               await page.locator('#enterLiveModeButton').click();
               assert.ok(await page.locator('body').evaluate(el => el.classList.contains('live-mode')), label);
+              assert.equal(await page.locator(buildSelector).evaluate(el => getComputedStyle(el).display), 'none', label + ': Live Mode build hiding preserved');
+              assert.equal(await page.locator('#helpButton').isVisible(), false, label + ': existing Live Mode header hiding');
+              await page.locator('#exitLiveModeButton').focus();
+              await page.keyboard.down('Enter');
+              await page.waitForFunction(() => !document.body.classList.contains('live-mode'));
+              await page.keyboard.up('Enter');
               await page.locator('#helpButton').click();
-              assert.equal(await page.locator(buildSelector).isVisible(), false, label + ': Live Mode build hiding preserved');
+              assert.equal(await page.locator(buildSelector).isVisible(), true, label + ': build returns after hold-to-exit');
               await page.locator('#closeHelpButton').click();
             }
             assert.deepEqual(errors, [], label + ': console errors');
