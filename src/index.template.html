@@ -553,6 +553,7 @@
       :root { --player-height: 126px; }
     }
     @media (max-width: 620px) {
+      footer { display: none; }
       :root { --player-height: 278px; }
       .page-intro { display: block; }
       .local-badge { margin-top: 11px; }
@@ -846,15 +847,6 @@
       <p class="backup-note" data-i18n="backupNote">.bkcue はMusic Cue Pad用のZIPコンテナです。読み込み前に内容を検証し、問題がある場合は現在のボードを変更しません。</p>
     </section>
     <!-- APP:END -->
-
-    <details class="build-details">
-      <summary data-i18n="buildInfo">ビルド情報</summary>
-      <div class="build-grid">
-        <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
-        <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
-        <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
-      </div>
-    </details>
   </main>
 
   <footer><span id="footerName">Music Cue Pad</span> · MIT License · <span data-i18n="footer">音声はこのブラウザ内で処理されます</span></footer>
@@ -1057,6 +1049,14 @@
         <li data-i18n="helpNoteSize">1ファイル2 GiBを上限としています。大きな音声は端末やブラウザの性能によって読み込みに時間がかかる場合があります。</li>
       </ul>
       <p class="dialog-note" data-i18n="helpRoadmap">再生専用表示・バックアップ・単一HTML Player Export を利用できます。</p>
+      <details class="build-details">
+        <summary data-i18n="buildInfo">ビルド情報</summary>
+        <div class="build-grid">
+          <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
+          <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
+          <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
+        </div>
+      </details>
       <!-- APP:HELP:END -->
     </div>
   </dialog>
@@ -3691,6 +3691,7 @@
       $('#helpButton').addEventListener('click', () => helpDialog.showModal());
       $('#closeHelpButton').addEventListener('click', () => helpDialog.close());
       helpDialog.addEventListener('click', event => {
+        if (event.target !== helpDialog) return;
         const rect = helpDialog.getBoundingClientRect();
         const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
         if (outside) helpDialog.close();

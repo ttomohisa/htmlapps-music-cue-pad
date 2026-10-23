@@ -553,6 +553,7 @@
       :root { --player-height: 126px; }
     }
     @media (max-width: 620px) {
+      footer { display: none; }
       :root { --player-height: 278px; }
       .page-intro { display: block; }
       .local-badge { margin-top: 11px; }
@@ -846,15 +847,6 @@
       <p class="backup-note" data-i18n="backupNote">.bkcue はMusic Cue Pad用のZIPコンテナです。読み込み前に内容を検証し、問題がある場合は現在のボードを変更しません。</p>
     </section>
     <!-- APP:END -->
-
-    <details class="build-details">
-      <summary data-i18n="buildInfo">ビルド情報</summary>
-      <div class="build-grid">
-        <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
-        <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
-        <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
-      </div>
-    </details>
   </main>
 
   <footer><span id="footerName">Music Cue Pad</span> · MIT License · <span data-i18n="footer">音声はこのブラウザ内で処理されます</span></footer>
@@ -1057,6 +1049,14 @@
         <li data-i18n="helpNoteSize">1ファイル2 GiBを上限としています。大きな音声は端末やブラウザの性能によって読み込みに時間がかかる場合があります。</li>
       </ul>
       <p class="dialog-note" data-i18n="helpRoadmap">再生専用表示・バックアップ・単一HTML Player Export を利用できます。</p>
+      <details class="build-details">
+        <summary data-i18n="buildInfo">ビルド情報</summary>
+        <div class="build-grid">
+          <div class="build-item"><span data-i18n="appVersion">アプリバージョン</span><strong id="buildVersion">—</strong></div>
+          <div class="build-item"><span data-i18n="builtAt">生成日時</span><strong id="builtAt">—</strong></div>
+          <div class="build-item"><span data-i18n="dependencies">内包依存数</span><strong id="dependencyCount">0</strong></div>
+        </div>
+      </details>
       <!-- APP:HELP:END -->
     </div>
   </dialog>
@@ -1066,7 +1066,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-11T22:21:27.2529221Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-23T09:24:15.8439337Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -3691,6 +3691,7 @@
       $('#helpButton').addEventListener('click', () => helpDialog.showModal());
       $('#closeHelpButton').addEventListener('click', () => helpDialog.close());
       helpDialog.addEventListener('click', event => {
+        if (event.target !== helpDialog) return;
         const rect = helpDialog.getBoundingClientRect();
         const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
         if (outside) helpDialog.close();
