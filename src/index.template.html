@@ -812,6 +812,7 @@
           <p data-i18n="backupBody">音源とキュー設定を1つの .bkcue ファイルにまとめて保存し、別の端末やブラウザで復元できます。</p>
         </div>
       </div>
+      <p id="backupDeliveryError" role="status" aria-live="polite" style="color:#B3261E"></p>
       <div class="backup-grid">
         <div class="backup-name-field">
           <label for="boardNameInput" data-i18n="boardNameLabel">ボード名</label>
@@ -823,6 +824,7 @@
           <input id="backupFileInput" type="file" accept=".bkcue,application/zip" hidden>
         </div>
       </div>
+      <p id="playerDeliveryError" role="status" aria-live="polite" style="color:#B3261E"></p>
       <div class="player-export-card">
         <div class="player-export-head">
           <div class="player-export-copy">
@@ -1300,8 +1302,8 @@
         }
       };
 
-      Object.assign(translations.en, { exportScope: 'Backups and playback HTML include all current cues and their source audio. The board name sets the .bkcue filename.', exportBackup: 'Save backup (.bkcue)', importBackup: 'Restore backup', exportPlayer: 'Save playback HTML', save: 'Apply settings', resetAll: 'Delete saved board', resetConfirm: 'Delete saved board', resetMessage: 'Delete all Music Cue Pad audio, cues and volume settings in this browser and the current board? This cannot be undone. Language preferences remain.', backupExported: 'Download started', playerExported: 'Download started' });
-      Object.assign(translations.ja, { exportScope: 'バックアップと再生用HTMLは全キューと使用音源を含みます。ボード名が .bkcue のファイル名になります。', exportBackup: 'バックアップを保存 (.bkcue)', importBackup: 'バックアップから復元', exportPlayer: '再生用HTMLを保存', save: '設定を適用', resetAll: '保存済みボードを削除', resetConfirm: '保存済みボードを削除', resetMessage: 'このブラウザーと現在のボードの音源・キュー・音量設定を削除します。元に戻せません。言語設定は残ります。', backupExported: '保存を開始しました', playerExported: '保存を開始しました' });
+      Object.assign(translations.en, { backupDeliveryFailed: 'Could not create or start the backup download. Retry Save backup (.bkcue); the current board and audio remain available.', playerDeliveryFailed: 'Could not create or start the playback HTML download. Retry Save playback HTML; the current board and audio remain available.', exportScope: 'Backups and playback HTML include all current cues and their source audio. The board name sets the .bkcue filename.', exportBackup: 'Save backup (.bkcue)', importBackup: 'Restore backup', exportPlayer: 'Save playback HTML', save: 'Apply settings', resetAll: 'Delete saved board', resetConfirm: 'Delete saved board', resetMessage: 'Delete all Music Cue Pad audio, cues and volume settings in this browser and the current board? This cannot be undone. Language preferences remain.', backupExported: 'Download started', playerExported: 'Download started' });
+      Object.assign(translations.ja, { backupDeliveryFailed: 'バックアップの作成・保存を開始できませんでした。「バックアップを保存 (.bkcue)」を再試行してください。現在のボードと音源は残っています。', playerDeliveryFailed: '再生用HTMLの作成・保存を開始できませんでした。「再生用HTMLを保存」を再試行してください。現在のボードと音源は残っています。', exportScope: 'バックアップと再生用HTMLは全キューと使用音源を含みます。ボード名が .bkcue のファイル名になります。', exportBackup: 'バックアップを保存 (.bkcue)', importBackup: 'バックアップから復元', exportPlayer: '再生用HTMLを保存', save: '設定を適用', resetAll: '保存済みボードを削除', resetConfirm: '保存済みボードを削除', resetMessage: 'このブラウザーと現在のボードの音源・キュー・音量設定を削除します。元に戻せません。言語設定は残ります。', backupExported: '保存を開始しました', playerExported: '保存を開始しました' });
       const storageKeys = { language: `${APP_CONFIG.slug}:language` };
       const DB_NAME = `${APP_CONFIG.slug}:data`;
       const DB_VERSION = 1;
@@ -1475,7 +1477,7 @@
         showToast(() => translate(state.persistence.errorType === 'quota' ? 'persistenceQuotaWarning' : 'persistenceWriteWarning'), { tone: 'warning', duration: 6200 });
       }
       function enqueuePersistence(task, { clearErrorOnSuccess = false } = {}) {
-        if (!state.persistence.supported || !state.persistence.ready) return Promise.resolve(false);
+        if (state.boardMutationLocked || !state.persistence.supported || !state.persistence.ready) return Promise.resolve(false);
         const generation = persistenceGeneration;
         persistencePendingWrites += 1;
         state.persistence.saving = true;
@@ -1641,10 +1643,10 @@
         storageUsage.textContent = estimate && Number.isFinite(estimate.usage) && Number.isFinite(estimate.quota) ? `${formatBytes(estimate.usage)} / ${formatBytes(estimate.quota)}` : '—';
         storageProtection.textContent = !state.persistence.supported ? translate('storageUnavailable') : state.persistence.persistent === true ? translate('storageProtected') : navigator.storage?.persist ? translate('storageNotProtected') : translate('storageUnavailable');
         requestPersistenceButton.hidden = !state.persistence.supported || !navigator.storage?.persist || state.persistence.persistent === true;
-        requestPersistenceButton.disabled = !state.persistence.ready || state.persistence.saving;
+        requestPersistenceButton.disabled = !state.persistence.ready || state.persistence.saving || state.boardMutationLocked;
         retrySaveButton.hidden = !state.persistence.supported || !state.persistence.errorType;
-        retrySaveButton.disabled = !state.persistence.ready || state.persistence.saving;
-        resetButton.disabled = !state.persistence.ready || state.persistence.saving || state.backupBusy;
+        retrySaveButton.disabled = !state.persistence.ready || state.persistence.saving || state.boardMutationLocked;
+        resetButton.disabled = !state.persistence.ready || state.persistence.saving || state.backupBusy || state.boardMutationLocked;
         const warningKey = !state.persistence.supported ? 'persistenceUnavailableWarning' : state.persistence.errorType === 'quota' ? 'persistenceQuotaWarning' : state.persistence.errorType ? 'persistenceWriteWarning' : '';
         storageWarning.hidden = !warningKey;
         storageWarning.textContent = warningKey ? translate(warningKey) : '';
@@ -1726,9 +1728,17 @@
         if (ok) showToast(() => translate('retrySaveSuccess'), { tone: 'success' });
       }
 
+      function renderBoardMutationState() {
+        for (const id of ['audioInput','dropZone','boardNameInput','playerFilenameInput','masterVolumeSlider']) { const el = $('#'+id); if (el) el.disabled = Boolean(state.boardMutationLocked || state.backupBusy); }
+        setBackupBusy(state.backupBusy, state.backupLabel, backupProgressBar.value);
+        renderCues(); renderStorageStatus();
+      }
       async function resetAllData() {
+        if (state.boardMutationLocked) return;
         const confirmed = await AppConfirm.ask({ localize: () => ({ title: translate('resetTitle'), message: translate('resetMessage'), confirmLabel: translate('resetConfirm'), cancelLabel: translate('cancel'), tone: 'danger' }) });
-        if (!confirmed) return;
+        if (!confirmed || state.boardMutationLocked) return;
+        state.boardMutationLocked = true; renderBoardMutationState();
+        try {
         resetButton.disabled = true;
         clearTimeout(masterVolumeSaveTimer);
         clearTimeout(orphanCleanupTimer);
@@ -1763,16 +1773,18 @@
         updateCueCount(); renderCues(); renderPlayer(); refreshImportStatus();
         await refreshStorageEstimate();
         showToast(() => translate('resetDone'), { tone: 'success' });
+        } finally { state.boardMutationLocked = false; renderBoardMutationState(); }
       }
 
       function backupLabel(key, values = {}) { return { key, values }; }
       function setBackupBusy(busy, label = '', percent = 0) {
         state.backupBusy = Boolean(busy);
-        BrowserKittyUI.setButtonState(exportBackupButton, state.backupBusy ? 'busy' : state.cues.length ? 'ready' : 'unavailable');
-        BrowserKittyUI.setButtonState(exportPlayerButton, state.backupBusy ? 'busy' : state.cues.length ? 'ready' : 'unavailable');
-        BrowserKittyUI.setButtonState(importBackupButton, state.backupBusy ? 'busy' : 'ready');
-        boardNameInput.disabled = state.backupBusy;
-        playerFilenameInput.disabled = state.backupBusy;
+        for (const id of ['audioInput','dropZone','masterVolumeSlider']) { const el = $('#'+id); if (el) el.disabled = Boolean(state.boardMutationLocked || state.backupBusy); }
+        BrowserKittyUI.setButtonState(exportBackupButton, (state.backupBusy || state.boardMutationLocked) ? 'busy' : state.cues.length ? 'ready' : 'unavailable');
+        BrowserKittyUI.setButtonState(exportPlayerButton, (state.backupBusy || state.boardMutationLocked) ? 'busy' : state.cues.length ? 'ready' : 'unavailable');
+        BrowserKittyUI.setButtonState(importBackupButton, (state.backupBusy || state.boardMutationLocked) ? 'busy' : 'ready');
+        boardNameInput.disabled = state.backupBusy || state.boardMutationLocked;
+        playerFilenameInput.disabled = state.backupBusy || state.boardMutationLocked;
         backupProgress.hidden = !state.backupBusy;
         if (state.backupBusy) {
           state.backupLabel = label;
@@ -1957,8 +1969,13 @@
 })();${scriptClose}
 </body></html>`;
       }
+      function renderDeliveryStatus() {
+        const backup = $('#backupDeliveryError'), player = $('#playerDeliveryError');
+        if (backup) backup.textContent = state.backupDeliveryError ? translate('backupDeliveryFailed') : '';
+        if (player) player.textContent = state.playerDeliveryError ? translate('playerDeliveryFailed') : '';
+      }
       async function exportPlaybackHtml() {
-        if (state.backupBusy) return;
+        if (state.backupBusy || state.boardMutationLocked) return;
         const output = { boardName: state.boardName, masterVolume: state.masterVolume, language, cues: state.cues.map(cue => ({...cue})), filename: `${safePlayerBaseName(playerFilenameInput.value)}${outputFilenameRules.extension}` };
         if (!state.cues.length) { showToast(() => translate('backupEmpty'), { tone:'warning' }); return; }
         const usedIds = Array.from(new Set(state.cues.map(cue => cue.assetId)));
@@ -1987,10 +2004,11 @@
           const filename = output.filename;
           downloadBlob(new Blob([html], { type:'text/html;charset=utf-8' }), filename);
           setBackupBusy(true, backupLabel('backupProgressDone'), 100);
+          state.playerDeliveryError = false; renderDeliveryStatus();
           showToast(() => translate('playerExported'), { tone:'success', duration:4800 });
         } catch (error) {
           console.error('Player HTML export failed', error);
-          showToast(() => translate('persistenceWriteWarning'), { tone:'warning', duration:6200 });
+          state.playerDeliveryError = true; renderDeliveryStatus();
         } finally { setTimeout(() => { setBackupBusy(false); restoreExportFocus(); }, 250); }
       }
 
@@ -2074,7 +2092,7 @@
         };
       }
       async function exportBoardBackup() {
-        if (state.backupBusy) return;
+        if (state.backupBusy || state.boardMutationLocked) return;
         const sourceAssets = new Map(state.assets);
         if (!state.cues.length) { showToast(() => translate('backupEmpty'), { tone: 'warning' }); return; }
         const manifest = backupManifest();
@@ -2105,10 +2123,11 @@
           const filename = `${safeBackupBaseName(manifest.board.name)}.bkcue`;
           setBackupBusy(true, backupLabel('backupProgressDone'), 100);
           downloadBlob(blob, filename);
+          state.backupDeliveryError = false; renderDeliveryStatus();
           showToast(() => translate('backupExported', { name: manifest.board.name }), { tone: 'success', duration: 4800 });
         } catch (error) {
           console.error('Backup export failed', error);
-          showToast(() => translate('backupImportFailed'), { tone: 'warning', duration: 5200 });
+          state.backupDeliveryError = true; renderDeliveryStatus();
         } finally { setTimeout(() => { setBackupBusy(false); restoreExportFocus(); }, 250); }
       }
       async function readZipDirectory(file) {
@@ -2185,14 +2204,15 @@
         boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard({ force:true }); setMasterVolume(state.masterVolume, { persist: false }); updateCueCount(); renderCues(); renderPlayer(); refreshImportStatus(); renderStorageStatus(); refreshStorageEstimate();
       }
       async function importBoardBackup(file) {
-        if (!file || state.backupBusy) return;
+        if (!file || state.backupBusy || state.boardMutationLocked) return;
         setBackupBusy(true, backupLabel('backupReading'), 1);
         let snapshot;
         try { snapshot = await parseBoardBackup(file); }
         catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); showToast(() => translate(error?.message === 'unsupported version' ? 'backupUnsupportedVersion' : 'backupInvalid'), { tone:'warning', duration:6200 }); return; }
         setBackupBusy(false);
         const confirmed = await AppConfirm.ask({ localize: () => ({ title: translate('backupReplaceTitle'), message: translate('backupReplaceMessage', { name: snapshot.boardName }), confirmLabel: translate('backupReplaceConfirm'), cancelLabel: translate('cancel'), tone: 'danger' }) });
-        if (!confirmed) return;
+        if (!confirmed || state.boardMutationLocked) return;
+        state.boardMutationLocked = true; renderBoardMutationState();
         clearTimeout(masterVolumeSaveTimer); clearTimeout(orphanCleanupTimer); persistenceGeneration += 1;
         setBackupBusy(true, backupLabel('backupWriting'), 92);
         try {
@@ -2201,7 +2221,7 @@
           applyImportedSnapshot(snapshot); setBackupBusy(true, backupLabel('backupProgressDone'), 100);
           showToast(() => translate('backupImported', { name: snapshot.boardName }), { tone:'success', duration:4800 });
         } catch (error) { console.error('Backup import failed', error); showToast(() => translate('backupSaveFailed'), { tone:'warning', duration:6200 }); }
-        finally { backupFileInput.value = ''; setTimeout(() => setBackupBusy(false), 250); }
+        finally { state.boardMutationLocked = false; renderBoardMutationState(); backupFileInput.value = ''; setTimeout(() => setBackupBusy(false), 250); }
       }
 
       function detectLanguage() {
@@ -2474,7 +2494,7 @@
         $('#cueEditFileMeta').textContent = asset ? `${asset.fileName} · ${formatDuration(asset.duration)} · ${formatBytes(asset.size)}` : '';
         cueEditValidation.textContent = values.errorKey ? translate(values.errorKey, values.errorKey === 'shortcutConflict' ? { name: values.shortcutConflictName } : {}) : '';
         $('#cueVolumeValue').textContent = `${cueVolumeInput.value}%`;
-        $('#saveCueEditButton').disabled = !values.valid;
+        $('#saveCueEditButton').disabled = state.boardMutationLocked || !values.valid;
         syncCueWindowFromFields();
         updatePreviewUi();
       }
@@ -2496,6 +2516,7 @@
         updatePreviewUi();
       }
       function openCueEditor(cueId) {
+        if (state.boardMutationLocked) return;
         const cue = cueForId(cueId);
         const asset = cue ? state.assets.get(cue.assetId) : null;
         if (!cue || !asset || asset.status !== 'ready') return;
@@ -2544,6 +2565,7 @@
         updateCueEditDialog();
       }
       async function saveCueEditor() {
+        if (state.boardMutationLocked) return;
         const values = cueEditValues();
         if (!values.cue) { closeCueEditor(); return; }
         if (!values.valid) {
@@ -2575,6 +2597,7 @@
         showToast(() => translate('renamedCue'), { tone: 'success' });
       }
       function duplicateCue(cueId) {
+        if (state.boardMutationLocked) return;
         const index = cueIndex(cueId);
         if (index < 0) return;
         const source = state.cues[index];
@@ -2587,6 +2610,7 @@
         showToast(() => translate('duplicatedCue', { name: source.name }), { tone: 'success' });
       }
       function deleteCue(cueId) {
+        if (state.boardMutationLocked) return;
         const index = cueIndex(cueId);
         if (index < 0) return;
         const cue = state.cues[index];
@@ -2601,6 +2625,7 @@
         scheduleOrphanCleanup();
         showToast(() => translate('deletedCue', { name: cue.name }), {
           tone: 'success', duration: 6000, actionLabel: translate('undo'), onAction: () => {
+            if (state.boardMutationLocked) return;
             const restoreIndex = Math.min(index, state.cues.length);
             state.cues.splice(restoreIndex, 0, cue);
             reindexCues();
@@ -2623,6 +2648,7 @@
         state.undoAssetId = cue.assetId;
       }
       function moveCue(cueId, delta) {
+        if (state.boardMutationLocked) return;
         const index = cueIndex(cueId);
         const target = index + delta;
         if (index < 0 || target < 0 || target >= state.cues.length || target === index) return false;
@@ -2634,6 +2660,7 @@
         return true;
       }
       function onCueReorderKeydown(cueId, event) {
+        if (state.boardMutationLocked) return;
         if (event.defaultPrevented || event.isComposing || event.keyCode === 229 || event.repeat) return;
         if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) return;
         if (state.liveMode || anyDialogOpen() || cueDragSession) return;
@@ -2644,6 +2671,7 @@
         }
       }
       function reorderCue(sourceId, targetId, after = false) {
+        if (state.boardMutationLocked) return;
         if (!sourceId || !targetId || sourceId === targetId) return;
         const sourceIndex = cueIndex(sourceId);
         const targetIndexBefore = cueIndex(targetId);
@@ -2770,7 +2798,7 @@
         renderStorageStatus();
         renderLiveModeUi();
         $('#reorderHint').hidden = state.cues.length < 2;
-        AppConfirm.refresh(); AppToast.refresh();
+        AppConfirm.refresh(); AppToast.refresh(); renderDeliveryStatus();
         if (state.backupBusy) setBackupBusy(true, state.backupLabel, backupProgressBar.value);
       }
 
@@ -2908,7 +2936,7 @@
         button.className = `cue-tool-button ${className}`.trim();
         button.setAttribute('aria-label', label);
         button.title = label;
-        button.disabled = disabled;
+        button.disabled = disabled || state.boardMutationLocked;
         if (className !== 'cue-drag-handle') { button.setAttribute('data-bk-button',''); button.setAttribute('data-bk-variant', className === 'danger' ? 'danger' : 'secondary'); }
         if (draggable) button.draggable = true;
         button.innerHTML = icon;
@@ -3005,6 +3033,7 @@
         placeCueDragPlaceholder(cueDragInsertion(target, x, y));
       }
       function finishCuePointerDrag(cancelled = false) {
+        if (state.boardMutationLocked) cancelled = true;
         const d = cueDragSession; if (!d) return;
         window.removeEventListener('pointermove', onCuePointerMove, true); window.removeEventListener('pointerup', onCuePointerUp, true); window.removeEventListener('pointercancel', onCuePointerCancel, true);
         const insertAt = cancelled ? -1 : d.insertIndex;
@@ -3022,6 +3051,7 @@
       function onCuePointerUp(event) { if (!cueDragSession || event.pointerId !== cueDragSession.pointerId) return; event.preventDefault(); finishCuePointerDrag(false); }
       function onCuePointerCancel(event) { if (!cueDragSession || event.pointerId !== cueDragSession.pointerId) return; finishCuePointerDrag(true); }
       function startCuePointerDrag(cueId, card, event) {
+        if (state.boardMutationLocked) return;
         if (state.liveMode || cueDragSession || event.button !== 0) return;
         event.preventDefault(); event.stopPropagation();
         const rect = card.getBoundingClientRect(), ghost = card.cloneNode(true), placeholder = document.createElement('div');
@@ -3231,6 +3261,8 @@
       }
 
       async function addFiles(fileList) {
+        if (state.boardMutationLocked) return;
+        const sourceGeneration = persistenceGeneration;
         const files = Array.from(fileList || []);
         if (!files.length) return;
         setImportStatus('selectedFiles', { count: files.length });
@@ -3274,6 +3306,7 @@
           return;
         }
         await Promise.allSettled(inspections);
+        if (sourceGeneration !== persistenceGeneration || state.boardMutationLocked) return;
         const decodeFailures = state.cues.slice(-added).filter(cue => state.assets.get(cue.assetId)?.status === 'error').length;
         const failed = immediateFailures + decodeFailures;
         const readyAdded = added - decodeFailures;
@@ -3346,6 +3379,7 @@
         }
       }
       function setMasterVolume(value, { persist = true } = {}) {
+        if (persist && state.boardMutationLocked) return;
         state.masterVolume = Math.min(1, Math.max(0, Number(value)));
         masterVolumeSlider.value = String(Math.round(state.masterVolume * 100));
         $('#masterVolumeValue').textContent = `${Math.round(state.masterVolume * 100)}%`;
@@ -3639,8 +3673,8 @@
       requestPersistenceButton.addEventListener('click', requestPersistentStorage);
       retrySaveButton.addEventListener('click', retrySaveCurrentBoard);
       resetButton.addEventListener('click', resetAllData);
-      boardNameInput.addEventListener('change', () => { state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); enqueuePersistence(putBoardName); });
-      boardNameInput.addEventListener('blur', () => { state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); });
+      boardNameInput.addEventListener('change', () => { if (state.boardMutationLocked) return; state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); enqueuePersistence(putBoardName); });
+      boardNameInput.addEventListener('blur', () => { if (state.boardMutationLocked) return; state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); });
       exportBackupButton.addEventListener('click', exportBoardBackup);
       exportPlayerButton.addEventListener('click', exportPlaybackHtml);
       playerFilenameInput.addEventListener('input', () => { playerFilenameInput.dataset.edited = 'true'; });

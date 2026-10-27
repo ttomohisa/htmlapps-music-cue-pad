@@ -37,11 +37,11 @@ function fixture(kind, fail = false) {
     };
   }
   document.body = element('body'); document.documentElement = element('html');
-  const names = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressBar', 'backupProgressValue', 'backupFileInput'];
+  const names = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressBar', 'backupProgressValue', 'backupFileInput', 'backupDeliveryError', 'playerDeliveryError'];
   const elements = Object.fromEntries(names.map(name => [name, element(name)]));
   const opener = elements[kind === 'backup' ? 'exportBackupButton' : 'exportPlayerButton'];
   const state = { cues: [{ id: 'cue', assetId: 'asset', name: 'Synthetic cue', volume: 1 }], assets: new Map([['asset', { id: 'asset', fileName: 'synthetic.wav', status: 'ready', duration: 1, blob: new Blob(['synthetic audio']) }]]), boardName: 'Focus test', masterVolume: 1, persistence: { supported: false }, backupBusy: false };
-  const context = vm.createContext({ ...elements, document, state, Blob, TextEncoder, btoa, language: 'en',
+  const context = vm.createContext({ ...elements, $: selector=>elements[selector.slice(1)], renderBoardMutationState() {}, document, state, Blob, TextEncoder, btoa, language: 'en',
     APP_CONFIG: { version: '1.0.2' }, BOARD_SCHEMA_VERSION: 1,
     outputFilenameRules: { extension: '.html', fallback: 'music-cue-pad-player' },
     translate: key => key, showToast() {}, console: { error: (...args) => errors.push(args.at(-1)) },
@@ -54,7 +54,7 @@ function fixture(kind, fail = false) {
     persistenceWriteChain: Promise.resolve(), persistenceGeneration:0, masterVolumeSaveTimer:0, orphanCleanupTimer:0, clearTimeout() {}, applyImportedSnapshot() {},
   });
   vm.runInContext(fs.readFileSync('components/ui-conventions.js','utf8'),context);
-  const functions = ['backupLabel', 'setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
+  const functions = ['renderDeliveryStatus','backupLabel', 'setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
   if (source.includes('      function captureExportFocus(')) functions.push('captureExportFocus');
   const playerBuilder = source.slice(source.indexOf('      function playerExportDocument('), source.indexOf('      async function exportPlaybackHtml('));
   const backupBuilder = source.slice(source.indexOf('      const crc32Table = '), source.indexOf('      async function readZipDirectory('));
@@ -67,6 +67,13 @@ function fixture(kind, fail = false) {
 }
 
 for (const kind of ['backup', 'player']) {
+  test(`${kind}: export failure persists in its own domain and successful retry clears it`, async()=>{
+    const h=fixture(kind,true); await h.run();
+    assert.equal(h.state[kind==='backup'?'backupDeliveryError':'playerDeliveryError'],true);
+    h.release();h.context.downloadBlob=(blob,filename)=>h.downloads.push({blob,filename});await h.run();
+    assert.equal(h.state[kind==='backup'?'backupDeliveryError':'playerDeliveryError'],false);
+    assert.equal(h.downloads.length,1);
+  });
   for (const fail of [false, true]) {
     test(`${kind}: ${fail ? 'failed' : 'successful'} export returns keyboard focus after the existing busy delay`, async () => {
       const h = fixture(kind, fail);

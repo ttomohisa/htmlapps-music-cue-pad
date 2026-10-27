@@ -9,7 +9,7 @@ test('invalidated queued save drains accounting and never writes after replaceme
  assert.equal(writes,0);assert.equal(c.persistencePendingWrites,0);assert.equal(c.state.persistence.saving,false);
 });
 test('backup restore cancels delayed volume and cleanup before waiting for queued writes',async()=>{
- const cancelled=[],c=vm.createContext({state:{backupBusy:false,persistence:{supported:false,ready:true}},translate:k=>k,setBackupBusy(){},parseBoardBackup:async()=>({boardName:'Imported'}),AppConfirm:{ask:async()=>true},persistenceWriteChain:Promise.resolve(),persistenceGeneration:0,masterVolumeSaveTimer:11,orphanCleanupTimer:22,clearTimeout:id=>cancelled.push(id),applyImportedSnapshot(){},showToast(){},setTimeout(){},backupFileInput:{value:''},console});
+ const cancelled=[],c=vm.createContext({state:{backupBusy:false,persistence:{supported:false,ready:true}},translate:k=>k,setBackupBusy(){},renderBoardMutationState(){},parseBoardBackup:async()=>({boardName:'Imported'}),AppConfirm:{ask:async()=>true},persistenceWriteChain:Promise.resolve(),persistenceGeneration:0,masterVolumeSaveTimer:11,orphanCleanupTimer:22,clearTimeout:id=>cancelled.push(id),applyImportedSnapshot(){},showToast(){},setTimeout(){},backupFileInput:{value:''},console});
  vm.runInContext(fn('backupLabel')+'\n'+fn('importBoardBackup'),c);await c.importBoardBackup(new Blob(['backup']));
  assert.ok(cancelled.includes(11));assert.ok(cancelled.includes(22));assert.equal(c.persistenceGeneration,1);
 });

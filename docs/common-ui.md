@@ -6,6 +6,8 @@ The working area repeats the IndexedDB storage state with confirmed save time an
 
 The existing confirmation and toast APIs remain authoritative. Confirmation translates while open, starts at Cancel and restores focus. Focus pauses Undo toast expiration; orphan audio stays retained while Undo is available. Delete saved board explicitly describes the audio/cues/volume and leaves language preferences intact.
 
+Reset and restore now own an explicit board mutation lock through queue invalidation, active-write drain, the atomic storage transaction and in-memory replacement. All cue edit/import/reorder/Undo/volume/name entry points and persistence enqueue reject edits during that interval, and visible mutation controls are disabled. Late metadata import completion is generation-checked. Delivery failures for .bkcue and playback HTML remain in separate persistent translated recovery notices until that output succeeds; they never claim import/autosave failure.
+
 Language resolves URL, shared key, legacy scalar, supported browser languages, then English. Startup never writes preference. Explicit switch writes the shared key; blocked storage shows the screen-only notice. Progress, confirmation and toast messages re-render without clearing work or stopping playback. Playback cue cards, drag handles and fullscreen/wake-lock selection styles remain domain controls; toolbar/export/management actions opt into shared variants.
 
 Run the PowerShell syntax preflight, build, repository check and `node --test`. Native audio, IndexedDB reload/failure behavior, modal keyboard focus and mobile touch/layout acceptance remain human checks because no browser is permitted in this task.

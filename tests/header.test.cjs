@@ -30,7 +30,7 @@ function harness(storage = new Map(), browserLanguage = 'en-US') {
   const state = { cues: [], masterVolume: 0.8 };
   const context = vm.createContext({ document, $, state, APP_CONFIG: config, navigator: { language: browserLanguage },
     storageKeys: { language: `${config.slug}:language` }, URL, location:{href:''}, localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)}, readStorage: key => storage.get(key), writeStorage: (key, value) => storage.set(key, value),
-    renderCues() {}, renderPlayer() {}, updateCueCount() {}, refreshImportStatus() {}, updateCueEditDialog() {}, setMasterVolume() {}, renderStorageStatus() {}, renderLiveModeUi() {}, AppConfirm: { refresh() {} }, AppToast: { dismiss() {}, refresh() {} }
+    renderCues() {}, renderPlayer() {}, updateCueCount() {}, refreshImportStatus() {}, updateCueEditDialog() {}, setMasterVolume() {}, renderStorageStatus() {}, renderLiveModeUi() {}, renderDeliveryStatus() {}, AppConfirm: { refresh() {} }, AppToast: { dismiss() {}, refresh() {} }
   });
   const translations = source.match(/      const translations = \{[\s\S]*?\n      \};/);
   const initialization = source.match(/      let language = [^\n]+;/);
