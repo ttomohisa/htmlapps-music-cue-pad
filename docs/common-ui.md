@@ -8,6 +8,8 @@ The existing confirmation and toast APIs remain authoritative. Confirmation tran
 
 Reset and restore now own an explicit board mutation lock through queue invalidation, active-write drain, the atomic storage transaction and in-memory replacement. All cue edit/import/reorder/Undo/volume/name entry points and persistence enqueue reject edits during that interval, and visible mutation controls are disabled. Late metadata import completion is generation-checked. Delivery failures for .bkcue and playback HTML remain in separate persistent translated recovery notices until that output succeeds; they never claim import/autosave failure.
 
+Backup validation/unsupported-version and restore-storage failures have a third independent persistent translated recovery domain. The current board remains playable/exportable. Choosing a valid backup or fixing browser storage and retrying Restore backup is the explicit recovery; only a successful restore clears this notice.
+
 Language resolves URL, shared key, legacy scalar, supported browser languages, then English. Startup never writes preference. Explicit switch writes the shared key; blocked storage shows the screen-only notice. Progress, confirmation and toast messages re-render without clearing work or stopping playback. Playback cue cards, drag handles and fullscreen/wake-lock selection styles remain domain controls; toolbar/export/management actions opt into shared variants.
 
 Run the PowerShell syntax preflight, build, repository check and `node --test`. Native audio, IndexedDB reload/failure behavior, modal keyboard focus and mobile touch/layout acceptance remain human checks because no browser is permitted in this task.

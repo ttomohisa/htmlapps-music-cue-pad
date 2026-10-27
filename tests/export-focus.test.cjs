@@ -37,7 +37,7 @@ function fixture(kind, fail = false) {
     };
   }
   document.body = element('body'); document.documentElement = element('html');
-  const names = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressBar', 'backupProgressValue', 'backupFileInput', 'backupDeliveryError', 'playerDeliveryError'];
+  const names = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressBar', 'backupProgressValue', 'backupFileInput', 'backupDeliveryError', 'playerDeliveryError', 'restoreBackupError'];
   const elements = Object.fromEntries(names.map(name => [name, element(name)]));
   const opener = elements[kind === 'backup' ? 'exportBackupButton' : 'exportPlayerButton'];
   const state = { cues: [{ id: 'cue', assetId: 'asset', name: 'Synthetic cue', volume: 1 }], assets: new Map([['asset', { id: 'asset', fileName: 'synthetic.wav', status: 'ready', duration: 1, blob: new Blob(['synthetic audio']) }]]), boardName: 'Focus test', masterVolume: 1, persistence: { supported: false }, backupBusy: false };

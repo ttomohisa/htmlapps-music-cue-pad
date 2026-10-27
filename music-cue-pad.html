@@ -922,6 +922,7 @@
           <p data-i18n="backupBody">音源とキュー設定を1つの .bkcue ファイルにまとめて保存し、別の端末やブラウザで復元できます。</p>
         </div>
       </div>
+      <p id="restoreBackupError" role="status" aria-live="polite" style="color:#B3261E"></p>
       <p id="backupDeliveryError" role="status" aria-live="polite" style="color:#B3261E"></p>
       <div class="backup-grid">
         <div class="backup-name-field">
@@ -1181,7 +1182,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-27T11:32:09.1664158Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-27T11:49:01.4955130Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -1412,8 +1413,8 @@
         }
       };
 
-      Object.assign(translations.en, { backupDeliveryFailed: 'Could not create or start the backup download. Retry Save backup (.bkcue); the current board and audio remain available.', playerDeliveryFailed: 'Could not create or start the playback HTML download. Retry Save playback HTML; the current board and audio remain available.', exportScope: 'Backups and playback HTML include all current cues and their source audio. The board name sets the .bkcue filename.', exportBackup: 'Save backup (.bkcue)', importBackup: 'Restore backup', exportPlayer: 'Save playback HTML', save: 'Apply settings', resetAll: 'Delete saved board', resetConfirm: 'Delete saved board', resetMessage: 'Delete all Music Cue Pad audio, cues and volume settings in this browser and the current board? This cannot be undone. Language preferences remain.', backupExported: 'Download started', playerExported: 'Download started' });
-      Object.assign(translations.ja, { backupDeliveryFailed: 'バックアップの作成・保存を開始できませんでした。「バックアップを保存 (.bkcue)」を再試行してください。現在のボードと音源は残っています。', playerDeliveryFailed: '再生用HTMLの作成・保存を開始できませんでした。「再生用HTMLを保存」を再試行してください。現在のボードと音源は残っています。', exportScope: 'バックアップと再生用HTMLは全キューと使用音源を含みます。ボード名が .bkcue のファイル名になります。', exportBackup: 'バックアップを保存 (.bkcue)', importBackup: 'バックアップから復元', exportPlayer: '再生用HTMLを保存', save: '設定を適用', resetAll: '保存済みボードを削除', resetConfirm: '保存済みボードを削除', resetMessage: 'このブラウザーと現在のボードの音源・キュー・音量設定を削除します。元に戻せません。言語設定は残ります。', backupExported: '保存を開始しました', playerExported: '保存を開始しました' });
+      Object.assign(translations.en, { restoreValidationFailed:'Could not validate this backup. The current board is unchanged. Choose Restore backup again with a valid .bkcue file.',restoreUnsupportedFailed:'This backup version is unsupported. The current board is unchanged. Choose a supported .bkcue file with Restore backup.',restoreSaveFailed:'Could not save the restored board. The current board is unchanged. Free browser storage or enable storage, then choose Restore backup again. The current board can still be played or exported.', backupDeliveryFailed: 'Could not create or start the backup download. Retry Save backup (.bkcue); the current board and audio remain available.', playerDeliveryFailed: 'Could not create or start the playback HTML download. Retry Save playback HTML; the current board and audio remain available.', exportScope: 'Backups and playback HTML include all current cues and their source audio. The board name sets the .bkcue filename.', exportBackup: 'Save backup (.bkcue)', importBackup: 'Restore backup', exportPlayer: 'Save playback HTML', save: 'Apply settings', resetAll: 'Delete saved board', resetConfirm: 'Delete saved board', resetMessage: 'Delete all Music Cue Pad audio, cues and volume settings in this browser and the current board? This cannot be undone. Language preferences remain.', backupExported: 'Download started', playerExported: 'Download started' });
+      Object.assign(translations.ja, { restoreValidationFailed:'バックアップを検証できませんでした。現在のボードは変更していません。有効な .bkcue を選び「バックアップから復元」を再試行してください。',restoreUnsupportedFailed:'このバックアップの形式版には対応していません。現在のボードは変更していません。対応する .bkcue で「バックアップから復元」を再試行してください。',restoreSaveFailed:'復元するボードを保存できませんでした。現在のボードは変更していません。ブラウザーの保存容量や設定を確認して「バックアップから復元」を再試行してください。現在のボードは再生・保存できます。', backupDeliveryFailed: 'バックアップの作成・保存を開始できませんでした。「バックアップを保存 (.bkcue)」を再試行してください。現在のボードと音源は残っています。', playerDeliveryFailed: '再生用HTMLの作成・保存を開始できませんでした。「再生用HTMLを保存」を再試行してください。現在のボードと音源は残っています。', exportScope: 'バックアップと再生用HTMLは全キューと使用音源を含みます。ボード名が .bkcue のファイル名になります。', exportBackup: 'バックアップを保存 (.bkcue)', importBackup: 'バックアップから復元', exportPlayer: '再生用HTMLを保存', save: '設定を適用', resetAll: '保存済みボードを削除', resetConfirm: '保存済みボードを削除', resetMessage: 'このブラウザーと現在のボードの音源・キュー・音量設定を削除します。元に戻せません。言語設定は残ります。', backupExported: '保存を開始しました', playerExported: '保存を開始しました' });
       const storageKeys = { language: `${APP_CONFIG.slug}:language` };
       const DB_NAME = `${APP_CONFIG.slug}:data`;
       const DB_VERSION = 1;
@@ -2083,6 +2084,7 @@
         const backup = $('#backupDeliveryError'), player = $('#playerDeliveryError');
         if (backup) backup.textContent = state.backupDeliveryError ? translate('backupDeliveryFailed') : '';
         if (player) player.textContent = state.playerDeliveryError ? translate('playerDeliveryFailed') : '';
+        const restore = $('#restoreBackupError'); if (restore) restore.textContent = state.restoreErrorKey ? translate(state.restoreErrorKey) : '';
       }
       async function exportPlaybackHtml() {
         if (state.backupBusy || state.boardMutationLocked) return;
@@ -2318,7 +2320,7 @@
         setBackupBusy(true, backupLabel('backupReading'), 1);
         let snapshot;
         try { snapshot = await parseBoardBackup(file); }
-        catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); showToast(() => translate(error?.message === 'unsupported version' ? 'backupUnsupportedVersion' : 'backupInvalid'), { tone:'warning', duration:6200 }); return; }
+        catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); state.restoreErrorKey=error?.message==='unsupported version'?'restoreUnsupportedFailed':'restoreValidationFailed';renderDeliveryStatus();return; }
         setBackupBusy(false);
         const confirmed = await AppConfirm.ask({ localize: () => ({ title: translate('backupReplaceTitle'), message: translate('backupReplaceMessage', { name: snapshot.boardName }), confirmLabel: translate('backupReplaceConfirm'), cancelLabel: translate('cancel'), tone: 'danger' }) });
         if (!confirmed || state.boardMutationLocked) return;
@@ -2328,9 +2330,9 @@
         try {
           await persistenceWriteChain.catch(() => {});
           if (state.persistence.supported && state.persistence.ready) await persistImportedSnapshot(snapshot);
-          applyImportedSnapshot(snapshot); setBackupBusy(true, backupLabel('backupProgressDone'), 100);
+          applyImportedSnapshot(snapshot); state.restoreErrorKey='';renderDeliveryStatus();setBackupBusy(true, backupLabel('backupProgressDone'), 100);
           showToast(() => translate('backupImported', { name: snapshot.boardName }), { tone:'success', duration:4800 });
-        } catch (error) { console.error('Backup import failed', error); showToast(() => translate('backupSaveFailed'), { tone:'warning', duration:6200 }); }
+        } catch (error) { console.error('Backup import failed', error); state.restoreErrorKey='restoreSaveFailed';renderDeliveryStatus(); }
         finally { state.boardMutationLocked = false; renderBoardMutationState(); backupFileInput.value = ''; setTimeout(() => setBackupBusy(false), 250); }
       }
 
