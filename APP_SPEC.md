@@ -1,5 +1,7 @@
 # APP_SPEC.md — Music Cue Pad
 
+Shared UI 1.0.0 integration: save labels distinguish .bkcue backup and playback HTML; explicit language switches use the common preference without startup migration. Confirmations/progress/Undo remain live during language changes. The working area exposes storage state and confirmed save time. See `docs/common-ui.md` for behavior and verification.
+
 This file is the product contract for Music Cue Pad. User instructions override this file; otherwise this file defines the intended behavior and release scope.
 
 ## 1. Product identity

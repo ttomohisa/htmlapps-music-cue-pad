@@ -29,13 +29,14 @@ function harness(storage = new Map(), browserLanguage = 'en-US') {
   const document = { documentElement: {}, querySelectorAll: selector => elements.filter(el => selector.slice(1, -1) in el.attributes) };
   const state = { cues: [], masterVolume: 0.8 };
   const context = vm.createContext({ document, $, state, APP_CONFIG: config, navigator: { language: browserLanguage },
-    storageKeys: { language: `${config.slug}:language` }, readStorage: key => storage.get(key), writeStorage: (key, value) => storage.set(key, value),
-    renderCues() {}, renderPlayer() {}, updateCueCount() {}, refreshImportStatus() {}, updateCueEditDialog() {}, setMasterVolume() {}, renderStorageStatus() {}, renderLiveModeUi() {}, AppToast: { dismiss() {} }
+    storageKeys: { language: `${config.slug}:language` }, URL, location:{href:''}, localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)}, readStorage: key => storage.get(key), writeStorage: (key, value) => storage.set(key, value),
+    renderCues() {}, renderPlayer() {}, updateCueCount() {}, refreshImportStatus() {}, updateCueEditDialog() {}, setMasterVolume() {}, renderStorageStatus() {}, renderLiveModeUi() {}, AppConfirm: { refresh() {} }, AppToast: { dismiss() {}, refresh() {} }
   });
   const translations = source.match(/      const translations = \{[\s\S]*?\n      \};/);
-  const initialization = source.match(/      let language = readStorage\(storageKeys.language\) \|\| detectLanguage\(\);/);
+  const initialization = source.match(/      let language = [^\n]+;/);
   const clickHandler = source.match(/      \$\('#languageButton'\)\.addEventListener\('click', \(\) => \{[\s\S]*?\n      \}\);/);
   assert.ok(translations && initialization && clickHandler, 'test the real translation, initial language and click handler');
+  vm.runInContext(fs.readFileSync('components/ui-conventions.js','utf8'),context);
   vm.runInContext([translations[0], runtimeFunction('detectLanguage'), runtimeFunction('translate'), initialization[0], runtimeFunction('applyLanguage'), clickHandler[0], 'applyLanguage();'].join('\n'), context);
   return { $, document, state, elements, storage };
 }
@@ -69,7 +70,7 @@ test('repeated language clicks persist the choice and reload restores it without
     h.$('#languageButton').click();
     assert.equal(h.document.documentElement.lang, language);
     assert.equal(h.$('#languageButton').textContent, label);
-    assert.equal(storage.get(`${config.slug}:language`), language);
+    assert.equal(storage.get('browser-kitty:ui-language:v1'), language);
   }
   assert.equal(JSON.stringify(h.state), before);
   assert.equal(harness(storage, 'ja-JP').document.documentElement.lang, 'en');

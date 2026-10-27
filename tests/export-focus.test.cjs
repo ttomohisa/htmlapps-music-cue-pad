@@ -27,6 +27,7 @@ function fixture(kind, fail = false) {
     return {
       id, isConnected: true, hidden: false, visibility: 'visible', value: 'focus-test-player', focusCalls: [],
       set disabled(value) { this.isDisabled = value; if (value && document.activeElement === this) document.activeElement = document.body; },
+      setAttribute() {}, removeAttribute() {},
       get disabled() { return Boolean(this.isDisabled); },
       getClientRects() { return this.isConnected && !this.hidden ? [{}] : []; },
       focus(options) {
@@ -50,9 +51,10 @@ function fixture(kind, fail = false) {
     // Download and import persistence are external boundaries, not focus logic.
     downloadBlob(blob, filename) { if (fail) throw new Error('synthetic export failure'); downloads.push({ blob, filename }); },
     parseBoardBackup: async () => ({ boardName: 'Imported' }), AppConfirm: { ask: async () => true },
-    persistenceWriteChain: Promise.resolve(), applyImportedSnapshot() {},
+    persistenceWriteChain: Promise.resolve(), persistenceGeneration:0, masterVolumeSaveTimer:0, orphanCleanupTimer:0, clearTimeout() {}, applyImportedSnapshot() {},
   });
-  const functions = ['setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
+  vm.runInContext(fs.readFileSync('components/ui-conventions.js','utf8'),context);
+  const functions = ['backupLabel', 'setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
   if (source.includes('      function captureExportFocus(')) functions.push('captureExportFocus');
   const playerBuilder = source.slice(source.indexOf('      function playerExportDocument('), source.indexOf('      async function exportPlaybackHtml('));
   const backupBuilder = source.slice(source.indexOf('      const crc32Table = '), source.indexOf('      async function readZipDirectory('));

@@ -675,6 +675,118 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
   </style>
+<style>/* Browser Kitty shared UI conventions 1.0.0. Explicit opt-in only. */
+[data-bk-button] { min-height: 44px; border: 1px solid #BFC1BA; background: #FFFFFF; color: #202823; cursor: pointer; opacity: 1; }
+[data-bk-button][data-bk-variant="primary"] { background: #16624F; border-color: #16624F; color: #FFFFFF; }
+[data-bk-button][data-bk-variant="primary"]:hover:not(:disabled) { background: #0E503F; border-color: #0E503F; }
+[data-bk-button][data-bk-variant="secondary"] { background: #FFFFFF; color: #202823; border-color: #BFC1BA; }
+[data-bk-button][data-bk-variant="secondary"]:hover:not(:disabled) { background: #FFFFFF; color: #202823; border-color: #BFC1BA; }
+[data-bk-button][data-bk-variant="danger"] { background: #B3261E; border-color: #B3261E; color: #FFFFFF; }
+[data-bk-button][data-bk-variant="danger"]:hover:not(:disabled) { background: #8C1D18; border-color: #8C1D18; color: #FFFFFF; }
+[data-bk-button]:focus-visible, [data-bk-header-action]:focus-visible { outline: 2px solid #16624F; outline-offset: 2px; }
+[data-bk-button]:disabled, [data-bk-button]:disabled:hover, [data-bk-button]:disabled:active { background: #E7EBE7; color: #59635C; border-color: #E7EBE7; cursor: not-allowed; opacity: 1; transform: none; }
+[data-bk-button][data-bk-state="busy"], [data-bk-button][data-bk-state="stopping"], [data-bk-button][data-bk-state="busy"]:hover, [data-bk-button][data-bk-state="stopping"]:hover { background: #E1F0EA; color: #16624F; border-color: #E1F0EA; cursor: wait; opacity: 1; }
+[data-bk-button][data-bk-state="busy"]::before, [data-bk-button][data-bk-state="stopping"]::before { content: ''; display: inline-block; width: .85em; height: .85em; margin-inline-end: .45em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -.1em; animation: bk-ui-spin .85s linear infinite; }
+[data-bk-header-action] { min-width: 44px; min-height: 44px; }
+[data-bk-save-status] { display: block; font-size: .85rem; color: #59635C; overflow-wrap: anywhere; }
+[data-bk-save-status="error"] { color: #B3261E; }
+@keyframes bk-ui-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { [data-bk-button] { transition: none; } [data-bk-button]::before { animation: none !important; } }
+</style>
+<script data-bk-ui-version="1.0.0">/* Browser Kitty shared UI conventions 1.0.0. Build-time embed only; no network. */
+(function (root) {
+  'use strict';
+  const version = '1.0.0';
+  const languageKey = 'browser-kitty:ui-language:v1';
+  const validLanguage = value => value === 'ja' || value === 'en';
+  function safely(read, fallback) { try { return read(); } catch (_) { return fallback; } }
+  function dependency(options, key, readDefault, fallback) {
+    return safely(() => Object.prototype.hasOwnProperty.call(options, key) ? options[key] : readDefault(), fallback);
+  }
+  function storageFrom(options) { return dependency(options, 'storage', () => root.localStorage, null); }
+  function urlFrom(options) { return dependency(options, 'url', () => root.location.href, ''); }
+  function parseUrl(value) { return safely(() => new URL(String(value), 'https://browser-kitty.invalid/'), null); }
+  function readLanguage(storage, key) { return safely(() => storage && storage.getItem(key), null); }
+  function resolveLanguage(options = {}) {
+    const url = parseUrl(urlFrom(options));
+    const query = url && url.searchParams.get('lang');
+    if (validLanguage(query)) return query;
+    const storage = storageFrom(options);
+    const shared = readLanguage(storage, languageKey);
+    if (validLanguage(shared)) return shared;
+    for (const key of options.legacyKeys || []) {
+      const legacy = readLanguage(storage, key);
+      if (validLanguage(legacy)) return legacy;
+    }
+    const languages = dependency(options, 'languages', () => root.navigator.languages || [root.navigator.language], []);
+    for (const value of languages || []) {
+      const language = String(value).toLowerCase().split('-')[0];
+      if (validLanguage(language)) return language;
+    }
+    return 'en';
+  }
+  function chooseLanguage(language, options = {}) {
+    if (!validLanguage(language)) throw new TypeError('Unsupported language: ' + language);
+    const storage = storageFrom(options);
+    const persisted = safely(() => { if (!storage) return false; storage.setItem(languageKey, language); return true; }, false);
+    const url = parseUrl(urlFrom(options));
+    const history = dependency(options, 'history', () => root.history, null);
+    const urlUpdated = safely(() => {
+      if (!url || !url.searchParams.has('lang') || !history) return false;
+      url.searchParams.set('lang', language);
+      history.replaceState(history.state, '', url.href);
+      return true;
+    }, false);
+    return { language, persisted, urlUpdated };
+  }
+  const copy = {
+    en: {
+      sessionOnly: 'Your work will be lost when this tab closes',
+      manualSave: 'Your work is not saved automatically. Save a project file to continue editing later.',
+      dirty: 'Unsaved changes', saving: 'Saving…', saved: 'Saved in this browser',
+      saveFailed: 'Could not save in this browser', downloadStarted: 'Download started',
+      previousResult: 'Previous result', stopping: 'Stopping…', stopProcessing: 'Stop processing', cancel: 'Cancel',
+      languageSessionOnly: 'Language applies to this screen only'
+    },
+    ja: {
+      sessionOnly: '作業内容はこのタブを閉じると消えます',
+      manualSave: '自動保存されません。続きの編集には作業ファイルを保存してください',
+      dirty: '未保存の変更があります', saving: '保存しています…', saved: 'このブラウザーに保存済み',
+      saveFailed: 'このブラウザーに保存できませんでした', downloadStarted: '保存を開始しました',
+      previousResult: '前回の結果', stopping: '中止しています…', stopProcessing: '処理を中止', cancel: 'キャンセル',
+      languageSessionOnly: '言語はこの画面だけに適用されます'
+    }
+  };
+  function text(key, language = 'en', values = {}) {
+    const locale = validLanguage(language) ? language : 'en';
+    let value = copy[locale][key] || copy.en[key] || String(key);
+    if (key === 'saved' && values.time) value += (locale === 'ja' ? '・' : ' · ') + String(values.time);
+    return value.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, name) => Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : match);
+  }
+  function setButtonState(button, state) {
+    if (!['ready', 'unavailable', 'busy', 'stopping'].includes(state)) throw new TypeError('Unsupported button state: ' + state);
+    button.disabled = state !== 'ready';
+    button.setAttribute('data-bk-state', state);
+    if (state === 'busy' || state === 'stopping') button.setAttribute('aria-busy', 'true');
+    else button.removeAttribute('aria-busy');
+  }
+  function setSaveStatus(element, options = {}) {
+    const mode = options.mode || 'session';
+    const state = options.state || 'dirty';
+    if (!['session', 'manual', 'autosave'].includes(mode)) throw new TypeError('Unsupported save mode: ' + mode);
+    if (!['dirty', 'saving', 'saved', 'error'].includes(state)) throw new TypeError('Unsupported save state: ' + state);
+    const key = mode === 'session' ? 'sessionOnly' : mode === 'manual' ? 'manualSave' : state === 'error' ? 'saveFailed' : state;
+    element.textContent = text(key, options.language, { time: options.time });
+    element.setAttribute('role', 'status');
+    element.setAttribute('aria-live', 'polite');
+    element.setAttribute('data-bk-save-status', state);
+    element.setAttribute('data-bk-save-mode', mode);
+  }
+  const api = Object.freeze({ version, languageKey, resolveLanguage, chooseLanguage, text, setButtonState, setSaveStatus });
+  root.BrowserKittyUI = api;
+  if (typeof module === 'object' && module.exports) module.exports = api;
+})(typeof globalThis === 'object' ? globalThis : window);
+</script>
 </head>
 <body>
   <header class="app-header">
@@ -687,8 +799,8 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="language-button" id="languageButton" type="button" title="英語に切り替え" aria-label="英語に切り替え">EN</button>
-        <button class="icon-button header-icon-button" id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
+        <button data-bk-header-action  class="language-button" id="languageButton" type="button" title="英語に切り替え" aria-label="英語に切り替え">EN</button>
+        <button data-bk-header-action  class="icon-button header-icon-button" id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.35 2.35 0 1 1 3.72 1.9c-.92.67-1.52 1.12-1.52 2.1"/><path d="M12 17h.01"/></svg>
         </button>
       </div>
@@ -777,6 +889,7 @@
         <h2 data-i18n="emptyTitle">まだ曲がありません</h2>
         <p data-i18n="emptyBody">上の「ファイルを選択」から音声を追加すると、ここに再生ボタンが並びます。</p>
       </div>
+      <p data-i18n="exportScope"></p><p id="workSaveStatus" role="status" aria-live="polite"></p>
       <div class="cue-grid" id="cueGrid" hidden></div>
     </section>
 
@@ -794,9 +907,9 @@
           <div class="storage-detail"><span data-i18n="storageProtectionLabel">保存の保護</span><strong id="storageProtection">—</strong></div>
         </div>
         <div class="storage-actions">
-          <button class="storage-button" id="requestPersistenceButton" type="button" data-i18n="requestPersistence">保存を保護する</button>
-          <button class="storage-button" id="retrySaveButton" type="button" hidden data-i18n="retrySave">保存を再試行</button>
-          <button class="storage-button danger" id="resetButton" type="button" data-i18n="resetAll">すべて削除</button>
+          <button data-bk-button data-bk-variant="secondary"  class="storage-button" id="requestPersistenceButton" type="button" data-i18n="requestPersistence">保存を保護する</button>
+          <button data-bk-button data-bk-variant="secondary"  class="storage-button" id="retrySaveButton" type="button" hidden data-i18n="retrySave">保存を再試行</button>
+          <button data-bk-button data-bk-variant="danger"  class="storage-button danger" id="resetButton" type="button" data-i18n="resetAll">すべて削除</button>
         </div>
       </div>
       <p class="storage-warning" id="storageWarning" hidden></p>
@@ -815,8 +928,8 @@
           <input id="boardNameInput" type="text" maxlength="120" autocomplete="off" spellcheck="false" data-i18n-placeholder="boardNamePlaceholder" placeholder="My cue board">
         </div>
         <div class="backup-actions">
-          <button class="backup-button primary" id="exportBackupButton" type="button" data-i18n="exportBackup">バックアップを書き出す</button>
-          <button class="backup-button" id="importBackupButton" type="button" data-i18n="importBackup">バックアップを読み込む</button>
+          <button data-bk-button data-bk-variant="primary"  class="backup-button primary" id="exportBackupButton" type="button" data-i18n="exportBackup">バックアップを書き出す</button>
+          <button data-bk-button data-bk-variant="secondary"  class="backup-button" id="importBackupButton" type="button" data-i18n="importBackup">バックアップを読み込む</button>
           <input id="backupFileInput" type="file" accept=".bkcue,application/zip" hidden>
         </div>
       </div>
@@ -836,7 +949,7 @@
             </span>
             <span class="sr-only" id="playerFilenameHint" data-i18n="playerFilenameHint">拡張子は自動で .html が付きます</span>
           </label>
-          <button class="backup-button primary" id="exportPlayerButton" type="button" data-i18n="exportPlayer">再生用HTMLを書き出す</button>
+          <button data-bk-button data-bk-variant="primary"  class="backup-button primary" id="exportPlayerButton" type="button" data-i18n="exportPlayer">再生用HTMLを書き出す</button>
         </div>
         <p class="export-size-note" id="playerExportEstimate" aria-live="polite">—</p>
       </div>
@@ -864,19 +977,19 @@
         <div class="timeline-time"><span id="elapsedTime">0:00</span><span id="remainingTime">残り —</span><span id="totalTime">0:00</span></div>
       </div>
       <div class="player-actions">
-        <button class="action-button" id="nextCueButton" type="button" aria-describedby="nextCueName" disabled>
+        <button data-bk-button data-bk-variant="secondary"  class="action-button" id="nextCueButton" type="button" aria-describedby="nextCueName" disabled>
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 5v14l10-7L5 5Z"/><rect x="17" y="5" width="2" height="14"/></svg>
           <span data-i18n="playNext">次を再生</span>
         </button>
-        <button class="action-button primary" id="pauseResumeButton" type="button" aria-keyshortcuts="Space">
+        <button data-bk-button data-bk-variant="secondary"  class="action-button primary" id="pauseResumeButton" type="button" aria-keyshortcuts="Space">
           <svg id="pauseResumeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
           <span id="pauseResumeLabel" data-i18n="pause">一時停止</span>
         </button>
-        <button class="action-button" id="fadeStopButton" type="button" aria-keyshortcuts="F">
+        <button data-bk-button data-bk-variant="secondary"  class="action-button" id="fadeStopButton" type="button" aria-keyshortcuts="F">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h4M4 12h7M4 17h10"/><path d="M18 7v10"/></svg>
           <span data-i18n="fadeStop">フェード停止</span>
         </button>
-        <button class="action-button" id="stopButton" type="button" aria-keyshortcuts="Escape">
+        <button data-bk-button data-bk-variant="secondary"  class="action-button" id="stopButton" type="button" aria-keyshortcuts="Escape">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>
           <span data-i18n="stop">停止</span>
         </button>
@@ -899,8 +1012,8 @@
     <div class="app-confirm-body">
       <p class="app-confirm-message" id="appConfirmMessage"></p>
       <div class="app-confirm-actions">
-        <button class="app-confirm-button" id="appConfirmCancel" type="button">キャンセル</button>
-        <button class="app-confirm-button primary" id="appConfirmOk" type="button">実行する</button>
+        <button data-bk-button data-bk-variant="secondary"  class="app-confirm-button" id="appConfirmCancel" type="button">キャンセル</button>
+        <button data-bk-button data-bk-variant="secondary"  class="app-confirm-button primary" id="appConfirmOk" type="button">実行する</button>
       </div>
     </div>
   </dialog>
@@ -1011,8 +1124,8 @@
 
       <p class="edit-validation" id="cueEditValidation" role="alert" aria-live="polite"></p>
       <div class="edit-actions">
-        <button class="app-confirm-button" id="cancelCueEditButton" type="button" data-i18n="cancel">キャンセル</button>
-        <button class="app-confirm-button primary" id="saveCueEditButton" type="button" data-i18n="save">保存</button>
+        <button data-bk-button data-bk-variant="secondary"  class="app-confirm-button" id="cancelCueEditButton" type="button" data-i18n="cancel">キャンセル</button>
+        <button data-bk-button data-bk-variant="primary"  class="app-confirm-button primary" id="saveCueEditButton" type="button" data-i18n="save">保存</button>
       </div>
     </div>
   </dialog>
@@ -1066,7 +1179,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-23T09:24:15.8439337Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-27T11:11:52.9506994Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -1297,6 +1410,8 @@
         }
       };
 
+      Object.assign(translations.en, { exportScope: 'Backups and playback HTML include all current cues and their source audio. The board name sets the .bkcue filename.', exportBackup: 'Save backup (.bkcue)', importBackup: 'Restore backup', exportPlayer: 'Save playback HTML', save: 'Apply settings', resetAll: 'Delete saved board', resetConfirm: 'Delete saved board', resetMessage: 'Delete all Music Cue Pad audio, cues and volume settings in this browser and the current board? This cannot be undone. Language preferences remain.', backupExported: 'Download started', playerExported: 'Download started' });
+      Object.assign(translations.ja, { exportScope: 'バックアップと再生用HTMLは全キューと使用音源を含みます。ボード名が .bkcue のファイル名になります。', exportBackup: 'バックアップを保存 (.bkcue)', importBackup: 'バックアップから復元', exportPlayer: '再生用HTMLを保存', save: '設定を適用', resetAll: '保存済みボードを削除', resetConfirm: '保存済みボードを削除', resetMessage: 'このブラウザーと現在のボードの音源・キュー・音量設定を削除します。元に戻せません。言語設定は残ります。', backupExported: '保存を開始しました', playerExported: '保存を開始しました' });
       const storageKeys = { language: `${APP_CONFIG.slug}:language` };
       const DB_NAME = `${APP_CONFIG.slug}:data`;
       const DB_VERSION = 1;
@@ -1318,6 +1433,7 @@
         liveMode: false,
         wakeLockRequested: false,
         wakeLockSentinel: null,
+        savedAt: '', dirty: false,
         persistence: { supported: 'indexedDB' in window, ready: false, saving: false, errorType: '', persistent: null, estimate: null }
       };
       const primaryAudio = new Audio();
@@ -1346,7 +1462,7 @@
       let liveExitHoldTimer = 0;
       let liveExitHoldFrame = 0;
       let liveExitHoldStartedAt = 0;
-      let language = readStorage(storageKeys.language) || detectLanguage();
+      let language = BrowserKittyUI.resolveLanguage({ legacyKeys: [storageKeys.language] });
 
       const $ = selector => document.querySelector(selector);
       function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char])); }
@@ -1466,7 +1582,7 @@
       function markPersistenceError(error) {
         state.persistence.errorType = isQuotaError(error) ? 'quota' : 'write';
         renderStorageStatus();
-        showToast(translate(state.persistence.errorType === 'quota' ? 'persistenceQuotaWarning' : 'persistenceWriteWarning'), { tone: 'warning', duration: 6200 });
+        showToast(() => translate(state.persistence.errorType === 'quota' ? 'persistenceQuotaWarning' : 'persistenceWriteWarning'), { tone: 'warning', duration: 6200 });
       }
       function enqueuePersistence(task, { clearErrorOnSuccess = false } = {}) {
         if (!state.persistence.supported || !state.persistence.ready) return Promise.resolve(false);
@@ -1475,9 +1591,10 @@
         state.persistence.saving = true;
         renderStorageStatus();
         const run = async () => {
-          if (generation !== persistenceGeneration) return false;
           try {
+            if (generation !== persistenceGeneration) return false;
             await task();
+            if (generation === persistenceGeneration) { state.savedAt = new Date().toLocaleTimeString(language); state.dirty = Boolean(masterVolumeSaveTimer); }
             if (clearErrorOnSuccess) state.persistence.errorType = '';
             return true;
           } catch (error) {
@@ -1561,8 +1678,9 @@
         await txDone;
       }
       function scheduleMasterVolumeSave() {
+        state.dirty = true; renderStorageStatus();
         clearTimeout(masterVolumeSaveTimer);
-        masterVolumeSaveTimer = window.setTimeout(() => enqueuePersistence(putMasterVolume), 260);
+        masterVolumeSaveTimer = window.setTimeout(() => { masterVolumeSaveTimer = 0; enqueuePersistence(putMasterVolume); }, 260);
       }
       function scheduleOrphanCleanup() {
         clearTimeout(orphanCleanupTimer);
@@ -1570,7 +1688,7 @@
       }
       async function cleanupOrphanAssets() {
         const referenced = new Set(state.cues.map(cue => cue.assetId));
-        const orphanIds = [...state.assets.keys()].filter(id => !referenced.has(id));
+        const orphanIds = [...state.assets.keys()].filter(id => !referenced.has(id) && id !== state.undoAssetId);
         if (!orphanIds.length) return;
         const db = await openPersistenceDb();
         const tx = db.transaction(['assets'], 'readwrite');
@@ -1626,7 +1744,9 @@
         if (!state.persistence.supported) { stateKey = 'storageSessionOnly'; storageState.classList.add('is-warning'); }
         else if (!state.persistence.ready || state.persistence.saving) { stateKey = state.persistence.ready ? 'storageSaving' : 'storageLoading'; storageState.classList.add('is-saving'); }
         else if (state.persistence.errorType) { stateKey = 'storageError'; storageState.classList.add('is-warning'); }
-        storageState.textContent = translate(stateKey);
+        BrowserKittyUI.setSaveStatus(storageState, {mode: state.persistence.supported ? 'autosave' : 'session', state: state.persistence.errorType ? 'error' : state.persistence.saving ? 'saving' : state.dirty ? 'dirty' : 'saved', language, time: state.savedAt});
+        if (!state.persistence.ready) storageState.textContent = translate('storageLoading');
+        const summary = $('#workSaveStatus'); if (summary) { summary.textContent = storageState.textContent; summary.setAttribute('role','status'); summary.setAttribute('aria-live','polite'); }
         const estimate = state.persistence.estimate;
         storageUsage.textContent = estimate && Number.isFinite(estimate.usage) && Number.isFinite(estimate.quota) ? `${formatBytes(estimate.usage)} / ${formatBytes(estimate.quota)}` : '—';
         storageProtection.textContent = !state.persistence.supported ? translate('storageUnavailable') : state.persistence.persistent === true ? translate('storageProtected') : navigator.storage?.persist ? translate('storageNotProtected') : translate('storageUnavailable');
@@ -1634,7 +1754,7 @@
         requestPersistenceButton.disabled = !state.persistence.ready || state.persistence.saving;
         retrySaveButton.hidden = !state.persistence.supported || !state.persistence.errorType;
         retrySaveButton.disabled = !state.persistence.ready || state.persistence.saving;
-        resetButton.disabled = !state.persistence.ready || state.persistence.saving;
+        resetButton.disabled = !state.persistence.ready || state.persistence.saving || state.backupBusy;
         const warningKey = !state.persistence.supported ? 'persistenceUnavailableWarning' : state.persistence.errorType === 'quota' ? 'persistenceQuotaWarning' : state.persistence.errorType ? 'persistenceWriteWarning' : '';
         storageWarning.hidden = !warningKey;
         storageWarning.textContent = warningKey ? translate(warningKey) : '';
@@ -1704,20 +1824,20 @@
         try {
           const granted = await navigator.storage.persist();
           state.persistence.persistent = Boolean(granted);
-          showToast(translate(granted ? 'persistenceGranted' : 'persistenceDenied'), { tone: granted ? 'success' : 'warning', duration: 5200 });
+          showToast(() => translate(granted ? 'persistenceGranted' : 'persistenceDenied'), { tone: granted ? 'success' : 'warning', duration: 5200 });
         } catch {
           state.persistence.persistent = false;
-          showToast(translate('persistenceDenied'), { tone: 'warning' });
+          showToast(() => translate('persistenceDenied'), { tone: 'warning' });
         } finally { renderStorageStatus(); refreshStorageEstimate(); }
       }
 
       async function retrySaveCurrentBoard() {
         const ok = await enqueuePersistence(persistCurrentSnapshot, { clearErrorOnSuccess: true });
-        if (ok) showToast(translate('retrySaveSuccess'), { tone: 'success' });
+        if (ok) showToast(() => translate('retrySaveSuccess'), { tone: 'success' });
       }
 
       async function resetAllData() {
-        const confirmed = await AppConfirm.ask({ title: translate('resetTitle'), message: translate('resetMessage'), confirmLabel: translate('resetConfirm'), cancelLabel: translate('cancel'), tone: 'danger' });
+        const confirmed = await AppConfirm.ask({ localize: () => ({ title: translate('resetTitle'), message: translate('resetMessage'), confirmLabel: translate('resetConfirm'), cancelLabel: translate('cancel'), tone: 'danger' }) });
         if (!confirmed) return;
         resetButton.disabled = true;
         clearTimeout(masterVolumeSaveTimer);
@@ -1735,7 +1855,7 @@
             await txDone;
           }
         } catch {
-          showToast(translate('resetFailed'), { tone: 'warning', duration: 5200 });
+          showToast(() => translate('resetFailed'), { tone: 'warning', duration: 5200 });
           renderStorageStatus();
           return;
         }
@@ -1752,19 +1872,21 @@
         setMasterVolume(1, { persist: false });
         updateCueCount(); renderCues(); renderPlayer(); refreshImportStatus();
         await refreshStorageEstimate();
-        showToast(translate('resetDone'), { tone: 'success' });
+        showToast(() => translate('resetDone'), { tone: 'success' });
       }
 
+      function backupLabel(key, values = {}) { return { key, values }; }
       function setBackupBusy(busy, label = '', percent = 0) {
         state.backupBusy = Boolean(busy);
-        exportBackupButton.disabled = state.backupBusy || state.cues.length === 0;
-        exportPlayerButton.disabled = state.backupBusy || state.cues.length === 0;
-        importBackupButton.disabled = state.backupBusy;
+        BrowserKittyUI.setButtonState(exportBackupButton, state.backupBusy ? 'busy' : state.cues.length ? 'ready' : 'unavailable');
+        BrowserKittyUI.setButtonState(exportPlayerButton, state.backupBusy ? 'busy' : state.cues.length ? 'ready' : 'unavailable');
+        BrowserKittyUI.setButtonState(importBackupButton, state.backupBusy ? 'busy' : 'ready');
         boardNameInput.disabled = state.backupBusy;
         playerFilenameInput.disabled = state.backupBusy;
         backupProgress.hidden = !state.backupBusy;
         if (state.backupBusy) {
-          backupProgressLabel.textContent = label || translate('backupPreparing');
+          state.backupLabel = label;
+          backupProgressLabel.textContent = label && typeof label === 'object' ? translate(label.key,label.values) : label || translate('backupPreparing');
           const value = Math.min(100, Math.max(0, Number(percent) || 0));
           backupProgressBar.value = value;
           backupProgressValue.textContent = `${Math.round(value)}%`;
@@ -1946,37 +2068,39 @@
 </body></html>`;
       }
       async function exportPlaybackHtml() {
-        if (!state.cues.length) { showToast(translate('backupEmpty'), { tone:'warning' }); return; }
+        if (state.backupBusy) return;
+        const output = { boardName: state.boardName, masterVolume: state.masterVolume, language, cues: state.cues.map(cue => ({...cue})), filename: `${safePlayerBaseName(playerFilenameInput.value)}${outputFilenameRules.extension}` };
+        if (!state.cues.length) { showToast(() => translate('backupEmpty'), { tone:'warning' }); return; }
         const usedIds = Array.from(new Set(state.cues.map(cue => cue.assetId)));
         const assets = usedIds.map(id => state.assets.get(id)).filter(asset => asset?.blob instanceof Blob && asset.status === 'ready');
         const totalBytes = assets.reduce((sum, asset) => sum + asset.blob.size, 0);
-        if (assets.length !== usedIds.length) { showToast(translate('playerExportTooLarge'), { tone:'warning', duration:6200 }); return; }
-        if (totalBytes > PLAYER_EXPORT_MAX_BYTES) { showToast(translate('playerExportTooLarge'), { tone:'warning', duration:7200 }); return; }
+        if (assets.length !== usedIds.length) { showToast(() => translate('playerExportTooLarge'), { tone:'warning', duration:6200 }); return; }
+        if (totalBytes > PLAYER_EXPORT_MAX_BYTES) { showToast(() => translate('playerExportTooLarge'), { tone:'warning', duration:7200 }); return; }
         if (totalBytes > PLAYER_EXPORT_WARN_BYTES) {
-          const confirmed = await AppConfirm.ask({ title: translate('playerExportLargeTitle'), message: translate('playerExportLargeMessage'), confirmLabel: translate('playerExportLargeConfirm'), cancelLabel: translate('cancel') });
+          const confirmed = await AppConfirm.ask({ localize: () => ({ title: translate('playerExportLargeTitle'), message: translate('playerExportLargeMessage'), confirmLabel: translate('playerExportLargeConfirm'), cancelLabel: translate('cancel') }) });
           if (!confirmed) return;
         }
         const restoreExportFocus = captureExportFocus(exportPlayerButton);
-        setBackupBusy(true, translate('playerExportPreparing'), 2);
+        setBackupBusy(true, backupLabel('playerExportPreparing'), 2);
         try {
           const embedded = [];
           for (let i = 0; i < assets.length; i++) {
             const asset = assets[i];
-            setBackupBusy(true, translate('playerExportEncoding', { current:i+1, total:assets.length }), 5 + (i / Math.max(1,assets.length))*85);
+            setBackupBusy(true, backupLabel('playerExportEncoding', { current:i+1, total:assets.length }), 5 + (i / Math.max(1,assets.length))*85);
             const base64 = await blobToBase64(asset.blob);
             embedded.push({ id:asset.id, fileName:asset.fileName, mimeType:asset.mimeType || asset.blob.type || 'application/octet-stream', duration:asset.duration, src:`data:${asset.mimeType || asset.blob.type || 'application/octet-stream'};base64,${base64}` });
             await new Promise(resolve => setTimeout(resolve, 0));
           }
-          setBackupBusy(true, translate('playerExportWriting'), 94);
-          const payload = { schemaVersion:1, app:'Music Cue Pad', appVersion:APP_CONFIG.version, boardName:String(state.boardName || translate('backupNameFallback')), language, masterVolume:state.masterVolume, assets:embedded, cues:state.cues.map(cue => ({ id:cue.id, assetId:cue.assetId, name:cue.name, startTime:cue.startTime, endTime:cue.endTime, loop:cue.loop, volume:cue.volume, fadeIn:cue.fadeIn, fadeOut:cue.fadeOut, shortcut:cue.shortcut || '' })) };
+          setBackupBusy(true, backupLabel('playerExportWriting'), 94);
+          const payload = { schemaVersion:1, app:'Music Cue Pad', appVersion:APP_CONFIG.version, boardName:String(output.boardName || translate('backupNameFallback')), language:output.language, masterVolume:output.masterVolume, assets:embedded, cues:output.cues.map(cue => ({ id:cue.id, assetId:cue.assetId, name:cue.name, startTime:cue.startTime, endTime:cue.endTime, loop:cue.loop, volume:cue.volume, fadeIn:cue.fadeIn, fadeOut:cue.fadeOut, shortcut:cue.shortcut || '' })) };
           const html = playerExportDocument(payload);
-          const filename = `${safePlayerBaseName(playerFilenameInput.value)}${outputFilenameRules.extension}`;
+          const filename = output.filename;
           downloadBlob(new Blob([html], { type:'text/html;charset=utf-8' }), filename);
-          setBackupBusy(true, translate('backupProgressDone'), 100);
-          showToast(translate('playerExported'), { tone:'success', duration:4800 });
+          setBackupBusy(true, backupLabel('backupProgressDone'), 100);
+          showToast(() => translate('playerExported'), { tone:'success', duration:4800 });
         } catch (error) {
           console.error('Player HTML export failed', error);
-          showToast(translate('persistenceWriteWarning'), { tone:'warning', duration:6200 });
+          showToast(() => translate('persistenceWriteWarning'), { tone:'warning', duration:6200 });
         } finally { setTimeout(() => { setBackupBusy(false); restoreExportFocus(); }, 250); }
       }
 
@@ -2060,23 +2184,25 @@
         };
       }
       async function exportBoardBackup() {
-        if (!state.cues.length) { showToast(translate('backupEmpty'), { tone: 'warning' }); return; }
+        if (state.backupBusy) return;
+        const sourceAssets = new Map(state.assets);
+        if (!state.cues.length) { showToast(() => translate('backupEmpty'), { tone: 'warning' }); return; }
         const manifest = backupManifest();
-        if (!manifest.assets.length) { showToast(translate('backupEmpty'), { tone: 'warning' }); return; }
+        if (!manifest.assets.length) { showToast(() => translate('backupEmpty'), { tone: 'warning' }); return; }
         const restoreExportFocus = captureExportFocus(exportBackupButton);
-        setBackupBusy(true, translate('backupPreparing'), 1);
+        setBackupBusy(true, backupLabel('backupPreparing'), 1);
         try {
           const encoder = new TextEncoder();
           const manifestBytes = encoder.encode(JSON.stringify(manifest, null, 2));
           const entries = [{ name: 'manifest.json', data: new Blob([manifestBytes], { type: 'application/json' }), crc: crc32Bytes(manifestBytes) }];
           for (let i = 0; i < manifest.assets.length; i++) {
-            const meta = manifest.assets[i]; const asset = state.assets.get(meta.id);
+            const meta = manifest.assets[i]; const asset = sourceAssets.get(meta.id);
             const base = 5 + (i / Math.max(1, manifest.assets.length)) * 75;
-            setBackupBusy(true, translate('backupHashing', { current: i + 1, total: manifest.assets.length }), base);
-            const crc = await crc32Blob(asset.blob, (done, total) => setBackupBusy(true, translate('backupHashing', { current: i + 1, total: manifest.assets.length }), base + (total ? done / total : 0) * (75 / manifest.assets.length)));
+            setBackupBusy(true, backupLabel('backupHashing', { current: i + 1, total: manifest.assets.length }), base);
+            const crc = await crc32Blob(asset.blob, (done, total) => setBackupBusy(true, backupLabel('backupHashing', { current: i + 1, total: manifest.assets.length }), base + (total ? done / total : 0) * (75 / manifest.assets.length)));
             entries.push({ name: meta.path, data: asset.blob, crc });
           }
-          setBackupBusy(true, translate('backupWriting'), 84);
+          setBackupBusy(true, backupLabel('backupWriting'), 84);
           const parts = []; const central = []; let offset = 0; const dos = zipDosDateTime(); const encoder2 = new TextEncoder();
           for (const entry of entries) {
             if (entry.data.size > 0xffffffff || offset > 0xffffffff) throw new Error('ZIP64 required');
@@ -2087,12 +2213,12 @@
           parts.push(...central, zipEndRecord(entries.length, centralSize, centralOffset));
           const blob = new Blob(parts, { type: 'application/zip' });
           const filename = `${safeBackupBaseName(manifest.board.name)}.bkcue`;
-          setBackupBusy(true, translate('backupProgressDone'), 100);
+          setBackupBusy(true, backupLabel('backupProgressDone'), 100);
           downloadBlob(blob, filename);
-          showToast(translate('backupExported', { name: manifest.board.name }), { tone: 'success', duration: 4800 });
+          showToast(() => translate('backupExported', { name: manifest.board.name }), { tone: 'success', duration: 4800 });
         } catch (error) {
           console.error('Backup export failed', error);
-          showToast(translate('backupImportFailed'), { tone: 'warning', duration: 5200 });
+          showToast(() => translate('backupImportFailed'), { tone: 'warning', duration: 5200 });
         } finally { setTimeout(() => { setBackupBusy(false); restoreExportFocus(); }, 250); }
       }
       async function readZipDirectory(file) {
@@ -2128,7 +2254,7 @@
         return { id: raw.id, assetId: raw.assetId, name: String(raw.name || 'Cue').slice(0,160), order: index, startTime: start, endTime: end, loop: Boolean(raw.loop), volume: Number.isFinite(Number(raw.volume)) ? Math.min(1, Math.max(0, Number(raw.volume))) : 1, fadeIn: Math.max(0, Number(raw.fadeIn) || 0), fadeOut: Math.max(0, Number(raw.fadeOut) || 0), shortcut: normalizeShortcutValue(raw.shortcut) };
       }
       async function parseBoardBackup(file) {
-        setBackupBusy(true, translate('backupReading'), 2);
+        setBackupBusy(true, backupLabel('backupReading'), 2);
         const entries = await readZipDirectory(file);
         const manifestEntry = entries.get('manifest.json'); if (!manifestEntry) throw new Error('manifest missing');
         if (manifestEntry.size > 5 * 1024 * 1024) throw new Error('manifest too large');
@@ -2140,8 +2266,8 @@
         for (let i = 0; i < manifest.assets.length; i++) {
           const meta = manifest.assets[i]; if (!meta?.id || !meta?.path || !Number.isFinite(Number(meta.duration)) || Number(meta.duration) <= 0) throw new Error('invalid asset');
           const entry = entries.get(meta.path); if (!entry || entry.size !== Number(meta.size)) throw new Error('missing audio');
-          setBackupBusy(true, translate('backupVerifying', { current: i + 1, total: manifest.assets.length }), 8 + (i / Math.max(1, manifest.assets.length)) * 80);
-          const crc = await crc32Blob(entry.blob, (done,total) => setBackupBusy(true, translate('backupVerifying', { current: i + 1, total: manifest.assets.length }), 8 + ((i + (total ? done/total : 0)) / Math.max(1, manifest.assets.length)) * 80));
+          setBackupBusy(true, backupLabel('backupVerifying', { current: i + 1, total: manifest.assets.length }), 8 + (i / Math.max(1, manifest.assets.length)) * 80);
+          const crc = await crc32Blob(entry.blob, (done,total) => setBackupBusy(true, backupLabel('backupVerifying', { current: i + 1, total: manifest.assets.length }), 8 + ((i + (total ? done/total : 0)) / Math.max(1, manifest.assets.length)) * 80));
           if (crc !== entry.crc) throw new Error('audio crc');
           const blob = entry.blob.slice(0, entry.blob.size, String(meta.mimeType || ''));
           assets.set(meta.id, { id: meta.id, blob, fileName: String(meta.fileName || 'audio'), mimeType: String(meta.mimeType || blob.type || ''), size: blob.size, duration: Number(meta.duration), url: '', status: 'ready', errorKey: '', persisted: false });
@@ -2169,21 +2295,22 @@
         boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard({ force:true }); setMasterVolume(state.masterVolume, { persist: false }); updateCueCount(); renderCues(); renderPlayer(); refreshImportStatus(); renderStorageStatus(); refreshStorageEstimate();
       }
       async function importBoardBackup(file) {
-        if (!file) return;
-        setBackupBusy(true, translate('backupReading'), 1);
+        if (!file || state.backupBusy) return;
+        setBackupBusy(true, backupLabel('backupReading'), 1);
         let snapshot;
         try { snapshot = await parseBoardBackup(file); }
-        catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); showToast(translate(error?.message === 'unsupported version' ? 'backupUnsupportedVersion' : 'backupInvalid'), { tone:'warning', duration:6200 }); return; }
+        catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); showToast(() => translate(error?.message === 'unsupported version' ? 'backupUnsupportedVersion' : 'backupInvalid'), { tone:'warning', duration:6200 }); return; }
         setBackupBusy(false);
-        const confirmed = await AppConfirm.ask({ title: translate('backupReplaceTitle'), message: translate('backupReplaceMessage', { name: snapshot.boardName }), confirmLabel: translate('backupReplaceConfirm'), cancelLabel: translate('cancel'), tone: 'danger' });
+        const confirmed = await AppConfirm.ask({ localize: () => ({ title: translate('backupReplaceTitle'), message: translate('backupReplaceMessage', { name: snapshot.boardName }), confirmLabel: translate('backupReplaceConfirm'), cancelLabel: translate('cancel'), tone: 'danger' }) });
         if (!confirmed) return;
-        setBackupBusy(true, translate('backupWriting'), 92);
+        clearTimeout(masterVolumeSaveTimer); clearTimeout(orphanCleanupTimer); persistenceGeneration += 1;
+        setBackupBusy(true, backupLabel('backupWriting'), 92);
         try {
           await persistenceWriteChain.catch(() => {});
           if (state.persistence.supported && state.persistence.ready) await persistImportedSnapshot(snapshot);
-          applyImportedSnapshot(snapshot); setBackupBusy(true, translate('backupProgressDone'), 100);
-          showToast(translate('backupImported', { name: snapshot.boardName }), { tone:'success', duration:4800 });
-        } catch (error) { console.error('Backup import failed', error); showToast(translate('backupSaveFailed'), { tone:'warning', duration:6200 }); }
+          applyImportedSnapshot(snapshot); setBackupBusy(true, backupLabel('backupProgressDone'), 100);
+          showToast(() => translate('backupImported', { name: snapshot.boardName }), { tone:'success', duration:4800 });
+        } catch (error) { console.error('Backup import failed', error); showToast(() => translate('backupSaveFailed'), { tone:'warning', duration:6200 }); }
         finally { backupFileInput.value = ''; setTimeout(() => setBackupBusy(false), 250); }
       }
 
@@ -2555,7 +2682,7 @@
         renderCues();
         renderPlayer();
         enqueuePersistence(() => putCue(cue));
-        showToast(translate('renamedCue'), { tone: 'success' });
+        showToast(() => translate('renamedCue'), { tone: 'success' });
       }
       function duplicateCue(cueId) {
         const index = cueIndex(cueId);
@@ -2567,7 +2694,7 @@
         updateCueCount();
         renderCues();
         enqueuePersistence(putAllCueMetadata);
-        showToast(translate('duplicatedCue', { name: source.name }), { tone: 'success' });
+        showToast(() => translate('duplicatedCue', { name: source.name }), { tone: 'success' });
       }
       function deleteCue(cueId) {
         const index = cueIndex(cueId);
@@ -2582,7 +2709,7 @@
         renderPlayer();
         enqueuePersistence(() => deleteCueRecord(cue.id));
         scheduleOrphanCleanup();
-        showToast(translate('deletedCue', { name: cue.name }), {
+        showToast(() => translate('deletedCue', { name: cue.name }), {
           tone: 'success', duration: 6000, actionLabel: translate('undo'), onAction: () => {
             const restoreIndex = Math.min(index, state.cues.length);
             state.cues.splice(restoreIndex, 0, cue);
@@ -2603,6 +2730,7 @@
             enqueuePersistence(putAllCueMetadata);
           }
         });
+        state.undoAssetId = cue.assetId;
       }
       function moveCue(cueId, delta) {
         const index = cueIndex(cueId);
@@ -2622,7 +2750,7 @@
         if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
         event.preventDefault();
         if (moveCue(cueId, event.key === 'ArrowUp' ? -1 : 1)) {
-          showToast(translate('dragMoved'), { tone: 'success', duration: 1800 });
+          showToast(() => translate('dragMoved'), { tone: 'success', duration: 1800 });
         }
       }
       function reorderCue(sourceId, targetId, after = false) {
@@ -2649,7 +2777,8 @@
         const cancelButton = $('#appConfirmCancel');
         const okButton = $('#appConfirmOk');
         let resolver = null;
-        let restoreFocus = null;
+        let restoreFocus = null; let localize = null;
+        function refresh() { if (!dialog.open || !localize) return; const c = localize(); title.textContent = c.title; message.textContent = c.message; cancelButton.textContent = c.cancelLabel; okButton.textContent = c.confirmLabel; }
         function finish(result) {
           if (!dialog.open) return;
           const currentResolver = resolver;
@@ -2659,12 +2788,15 @@
           restoreFocus = null;
           if (currentResolver) currentResolver(result);
         }
-        function ask({ title: heading, message: body, confirmLabel, cancelLabel, tone = 'default' } = {}) {
+        function ask(options = {}) {
+          localize = options.localize || null;
+          const { title: heading, message: body, confirmLabel, cancelLabel, tone = 'default' } = localize ? localize() : options;
           if (dialog.open) finish(false);
           title.textContent = heading || translate('confirmTitle');
           message.textContent = body || '';
           cancelButton.textContent = cancelLabel || translate('cancel');
           okButton.textContent = confirmLabel || translate('confirmAction');
+          okButton.setAttribute('data-bk-variant', tone === 'danger' ? 'danger' : 'primary');
           okButton.classList.toggle('danger', tone === 'danger');
           okButton.classList.toggle('primary', tone !== 'danger');
           restoreFocus = document.activeElement;
@@ -2683,7 +2815,7 @@
           const outside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
           if (outside) finish(false);
         });
-        return Object.freeze({ ask });
+        return Object.freeze({ ask, refresh });
       })();
       window.AppConfirm = AppConfirm;
 
@@ -2693,16 +2825,19 @@
         const message = $('#appToastMessage');
         const action = $('#appToastAction');
         let timer = 0;
-        let actionHandler = null;
+        let actionHandler = null; let localize = null;
+        function refresh() { if (localize) message.textContent = localize(); if (actionHandler) action.textContent = translate('undo'); }
         function dismiss() {
           clearTimeout(timer);
           timer = 0;
           root.classList.remove('show');
           actionHandler = null;
+          state.undoAssetId = null; scheduleOrphanCleanup();
         }
-        function show({ message: text = '', actionLabel = '', onAction = null, duration = 3400, tone = 'default' } = {}) {
+        function show({ localize: localizer = null, message: text = '', actionLabel = '', onAction = null, duration = 3400, tone = 'default' } = {}) {
           clearTimeout(timer);
-          message.textContent = String(text);
+          state.undoAssetId = null;
+          localize = localizer; message.textContent = String(text);
           root.dataset.tone = tone;
           actionHandler = typeof onAction === 'function' ? onAction : null;
           action.textContent = actionLabel || '';
@@ -2711,15 +2846,17 @@
           if (duration > 0) timer = window.setTimeout(dismiss, duration);
           return Object.freeze({ dismiss });
         }
+        root.addEventListener('focusin', () => clearTimeout(timer));
+        root.addEventListener('focusout', () => { timer = window.setTimeout(dismiss, 6000); });
         action.addEventListener('click', () => {
           const handler = actionHandler;
           dismiss();
           if (handler) handler();
         });
-        return Object.freeze({ show, dismiss });
+        return Object.freeze({ show, dismiss, refresh });
       })();
       window.AppToast = AppToast;
-      function showToast(message, options = {}) { AppToast.show({ message, ...options }); }
+      function showToast(message, options = {}) { AppToast.show({ message: typeof message === 'function' ? message() : message, localize: typeof message === 'function' ? message : null, ...options }); }
 
       function applyLanguage() {
         document.documentElement.lang = language;
@@ -2743,7 +2880,8 @@
         renderStorageStatus();
         renderLiveModeUi();
         $('#reorderHint').hidden = state.cues.length < 2;
-        AppToast.dismiss();
+        AppConfirm.refresh(); AppToast.refresh();
+        if (state.backupBusy) setBackupBusy(true, state.backupLabel, backupProgressBar.value);
       }
 
       function readyCueCount() { return state.cues.filter(cue => state.assets.get(cue.assetId)?.status === 'ready').length; }
@@ -2781,7 +2919,7 @@
         state.liveMode = true;
         renderLiveModeUi(); renderCues(); renderPlayer();
         requestAnimationFrame(() => document.querySelector('.cue-section')?.scrollIntoView({ block: 'start' }));
-        showToast(translate('liveModeEntered'), { tone: 'success' });
+        showToast(() => translate('liveModeEntered'), { tone: 'success' });
       }
       async function releaseWakeLock({ clearRequest = true } = {}) {
         if (clearRequest) state.wakeLockRequested = false;
@@ -2796,18 +2934,18 @@
         await releaseWakeLock();
         if (document.fullscreenElement && document.exitFullscreen) { try { await document.exitFullscreen(); } catch { /* Fullscreen may already be closing. */ } }
         renderLiveModeUi(); renderCues(); renderPlayer();
-        showToast(translate('liveModeExited'), { tone: 'success' });
+        showToast(() => translate('liveModeExited'), { tone: 'success' });
       }
       async function toggleFullscreen() {
-        if (!fullscreenSupported()) { showToast(translate('fullscreenUnavailable'), { tone: 'warning' }); return; }
+        if (!fullscreenSupported()) { showToast(() => translate('fullscreenUnavailable'), { tone: 'warning' }); return; }
         try {
           if (document.fullscreenElement) await document.exitFullscreen();
           else await document.documentElement.requestFullscreen();
-        } catch { showToast(translate('fullscreenUnavailable'), { tone: 'warning' }); }
+        } catch { showToast(() => translate('fullscreenUnavailable'), { tone: 'warning' }); }
         renderLiveModeUi();
       }
       async function requestWakeLock() {
-        if (!wakeLockSupported()) { showToast(translate('wakeLockUnavailable'), { tone: 'warning' }); return; }
+        if (!wakeLockSupported()) { showToast(() => translate('wakeLockUnavailable'), { tone: 'warning' }); return; }
         state.wakeLockRequested = true;
         try {
           const sentinel = await navigator.wakeLock.request('screen');
@@ -2816,7 +2954,7 @@
         } catch {
           state.wakeLockRequested = false;
           state.wakeLockSentinel = null;
-          showToast(translate('wakeLockFailed'), { tone: 'warning', duration: 5000 });
+          showToast(() => translate('wakeLockFailed'), { tone: 'warning', duration: 5000 });
         }
         renderLiveModeUi();
       }
@@ -2881,6 +3019,7 @@
         button.setAttribute('aria-label', label);
         button.title = label;
         button.disabled = disabled;
+        if (className !== 'cue-drag-handle') { button.setAttribute('data-bk-button',''); button.setAttribute('data-bk-variant', className === 'danger' ? 'danger' : 'secondary'); }
         if (draggable) button.draggable = true;
         button.innerHTML = icon;
         return button;
@@ -2986,7 +3125,7 @@
         if (!cancelled && target >= 0 && oldIndex >= 0 && target !== oldIndex) {
           const [moved] = state.cues.splice(oldIndex,1);
           state.cues.splice(target,0,moved);
-          reindexCues(); enqueuePersistence(putAllCueMetadata); renderCues(); showToast(translate('dragMoved'), { tone:'success', duration:1800 });
+          reindexCues(); enqueuePersistence(putAllCueMetadata); renderCues(); showToast(() => translate('dragMoved'), { tone:'success', duration:1800 });
         } else renderCues();
       }
       function onCuePointerMove(event) { if (!cueDragSession || event.pointerId !== cueDragSession.pointerId) return; event.preventDefault(); moveCueDragGhost(event.clientX,event.clientY); }
@@ -3240,7 +3379,7 @@
         renderCues();
         if (!added) {
           setImportStatus('noValidFiles', {}, true);
-          showToast(translate('noValidFiles'), { tone: 'warning' });
+          showToast(() => translate('noValidFiles'), { tone: 'warning' });
           audioInput.value = '';
           return;
         }
@@ -3432,7 +3571,7 @@
         if (!cue) return;
         const asset = state.assets.get(cue.assetId);
         if (!asset || asset.status === 'loading') {
-          showToast(translate('cueNotReady'), { tone: 'warning' });
+          showToast(() => translate('cueNotReady'), { tone: 'warning' });
           return;
         }
         if (asset.status !== 'ready') return;
@@ -3480,7 +3619,7 @@
           invalidatePlayback();
           primaryAudio.pause();
           state.playback = 'stopped';
-          showToast(translate('playbackFailed'), { tone: 'warning', duration: 5000 });
+          showToast(() => translate('playbackFailed'), { tone: 'warning', duration: 5000 });
         }
         renderCues(); renderPlayer();
       }
@@ -3550,7 +3689,7 @@
       primaryAudio.addEventListener('error', () => {
         if (!activeCue() || !primaryAudio.error) return;
         stopPlayback();
-        showToast(translate('playbackFailed'), { tone: 'warning', duration: 5000 });
+        showToast(() => translate('playbackFailed'), { tone: 'warning', duration: 5000 });
       });
 
 
@@ -3628,8 +3767,9 @@
 
       $('#languageButton').addEventListener('click', () => {
         language = language === 'ja' ? 'en' : 'ja';
-        writeStorage(storageKeys.language, language);
+        const choice = BrowserKittyUI.chooseLanguage(language);
         applyLanguage();
+        if (!choice.persisted) showToast(BrowserKittyUI.text('languageSessionOnly', language), {tone:'warning'});
       });
 
       for (const input of [cueNameInput, cueStartInput, cueEndInput]) input.addEventListener('input', updateCueEditDialog);
@@ -3659,7 +3799,7 @@
       previewPlayButton.addEventListener('click', async () => {
         if (!editPreviewAudio.paused) { editPreviewAudio.pause(); updatePreviewUi(); return; }
         if (state.playback === 'playing') pausePlayback();
-        try { await editPreviewAudio.play(); updatePreviewUi(); } catch { showToast(translate('playbackFailed'), { tone: 'warning' }); }
+        try { await editPreviewAudio.play(); updatePreviewUi(); } catch { showToast(() => translate('playbackFailed'), { tone: 'warning' }); }
       });
       previewRange.addEventListener('input', () => setPreviewPosition(Number(previewRange.value)));
       cueRangeStart.addEventListener('input', () => updateCueRangeFromSlider('start'));
