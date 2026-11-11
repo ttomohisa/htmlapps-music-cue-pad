@@ -304,8 +304,12 @@ Required behavior:
 - Internal audio entry names use `AudioAsset.id`, not the original filename, so duplicate source filenames cannot overwrite each other.
 - Manifest `schemaVersion` is independent from `appVersion`. v0.8.0 reads schema version 1 only.
 - Export calculates CRC32 for every entry locally and reports progress.
+- Refuse backup export if any cue references loading, failed, missing, or invalid-duration audio; never emit a manifest containing cues without corresponding audio. Freeze the selected audio Blobs and board metadata before asynchronous hashing.
+- Freeze the playback-HTML cues, settings, and audio references before asynchronous Base64 encoding; edits during export must not change the exported board.
+- When an audio metadata import resolves after reset/restore, discard its stale persistence continuation. Re-evaluate current cue membership when saving new assets so deleted cues are not resurrected and copies created during loading are saved.
 - Import validates ZIP directory/local-header bounds, manifest JSON, format identifier, schema version, asset metadata, referenced audio presence/size, entry CRC32, and cue time ranges before replacement confirmation.
 - Import does not mutate the working board during validation.
+- During the committed reset/restore transaction, block conflicting board edits, cancel pending import generations, and restore interaction state on success or failure.
 - When IndexedDB is available, replacement audio/cues/settings are written in one readwrite transaction before the in-memory board is replaced. Failure keeps the current board unchanged.
 - Import in a session-only browser still works for the current session, with the existing storage warning remaining visible.
 - Backups contain the source audio bytes, so backup size is expected to be close to total referenced audio size plus small ZIP/manifest overhead.
@@ -325,6 +329,8 @@ Required behavior:
 - Object URLs point to local `File` / `Blob` data.
 - Audio is started only from a user gesture; do not autoplay on page load.
 - A newly selected cue replaces the currently active cue.
+- The playback-only HTML also monitors custom cue End on animation frames while visible, retaining `timeupdate` as a fallback when backgrounded; no guarantee of sample-accurate stopping is implied.
+- A delayed Screen Wake Lock grant after cancellation or exit must be released rather than re-enabling screen-on mode.
 - `play()` failures are handled as visible user-facing errors.
 - Stop pauses playback, resets the playback position, and leaves the cue available for replay.
 - Ended audio remains identified as the most recently selected cue, but the player state becomes ended.
