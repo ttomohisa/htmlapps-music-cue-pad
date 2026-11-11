@@ -69,7 +69,7 @@ After a keyboard-started export, continue with Tab from the export button unless
 6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop.
 7. Use **Playback view** when you want only the large playback controls on screen. Remaining time is shown, and non-looping cues display an ending-soon notice during the final 10 seconds.
 8. The board is saved automatically in the browser. Use the storage panel to review usage, request persistent storage where supported, retry a failed save, or delete all saved app data.
-9. Use **Export & backup** to save a `.bkcue` file when you want to continue editing the board on another device.
+9. Use **Export & backup** to save a `.bkcue` file when you want to continue editing the board on another device. If any referenced audio is still loading or failed, wait for it to finish or remove that cue before exporting.
 10. Use **Export playback HTML** when you want a single playback-only `.html` file with the referenced audio embedded inside it.
 
 Supported audio formats depend on the browser and operating system. The app accepts common browser audio formats including MP3, WAV, M4A/AAC, OGG/Opus, WebM audio, and FLAC where supported.
