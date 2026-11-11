@@ -145,6 +145,24 @@ test('player HTML freezes cues and settings before asynchronous encoding',async(
   assert.equal(outputs[0].language,'ja');
 });
 
+test('Undo from before reset or restore cannot resurrect an old cue',()=>{
+  const b=board();let undo;
+  const c=vm.createContext({
+    state:{...b.state,activeCueId:null,boardMutationLocked:false},
+    persistenceGeneration:0,cueIndex:id=>b.state.cues.findIndex(cue=>cue.id===id),
+    reindexCues:()=>{},updateCueCount(){},renderCues(){},renderPlayer(){},scheduleOrphanCleanup(){},
+    enqueuePersistence(){},deleteCueRecord(){},putAllCueMetadata(){},
+    showToast:(message,options)=>{undo=options.onAction;},translate:x=>x,
+    Math
+  });
+  vm.runInContext(fn('deleteCue'),c);
+  c.deleteCue('cue1');
+  assert.equal(b.state.cues.length,0);
+  c.persistenceGeneration++;
+  undo();
+  assert.equal(b.state.cues.length,0);
+});
+
 test('late wake lock grant is released after user cancels',async()=>{
   const granting=deferred(),released=[];
   const state={liveMode:true,wakeLockRequested:false,wakeLockSentinel:null};
