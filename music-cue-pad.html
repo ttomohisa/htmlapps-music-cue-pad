@@ -2628,9 +2628,10 @@
         renderPlayer();
         enqueuePersistence(() => deleteCueRecord(cue.id));
         scheduleOrphanCleanup();
+        const undoGeneration = persistenceGeneration;
         showToast(translate('deletedCue', { name: cue.name }), {
           tone: 'success', duration: 6000, actionLabel: translate('undo'), onAction: () => {
-            if (state.boardMutationLocked) return;
+            if (state.boardMutationLocked || undoGeneration !== persistenceGeneration) return;
             const restoreIndex = Math.min(index, state.cues.length);
             state.cues.splice(restoreIndex, 0, cue);
             reindexCues();
