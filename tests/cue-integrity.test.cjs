@@ -48,7 +48,7 @@ function importFixture() {
   let counter = 0;
   const context = vm.createContext({
     state, Blob, Set, Map, Promise, Number, MAX_FILE_BYTES:2**31, persistenceGeneration:0,
-    looksLikeAudio:()=>true, makeId:(prefix)=>prefix+'-'+(++counter),
+    looksLikeAudio:()=>true, stripFinalExtension:name=>name.replace(/\.[^.]*$/, ''), makeId:(prefix)=>prefix+'-'+(++counter),
     URL:{createObjectURL:()=> 'blob:audio'}, blobUrls:new Set(),
     inspectMetadata(asset) { const wait=deferred(); inspections.push({asset,wait}); return wait.promise; },
     setImportStatus(){},updateCueCount(){},renderCues(){},showToast(){},translate:x=>x,
@@ -99,7 +99,7 @@ test('backup uses the captured audio blob if the board changes while hashing',as
   const b=board(), hashing=deferred(), downloads=[];
   const c=vm.createContext({
     state:b.state, Blob, Map, Set, Date, TextEncoder, APP_CONFIG:{version:'1.0.2'}, BOARD_SCHEMA_VERSION:1,
-    fileExtension:()=> 'wav', cueRecord:x=>({...x}), translate:x=>x, captureExportFocus:()=>()=>{},
+    fileExtension:()=> 'wav', cueRecord:x=>({...x}), translate:x=>x, safeBackupBaseName:x=>x, captureExportFocus:()=>()=>{},
     exportBackupButton:{}, setBackupBusy(){}, showToast(){},
     crc32Bytes:()=>0,
     crc32Blob(blob){ c.hashedBlob=blob; return hashing.promise; },
