@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — cue and audio integrity
+
+- Prevent incomplete .bkcue backups when an audio file is still loading or has failed; snapshot audio and cue settings before export.
+- Ignore stale audio imports after reset/restore, preserve duplicates created while audio metadata loads, and exclude deleted cues from late saves.
+- Block conflicting board mutations while reset/restore commits, and allow reselecting a canceled or invalid backup.
+- Reject audio with invalid or non-finite duration and prevent a late Wake Lock grant from reactivating screen-on mode after cancellation.
+- Monitor playback-only HTML cue ends using animation frames when visible, with timeupdate retained for background fallback.
+
 ## Unreleased — mobile Help layout
 
 - Hide the informational footer at 620px and below; move existing build information to the end of Help without changing functional bottom controls.
