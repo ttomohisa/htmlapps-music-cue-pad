@@ -54,7 +54,7 @@ function fixture(kind, fail = false) {
     persistenceGeneration:0, masterVolumeSaveTimer:0, orphanCleanupTimer:0,
     clearTimeout() {}, setBoardMutationLocked(locked) { state.boardMutationLocked = locked; },
   });
-  const functions = ['setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
+  const functions = ['refreshBackupActionAvailability', 'setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
   if (source.includes('      function captureExportFocus(')) functions.push('captureExportFocus');
   const playerBuilder = source.slice(source.indexOf('      function playerExportDocument('), source.indexOf('      async function exportPlaybackHtml('));
   const backupBuilder = source.slice(source.indexOf('      const crc32Table = '), source.indexOf('      async function readZipDirectory('));
