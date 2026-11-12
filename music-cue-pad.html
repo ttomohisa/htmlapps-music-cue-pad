@@ -1519,8 +1519,10 @@
         state.persistence.saving = true;
         renderStorageStatus();
         const run = async () => {
-          if (generation !== persistenceGeneration) return false;
           try {
+            // Even a superseded, skipped write must drain the pending counter.
+            // Reset/restore changes this generation while earlier writes queue.
+            if (generation !== persistenceGeneration) return false;
             await task();
             if (clearErrorOnSuccess) state.persistence.errorType = '';
             return true;
@@ -3505,6 +3507,9 @@
         const duration = Math.min(FADE_STOP_SECONDS, remaining);
         const base = cueVolume(cue) * fadeFactor(cue, asset, primaryAudio.currentTime);
         const graphReady = await ensureAudioGraph();
+        // AudioContext.resume() can be pending while another cue starts.
+        // Never fade (or schedule a Stop for) the newer selection.
+        if (!state.manualFadeActive || token !== manualFadeToken || activeCue() !== cue || state.playback !== 'fading') return;
         if (graphReady && cueGainNode && audioContext) {
           const now = audioContext.currentTime;
           cueGainNode.gain.cancelScheduledValues(now);
