@@ -25,10 +25,10 @@ GitHub Pages delivers the initial HTML. After it loads, audio import, cue editin
 - **Stay focused during playback** — Switch to a playback-only view that hides editing controls, enlarges the buttons, shows remaining time, and can use Fullscreen / Keep Screen On where supported.
 - **Play the next cue manually** — The bottom player names the next cue in board order. Start with the first when nothing is selected; Stop/Finished retain the position. No automatic advance, wrap, or skipped unavailable cues. The exported player works the same way.
 - **Control playback quickly** — Pause/Resume, Restart, Fade Stop, Stop, Master volume, per-cue shortcuts, and desktop keyboard controls are available.
-- **Phone-friendly cue controls** — The import area shrinks after adding audio and Master volume has room to use. Deleting a cue now requires confirmation.
+- **Phone-friendly cue controls** — The import area shrinks to an added-track count and an Add tracks action. Master volume has room to use, and deleting a cue requires confirmation.
 - **Keep the board on this device** — Audio, cue settings, board name, and Master volume are saved in IndexedDB and restored on reload.
 - **Move an editable board between devices** — Export and import `.bkcue` backups containing the board settings and audio assets.
-- **Export one playback-only HTML file** — Embed the current audio and cue settings into a self-contained `.html` file for playback on another device without the editor.
+- **Export one playback-only HTML file** — Embed the current audio and cue settings into a self-contained `.html` file for playback on another device without the editor. Tap any exported cue again to pause or resume.
 - **Private, single-HTML operation** — No account, runtime CDN, analytics, telemetry, API, or remote font is required by the app.
 - **Japanese / English UI** — Both languages are included in the same HTML.
 
@@ -63,7 +63,7 @@ On editing screens 480px tall or less, the player joins the page flow so it cann
 After a keyboard-started export, continue with Tab from the export button unless you have moved to another control.
 
 1. Add one or more audio files with the file picker or Drag & Drop.
-2. Each audio file becomes a numbered playback button. Press a button to play it; selecting another button switches playback to that cue.
+2. Each audio file becomes a numbered playback button. Press the same button again to pause or resume; pressing another button switches tracks.
 3. Use **Edit cue** to change the display name and set Start / End. In the preview section, drag the two handles to adjust the playback range or type an exact time.
 4. Set cue volume, Fade In, Fade Out, Loop, and an optional trigger key when needed.
 5. The red trash icon opens a confirmation dialog before removing a cue; Undo remains briefly available after deletion. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
