@@ -326,6 +326,9 @@ Required behavior:
 
 - Mobile (at or below 620 CSS px) hides the local-processing badge, stacks cue section controls, and gives Master volume a label/value row plus a full-width range input.
 - The cue editor and destructive confirmation dialogs remain horizontally centered on phones and within the viewport.
+- Backup actions use short single-line button text with full localized accessible names; drop only the redundant import-validation sentence from the backup note.
+- Fixed player clearance on phone screens uses the observed rendered transport height, including Live Mode, so the bottom of the backup panel or last cue remains scrollable above the transport.
+- Playback-only HTML's status badge is compact and top-aligned with wrapped titles, matching the primary cue card style.
 - Extremely short mobile edit viewports (up to 480 CSS px high and 620 CSS px wide) put the player into normal page flow so the fixed transport cannot cover edit buttons. Playback view retains its compact transport.
 - After at least one cue is present, the audio drop zone and its parent import panel become compact, show the localized ready/processing count, and keep file picking and drag-and-drop enabled. The import warning remains visible on failure.
 - The cue-list descriptive paragraph is removed as redundant; the grip's localized reordering explanation remains available to assistive technology, and full instructions remain in Help.
