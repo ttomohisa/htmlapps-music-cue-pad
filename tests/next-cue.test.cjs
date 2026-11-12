@@ -109,3 +109,46 @@ test('browser or OS media pause updates UI and selected cue can resume',async()=
 test('natural end during manual fade stops a looping cue instead of restarting',async()=>{const h=fixture();await h.playNextCue();h.state.cues[0].loop=true;h.state.playback='fading';h.audio.ended=true;h.audio.fire('ended');await h.flush();assert.equal(h.state.playback,'stopped');assert.equal(h.audio.paused,true);assert.equal(h.audio.plays.length,1);});
 
 for(const loop of [false,true])test(`natural end pause-before-ended event ordering (loop=${loop})`,async()=>{const h=fixture();await h.playNextCue();h.state.cues[0].loop=loop;h.audio.ended=true;h.audio.paused=true;h.audio.fire('pause');h.audio.fire('ended');await h.flush();assert.equal(h.state.playback,loop?'playing':'ended');assert.equal(h.audio.plays.length,loop?2:1);});
+
+test('pressing a playing cue pauses it; pressing the same cue again resumes at the saved position', async () => {
+  const h = fixture();
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'playing');
+  h.audio.currentTime = 4.25;
+  const before = h.audio.plays.length;
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'paused');
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.audio.currentTime, 4.25);
+  assert.equal(h.audio.plays.length, before);
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'playing');
+  assert.equal(h.audio.currentTime, 4.25);
+  assert.equal(h.audio.plays.length, before + 1);
+});
+
+test('pressing a cue a second time while play() is pending cancels that play', async () => {
+  const h = fixture(), deferredPlay = deferred();
+  h.audio.pending.push(deferredPlay);
+  const pending = h.handleCuePress('c0');
+  await h.flush();
+  assert.equal(h.state.activeCueId, 'c0');
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'paused');
+  deferredPlay.resolve();
+  await pending;
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.state.playback, 'paused');
+  assert.equal(h.frames.size, 0);
+});
+
+test('playing cue uses pause icon while paused and stopped cues use play', async () => {
+  const h=fixture();
+  vm.runInContext(fn('cueIconMarkup') + '\n' + fn('statusForCue'),h);
+  await h.handleCuePress('c0');
+  assert.equal(h.statusForCue(h.state.cues[0]).icon, 'playing');
+  assert.match(h.cueIconMarkup(h.statusForCue(h.state.cues[0]).icon), /<rect/);
+  await h.handleCuePress('c0');
+  assert.equal(h.statusForCue(h.state.cues[0]).icon, 'play');
+  assert.match(h.cueIconMarkup('play'), /<path/);
+});
