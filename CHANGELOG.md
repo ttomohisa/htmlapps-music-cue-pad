@@ -2,6 +2,14 @@
 
 ## v1.0.3 — 2026-11-12
 
+### Final race-condition and lifecycle audit
+
+- Drain canceled persistence tasks on reset/restore, so "Saving" does not remain stuck and storage actions unlock after a new generation.
+- Recheck cue selection and fade tokens after an asynchronous audio-graph resume, preventing a canceled Fade Stop from fading the next track.
+- Keep the bottom transport's Pause intent accurate while an audio play is pending; use native Space on focused cue buttons, and prevent cue-edit preview from overlapping pending main playback.
+- Preserve Blob audio URLs, WebAudio graph and local persistence connections when the browser puts the page in its back/forward cache; keep full cleanup for a real page exit.
+- Add focused race regression tests and a Chromium WAV-backed .bkcue download → board reset → import → playback roundtrip.
+
 - Keep `.bkcue` and playback HTML export buttons in sync with the current cue count so they are re-enabled after a board reset, deleting the final cue, or loading audio again.
 
 - Prevent incomplete .bkcue backups when an audio file is still loading or has failed; snapshot audio and cue settings before export.
