@@ -15,6 +15,7 @@
 - Collapse the import panel into a concise added-track count and add action; retain file selection and drag-and-drop, and distinguish loading and error states.
 - Toggle the original and exported player cue buttons between play and pause (including pending playback), retaining playback position across pause/resume.
 - Keep exported cue cards and remaining-time panels aligned across long/short names and optional shortcuts. Replace the exported header subtitle with a clear local-file explanation, removing the redundant page hero.
+- Make the original board's cue cards equal-height in every playback state; anchor edit controls at a shared bottom edge, reserve equal progress space, and prevent active outlines from changing visual card size.
 
 - Tighten the bilingual introduction, keep heading typography stable across languages, and remove redundant visible cue guidance while keeping screen-reader hints.
 - Hide the local-processing badge on phones; give Master volume a full-width, two-row control and center mobile edit/confirmation sheets.
