@@ -19,13 +19,41 @@ function silentWav(seconds) {
   return bytes;
 }
 
+
+async function assertMainCueRowAlignment(page, label, expectedInRow) {
+  const cards = await page.locator('#cueGrid .cue-card').evaluateAll(elements => elements.map(el => {
+    const r = el.getBoundingClientRect();
+    const play = el.querySelector('.cue-play').getBoundingClientRect();
+    const tools = el.querySelector('.cue-tools').getBoundingClientRect();
+    const progressElement = el.querySelector('.cue-progress-track');
+    const progress = progressElement.getBoundingClientRect();
+    return {
+      top: r.top, bottom: r.bottom, height: r.height,
+      playBottom: play.bottom, toolsTop: tools.top, toolsBottom: tools.bottom,
+      progressTop: progress.top, progressHeight: progress.height,
+      progressVisible: getComputedStyle(progressElement).visibility !== 'hidden',
+    };
+  }));
+  const row = cards.filter(card => Math.abs(card.top - cards[0].top) <= 1);
+  assert.equal(row.length, expectedInRow, label + ': expected cards in first grid row');
+  for (const card of row) {
+    assert.ok(Math.abs(card.bottom - row[0].bottom) <= 1, label + ': all card bottoms align');
+    assert.ok(Math.abs(card.toolsTop - row[0].toolsTop) <= 1, label + ': edit bars start at same height');
+    assert.ok(Math.abs(card.toolsBottom - row[0].toolsBottom) <= 1, label + ': edit bars end at same height');
+    assert.ok(Math.abs(card.playBottom - row[0].playBottom) <= 1, label + ': play button ends align');
+    assert.ok(Math.abs(card.progressTop - row[0].progressTop) <= 1, label + ': progress bar positions align');
+    assert.ok(Math.abs(card.progressHeight - row[0].progressHeight) <= 1, label + ': inactive progress reserves same height');
+  }
+  return cards;
+}
+
 async function main() {
   const output = path.resolve(__dirname, '..', 'test-results', 'music-export');
   fs.mkdirSync(output, { recursive: true });
   const browser = await chromium.launch();
   try {
     for (const language of ['ja', 'en']) {
-      for (const width of [360, 1280]) {
+      for (const width of [360, 900, 1280]) {
         const label = language + ' ' + width;
         const context = await browser.newContext({
           viewport: { width, height: 800 },
@@ -97,20 +125,30 @@ async function main() {
           await page.locator('#saveCueEditButton').click();
           assert.equal(await page.locator('#cueEditDialog').isVisible(), false);
 
+          const rowCount = width === 1280 ? 3 : width === 900 ? 2 : 1;
+          await assertMainCueRowAlignment(page, label + ' idle', rowCount);
           const first = page.locator('.cue-card .cue-play').first();
           await first.focus();
           await page.keyboard.press('Enter');
           await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'true');
           assert.ok(await first.locator('.cue-center').locator('svg rect').count() >= 2, label + ': play button changes to pause icon');
+          const activeRow = await assertMainCueRowAlignment(page, label + ' active', rowCount);
+          assert.equal(activeRow[0].progressVisible, true, label + ': active progress visible');
+          if (rowCount > 1) assert.ok(activeRow.slice(1, rowCount).every(card => !card.progressVisible), label + ': inactive progress hidden without losing layout height');
           await first.focus();
           await page.keyboard.press('Enter');
           await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'false');
           assert.ok(await first.locator('.cue-center').locator('svg path').count() >= 1, label + ': paused button changes to play icon');
+          await assertMainCueRowAlignment(page, label + ' paused', rowCount);
           await first.focus();
           await page.keyboard.press('Enter');
           await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'true');
           await page.locator('#stopButton').focus();
           await page.keyboard.press('Enter');
+          await assertMainCueRowAlignment(page, label + ' stopped', rowCount);
+          if (width === 1280 && language === 'ja') {
+            await page.locator('#cueGrid').screenshot({ path: path.join(output, 'main-cue-aligned-3-col.png') });
+          }
 
           const download = page.waitForEvent('download');
           await page.locator('#exportPlayerButton').focus();
@@ -140,6 +178,8 @@ async function main() {
           assert.ok(Math.max(...boxes.map(b => b.remaining.height)) - Math.min(...boxes.map(b => b.remaining.height)) <= 2, label + ': remaining panels same height');
           if (width === 1280) {
             assert.ok(Math.max(...boxes.map(b => b.remaining.y)) - Math.min(...boxes.map(b => b.remaining.y)) <= 2, label + ': remaining panels aligned in row');
+          } else if (width === 900) {
+            assert.ok(Math.abs(boxes[0].remaining.y - boxes[1].remaining.y) <= 2, label + ': two-column remaining panels aligned');
           } else {
             assert.ok(boxes[0].card.width >= width - 35, label + ': full-width mobile cues');
           }
