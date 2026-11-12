@@ -202,6 +202,17 @@ async function main() {
           await page.locator('#stopButton').focus();
           await page.keyboard.press('Enter');
           await assertMainCueRowAlignment(page, label + ' stopped', rowCount);
+          // A focused cue must handle native Space, not toggle the previously
+          // active cue through the document's global Space shortcut.
+          const second = page.locator('.cue-card .cue-play').nth(1);
+          await second.focus();
+          await page.keyboard.press('Space');
+          await page.waitForFunction(() => document.querySelectorAll('.cue-card .cue-play')[1]?.getAttribute('aria-pressed') === 'true');
+          assert.equal(await page.locator('.cue-card .cue-play').first().getAttribute('aria-pressed'), 'false', label + ': native Space plays focused second cue');
+          await second.focus();
+          await page.keyboard.press('Space');
+          await page.waitForFunction(() => document.querySelectorAll('.cue-card .cue-play')[1]?.getAttribute('aria-pressed') === 'false');
+          await page.locator('#stopButton').click();
           if (width === 1280 && language === 'ja') {
             await page.locator('#cueGrid').screenshot({ path: path.join(output, 'main-cue-aligned-3-col.png') });
           }
