@@ -12,6 +12,10 @@
 
 ### Mobile UI and cue controls
 
+- Shorten the backup buttons to single-line Save/Load wording while retaining descriptive accessible labels; remove the redundant validation sentence from backup notes.
+- Keep the final backup controls and last cue reachable behind the fixed mobile transport (including Live Mode) by allocating padding based on its rendered height.
+- Align the playback-only HTML's status badges with the compact main-app cue badges and pin badges to the top when titles wrap.
+
 - Collapse the import panel into a concise added-track count and add action; retain file selection and drag-and-drop, and distinguish loading and error states.
 - Toggle the original and exported player cue buttons between play and pause (including pending playback), retaining playback position across pause/resume.
 - Keep exported cue cards and remaining-time panels aligned across long/short names and optional shortcuts. Replace the exported header subtitle with a clear local-file explanation, removing the redundant page hero.
