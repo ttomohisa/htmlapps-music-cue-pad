@@ -63,6 +63,9 @@ async function assertMainCueRowAlignment(page, label, expectedInRow) {
 
 
 async function assertScrollReachesLastContent(page, selector, label) {
+  // Entering Live Mode intentionally scrolls to the cue section on the next
+  // animation frame. Let that finish before testing a user's later scroll.
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   await page.evaluate(() => {
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, document.documentElement.scrollHeight);
