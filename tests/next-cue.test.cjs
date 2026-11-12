@@ -178,7 +178,7 @@ test('transport button pauses a pending audio.play intent instead of starting it
 test('focused native cue buttons keep native Space activation', () => {
   const globalHandler = source.slice(
     source.lastIndexOf("      document.addEventListener('keydown', event => {"),
-    source.indexOf("\n      window.addEventListener('pagehide'"));
+    source.indexOf("\n      window.addEventListener('pagehide'")
   );
   assert.ok(globalHandler.includes("event.target.closest('button, input"), 'native button keypress is excluded from global Space toggle');
   assert.ok(!globalHandler.includes("button:not(.cue-play)"), 'cue buttons must not be special-cased as non-native buttons');
