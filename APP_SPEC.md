@@ -334,6 +334,7 @@ Required behavior:
 - The cue-list descriptive paragraph is removed as redundant; the grip's localized reordering explanation remains available to assistive technology, and full instructions remain in Help.
 - Cue deletion now opens a localized danger confirmation with the cue name. Cancel never changes the board, and pending confirmation cannot delete after board replacement; after confirmation, the existing time-limited Undo remains.
 - In-app Help uses an unversioned notes heading; hero title type sizes are fixed for both languages at each breakpoint.
+- The Reset action must stay disabled during ZIP/HTML export; busy-state updates must refresh the storage panel as well as export buttons.
 - Stale writes queued before board reset or restore must drain the saving counter even when they are skipped. The first queued write that has already begun may complete before the replacement transaction; the later generation must never execute stale queued tasks.
 - Fade Stop may suspend while AudioContext resumes. Upon completion, it must revalidate the selected cue, fade token and fading state before muting or scheduling a stop. Editing preview must cancel any pending main audio-play intent before starting.
 - Focused cue buttons preserve native keyboard Space activation; global Space toggles only when focus is not on a native interactive control. The bottom transport must offer Pause for in-progress play promises.
