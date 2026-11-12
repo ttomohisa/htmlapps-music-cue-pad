@@ -13,6 +13,7 @@
 - Tighten the bilingual introduction, keep heading typography stable across languages, and remove redundant visible cue guidance while keeping screen-reader hints.
 - Hide the local-processing badge on phones; give Master volume a full-width, two-row control and center mobile edit/confirmation sheets.
 - Compact the drop target after the first cue without disabling drag-and-drop or file picking.
+- Keep cue edit controls reachable in extremely short mobile viewports by placing the player in document flow outside Playback view.
 - Show the delete icon in red and require a localized, dangerous-action confirmation before deletion; keep short-lived Undo.
 
 ### Existing mobile Help improvements
