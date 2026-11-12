@@ -326,6 +326,7 @@ Required behavior:
 
 - Mobile (at or below 620 CSS px) hides the local-processing badge, stacks cue section controls, and gives Master volume a label/value row plus a full-width range input.
 - The cue editor and destructive confirmation dialogs remain horizontally centered on phones and within the viewport.
+- Extremely short mobile edit viewports (up to 480 CSS px high and 620 CSS px wide) put the player into normal page flow so the fixed transport cannot cover edit buttons. Playback view retains its compact transport.
 - After at least one cue is present, the audio drop zone becomes compact but remains a functional file picker and drag-and-drop target.
 - The cue-list descriptive paragraph is removed as redundant; the grip's localized reordering explanation remains available to assistive technology, and full instructions remain in Help.
 - Cue deletion now opens a localized danger confirmation with the cue name. Cancel never changes the board, and pending confirmation cannot delete after board replacement; after confirmation, the existing time-limited Undo remains.
