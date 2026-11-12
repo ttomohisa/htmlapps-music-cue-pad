@@ -25,6 +25,7 @@ GitHub Pages delivers the initial HTML. After it loads, audio import, cue editin
 - **Stay focused during playback** — Switch to a playback-only view that hides editing controls, enlarges the buttons, shows remaining time, and can use Fullscreen / Keep Screen On where supported.
 - **Play the next cue manually** — The bottom player names the next cue in board order. Start with the first when nothing is selected; Stop/Finished retain the position. No automatic advance, wrap, or skipped unavailable cues. The exported player works the same way.
 - **Control playback quickly** — Pause/Resume, Restart, Fade Stop, Stop, Master volume, per-cue shortcuts, and desktop keyboard controls are available.
+- **Phone-friendly cue controls** — The import area shrinks after adding audio and Master volume has room to use. Deleting a cue now requires confirmation.
 - **Keep the board on this device** — Audio, cue settings, board name, and Master volume are saved in IndexedDB and restored on reload.
 - **Move an editable board between devices** — Export and import `.bkcue` backups containing the board settings and audio assets.
 - **Export one playback-only HTML file** — Embed the current audio and cue settings into a self-contained `.html` file for playback on another device without the editor.
@@ -65,7 +66,7 @@ After a keyboard-started export, continue with Tab from the export button unless
 2. Each audio file becomes a numbered playback button. Press a button to play it; selecting another button switches playback to that cue.
 3. Use **Edit cue** to change the display name and set Start / End. In the preview section, drag the two handles to adjust the playback range or type an exact time.
 4. Set cue volume, Fade In, Fade Out, Loop, and an optional trigger key when needed.
-5. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
+5. The red trash icon opens a confirmation dialog before removing a cue; Undo remains briefly available after deletion. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
 6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop.
 7. Use **Playback view** when you want only the large playback controls on screen. Remaining time is shown, and non-looping cues display an ending-soon notice during the final 10 seconds.
 8. The board is saved automatically in the browser. Use the storage panel to review usage, request persistent storage where supported, retry a failed save, or delete all saved app data.
@@ -119,6 +120,12 @@ The repository includes a workflow that builds the standalone HTML and deploys i
 4. After a successful deployment, the app is available at `https://ttomohisa.github.io/htmlapps-music-cue-pad/`.
 
 The deployed page still performs user-audio processing locally in the browser.
+
+### Releases after merge
+
+When changing versions, update `app.config.json` and add a matching version section in `CHANGELOG.md` in the PR.
+
+Merging the PR into `main` triggers `release-on-merge.yml`. After the standalone build and tests pass, it creates the matching tag and GitHub Release with the readable HTML, self-extracting HTML, ZIP, and SHA256 checksums. Re-running an already published version skips release creation. Nothing is tagged or released before merging.
 
 ## Development and build layout
 
