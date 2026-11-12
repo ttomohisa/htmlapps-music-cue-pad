@@ -9,6 +9,7 @@
 - Keep the bottom transport's Pause intent accurate while an audio play is pending; use native Space on focused cue buttons, and prevent cue-edit preview from overlapping pending main playback.
 - Preserve Blob audio URLs, WebAudio graph and local persistence connections when the browser puts the page in its back/forward cache; keep full cleanup for a real page exit.
 - Add focused race regression tests and a Chromium WAV-backed .bkcue download → board reset → import → playback roundtrip.
+- Keep the destructive Reset button disabled while a backup or playback-HTML export is busy, then restore its availability on completion.
 
 - Keep `.bkcue` and playback HTML export buttons in sync with the current cue count so they are re-enabled after a board reset, deleting the final cue, or loading audio again.
 
