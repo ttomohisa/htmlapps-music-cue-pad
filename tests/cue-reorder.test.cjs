@@ -60,7 +60,7 @@ function fixture(count = 3) {
   const audioValues = { currentTime: 4, src: 'blob:shared', volume: .24, paused: false };
   const audioCalls = [];
   const primaryAudio = new Proxy(audioValues, { set(target, key, value) { audioCalls.push(['set', key, value]); target[key] = value; return true; } });
-  const c = { persistenceGeneration:0, $, state, cueGrid, dropZone: new Element(), document, Element, HTMLElement: Element, emptyState: new Element(), primaryAudio, cueDragSession: null, CSS: { escape: x => x }, Math, Number, Map, Set,
+  const c = { persistenceGeneration:0, playbackRequested:false, $, state, cueGrid, dropZone: new Element(), document, Element, HTMLElement: Element, emptyState: new Element(), primaryAudio, cueDragSession: null, CSS: { escape: x => x }, Math, Number, Map, Set,
     window: { removeEventListener(k) { windowListeners.delete(k); }, setTimeout(f, ms) { timers.set(++timerId, { at: clock + ms, f }); return timerId; } },
     clearTimeout(id) { timers.delete(id); }, writes: [], audioCalls, stops: 0,
     enqueuePersistence(f) { c.writes.push(f); }, putAllCueMetadata() {}, deleteCueRecord() {}, scheduleOrphanCleanup() {}, updateCueCount() {}, refreshPlayerExportEstimate() {},
