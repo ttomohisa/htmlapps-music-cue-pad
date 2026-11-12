@@ -21,6 +21,13 @@ function silentWav(seconds) {
 
 
 async function assertMainCueRowAlignment(page, label, expectedInRow) {
+  // A previous cue render can briefly leave stale detached cards while
+  // importing or transitioning playback; compare boxes only after the
+  // current list is visibly laid out.
+  await page.waitForFunction(expected => {
+    const cards = [...document.querySelectorAll('#cueGrid .cue-card')];
+    return cards.length >= expected && cards.every(card => card.isConnected && card.getBoundingClientRect().height > 50);
+  }, expectedInRow, { timeout: 8000 });
   const cards = await page.locator('#cueGrid .cue-card').evaluateAll(elements => elements.map(el => {
     const r = el.getBoundingClientRect();
     const play = el.querySelector('.cue-play').getBoundingClientRect();
@@ -42,7 +49,7 @@ async function assertMainCueRowAlignment(page, label, expectedInRow) {
     };
   }));
   const row = cards.filter(card => Math.abs(card.top - cards[0].top) <= 1);
-  assert.equal(row.length, expectedInRow, label + ': expected cards in first grid row');
+  assert.equal(row.length, expectedInRow, label + ': expected cards in first grid row '+JSON.stringify(cards));
   for (const card of row) {
     assert.ok(Math.abs(card.bottom - row[0].bottom) <= 1, label + ': all card bottoms align');
     assert.ok(Math.abs(card.toolsTop - row[0].toolsTop) <= 1, label + ': edit bars start at same height');
