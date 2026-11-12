@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — cue and audio integrity
+## v1.0.3 — 2026-11-12
 
 - Prevent incomplete .bkcue backups when an audio file is still loading or has failed; snapshot audio and cue settings before export.
 - Ignore stale audio imports after reset/restore, preserve duplicates created while audio metadata loads, and exclude deleted cues from late saves.
@@ -8,12 +8,19 @@
 - Reject audio with invalid or non-finite duration and prevent a late Wake Lock grant from reactivating screen-on mode after cancellation.
 - Monitor playback-only HTML cue ends using animation frames when visible, with timeupdate retained for background fallback.
 
-## Unreleased — mobile Help layout
+### Mobile UI and cue controls
+
+- Tighten the bilingual introduction, keep heading typography stable across languages, and remove redundant visible cue guidance while keeping screen-reader hints.
+- Hide the local-processing badge on phones; give Master volume a full-width, two-row control and center mobile edit/confirmation sheets.
+- Compact the drop target after the first cue without disabling drag-and-drop or file picking.
+- Show the delete icon in red and require a localized, dangerous-action confirmation before deletion; keep short-lived Undo.
+
+### Existing mobile Help improvements
 
 - Hide the informational footer at 620px and below; move existing build information to the end of Help without changing functional bottom controls.
 - Preserve localized build values, keyboard access, and existing visibility policies; standardize the exact local-processing label.
 
-## Unreleased
+### Help text updates
 
 - Clarify Japanese and English help by removing internal layout, implementation, and audit commentary while preserving usage guidance and cautions.
 
