@@ -1818,6 +1818,9 @@
       function setBackupBusy(busy, label = '', percent = 0) {
         state.backupBusy = Boolean(busy);
         refreshBackupActionAvailability();
+        // Reset is also destructive; it must be disabled for the entire
+        // backup import/export operation, not just during a board lock.
+        renderStorageStatus();
         backupProgress.hidden = !state.backupBusy;
         if (state.backupBusy) {
           backupProgressLabel.textContent = label || translate('backupPreparing');
