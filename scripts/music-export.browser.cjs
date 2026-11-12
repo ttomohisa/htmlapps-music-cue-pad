@@ -61,6 +61,31 @@ async function assertMainCueRowAlignment(page, label, expectedInRow) {
   return cards;
 }
 
+
+async function assertScrollReachesLastContent(page, selector, label) {
+  await page.evaluate(() => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+  await page.waitForTimeout(120);
+  const measured = await page.evaluate(selector => {
+    const target = document.querySelector(selector).getBoundingClientRect();
+    const transport = document.getElementById('playerBar').getBoundingClientRect();
+    const main = document.querySelector('main');
+    const padding = parseFloat(getComputedStyle(main).paddingBottom);
+    return {
+      targetBottom: target.bottom, playerTop: transport.top,
+      playerHeight: transport.height, padding,
+      visible: !document.getElementById('playerBar').hidden,
+      scrollTop: document.scrollingElement.scrollTop
+    };
+  }, selector);
+  assert.equal(measured.visible, true, label + ': transport visible');
+  assert.ok(measured.playerHeight > 120, label + ': transport measurable');
+  assert.ok(measured.padding >= measured.playerHeight + 24, label + ': clearance follows actual transport height ' + JSON.stringify(measured));
+  assert.ok(measured.targetBottom <= measured.playerTop - 16, label + ': last content not covered by fixed player ' + JSON.stringify(measured));
+}
+
 async function main() {
   const output = path.resolve(__dirname, '..', 'test-results', 'music-export');
   fs.mkdirSync(output, { recursive: true });
@@ -128,6 +153,20 @@ async function main() {
           assert.ok(await drop.evaluate(el => el.classList.contains('is-compact')), label + ': compact drop after import');
           assert.match(await drop.locator('.drop-title').innerText(), language === 'ja' ? /3曲を追加済み/ : /3 tracks added/, label);
           assert.equal(await page.locator('.import-panel .panel-head').isVisible(), false, label + ': redundant import heading hidden');
+          const saveBackup = page.locator('#exportBackupButton'), loadBackup = page.locator('#importBackupButton');
+          assert.equal(await saveBackup.innerText(), language === 'ja' ? '保存する' : 'Save backup', label + ': concise backup save label');
+          assert.equal(await loadBackup.innerText(), language === 'ja' ? '読み込む' : 'Load backup', label + ': concise backup import label');
+          assert.equal(await saveBackup.getAttribute('aria-label'), language === 'ja' ? 'バックアップを書き出す' : 'Export board backup', label + ': descriptive accessible label');
+          if (width === 360) {
+            for (const button of [saveBackup, loadBackup]) {
+              assert.ok(await button.evaluate(el => {
+                const range = document.createRange();
+                range.selectNodeContents(el);
+                return [...range.getClientRects()].length === 1 && el.scrollWidth <= el.clientWidth + 1;
+              }), label + ': one-line backup button');
+            }
+            assert.equal(await page.locator('.backup-note').innerText(), language === 'ja' ? '.bkcue はMusic Cue Pad用のZIPコンテナです。' : '.bkcue is a ZIP container for Music Cue Pad.', label + ': unnecessary backup sentence removed');
+          }
           await drop.focus();
           assert.equal(await drop.isEnabled(), true, label + ': still a file picker');
 
@@ -162,6 +201,17 @@ async function main() {
           await assertMainCueRowAlignment(page, label + ' stopped', rowCount);
           if (width === 1280 && language === 'ja') {
             await page.locator('#cueGrid').screenshot({ path: path.join(output, 'main-cue-aligned-3-col.png') });
+          }
+          if (width === 360) {
+            await assertScrollReachesLastContent(page, '.backup-panel', label + ': editor');
+            await page.locator('#enterLiveModeButton').click();
+            await page.waitForFunction(() => document.body.classList.contains('live-mode'));
+            await assertScrollReachesLastContent(page, '#cueGrid .cue-card:last-child', label + ': live mode');
+            await page.locator('#exitLiveModeButton').focus();
+            await page.keyboard.down('Enter');
+            await page.waitForFunction(() => !document.body.classList.contains('live-mode'));
+            await page.keyboard.up('Enter');
+            await page.locator('#exportPlayerButton:not([disabled])').waitFor();
           }
 
           const download = page.waitForEvent('download');
@@ -198,6 +248,18 @@ async function main() {
             assert.ok(boxes[0].card.width >= width - 35, label + ': full-width mobile cues');
           }
 
+          const badge = playerPage.locator('.grid .cue .state').first();
+          const badgeStyle = await badge.evaluate(el => {
+            const st = getComputedStyle(el);
+            const box = el.getBoundingClientRect();
+            return { size: st.fontSize, paddingX: st.paddingLeft, paddingY: st.paddingTop, radius: st.borderRadius, whiteSpace: st.whiteSpace, height: box.height };
+          });
+          const mainBadgeStyle = await page.locator('.cue-card .cue-state').first().evaluate(el => {
+            const st = getComputedStyle(el);
+            return { size: st.fontSize, paddingX: st.paddingLeft, paddingY: st.paddingTop, radius: st.borderRadius, whiteSpace: st.whiteSpace };
+          });
+          for (const key of Object.keys(mainBadgeStyle)) assert.equal(badgeStyle[key], mainBadgeStyle[key], label + ': exported status badge matches main ' + key);
+          assert.ok(badgeStyle.height < 30, label + ': exported status badge remains compact');
           const exportedFirst = playerPage.locator('.grid .cue button').first();
           await exportedFirst.click();
           await playerPage.waitForFunction(() => document.querySelector('.grid .cue button')?.getAttribute('aria-pressed') === 'true');
