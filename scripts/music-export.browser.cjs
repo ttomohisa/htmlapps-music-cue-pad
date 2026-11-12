@@ -67,6 +67,8 @@ async function main() {
             assert.equal(await page.locator('#exportPlayerButton').isEnabled(), false, label + ': empty board disables playback export');
             assert.equal(await page.locator('#exportBackupButton').isEnabled(), false, label + ': empty board disables backup');
 
+            // Reset finishes asynchronously after clearing the visible cue grid.
+            await page.locator('#audioInput:not([disabled])').waitFor();
             await page.locator('#audioInput').setInputFiles([
               { name: 'very-long-audio-title-for-a-test-of-the-card-layout.wav', mimeType: 'audio/wav', buffer: wav },
               { name: 'short.wav', mimeType: 'audio/wav', buffer: wav },
