@@ -28,7 +28,7 @@ async function assertMainCueRowAlignment(page, label, expectedInRow) {
     const cards = [...document.querySelectorAll('#cueGrid .cue-card')];
     return cards.length >= expected && cards.every(card => card.isConnected && card.getBoundingClientRect().height > 50);
   }, expectedInRow, { timeout: 8000 });
-  const cards = await page.locator('#cueGrid .cue-card').evaluateAll(elements => elements.map(el => {
+  const cards = await page.evaluate(() => [...document.querySelectorAll('#cueGrid .cue-card')].map(el => {
     const r = el.getBoundingClientRect();
     const play = el.querySelector('.cue-play').getBoundingClientRect();
     const tools = el.querySelector('.cue-tools').getBoundingClientRect();
