@@ -43,7 +43,7 @@ function fixture(kind, fail = false) {
   const context = vm.createContext({ ...elements, document, state, Blob, TextEncoder, btoa, language: 'en',
     APP_CONFIG: { version: '1.0.2' }, BOARD_SCHEMA_VERSION: 1,
     outputFilenameRules: { extension: '.html', fallback: 'music-cue-pad-player' },
-    translate: key => key, showToast() {}, console: { error: (...args) => errors.push(args.at(-1)) },
+    translate: key => key, showToast() {}, renderStorageStatus() {}, console: { error: (...args) => errors.push(args.at(-1)) },
     cueRecord: cue => ({ ...cue }),
     getComputedStyle: node => ({ visibility: node.visibility }),
     setTimeout(fn, delay) { if (delay === 0) queueMicrotask(fn); else timers.push({ fn, delay }); },
