@@ -67,7 +67,7 @@ After a keyboard-started export, continue with Tab from the export button unless
 3. Use **Edit cue** to change the display name and set Start / End. In the preview section, drag the two handles to adjust the playback range or type an exact time.
 4. Set cue volume, Fade In, Fade Out, Loop, and an optional trigger key when needed.
 5. The red trash icon opens a confirmation dialog before removing a cue; Undo remains briefly available after deletion. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
-6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop.
+6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop. When a cue button has keyboard focus, Space activates that cue rather than the previously selected one.
 7. Use **Playback view** when you want only the large playback controls on screen. Remaining time is shown, and non-looping cues display an ending-soon notice during the final 10 seconds.
 8. The board is saved automatically in the browser. Use the storage panel to review usage, request persistent storage where supported, retry a failed save, or delete all saved app data.
 9. Use **Export & backup** to save a `.bkcue` file when you want to continue editing the board on another device. If any referenced audio is still loading or failed, wait for it to finish or remove that cue before exporting.
