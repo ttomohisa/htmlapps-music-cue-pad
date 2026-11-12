@@ -34,6 +34,11 @@ async function assertMainCueRowAlignment(page, label, expectedInRow) {
       progressVisible: getComputedStyle(progressElement).visibility !== 'hidden',
       progressClass: progressElement.className,
       cueClass: el.className,
+      styleDisplay: getComputedStyle(el).display,
+      gridHidden: document.getElementById('cueGrid').hidden,
+      gridDisplay: getComputedStyle(document.getElementById('cueGrid')).display,
+      hiddenParent: el.closest('[hidden]')?.id || '',
+      bodyClass: document.body.className,
     };
   }));
   const row = cards.filter(card => Math.abs(card.top - cards[0].top) <= 1);
