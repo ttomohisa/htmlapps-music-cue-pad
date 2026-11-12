@@ -684,6 +684,11 @@
       @media (orientation: landscape) {
         body.live-mode { --player-height: min(134px, 50dvh); }
       }
+      /* In extremely short edit viewports, a pinned transport can cover every cue action.
+         Put the player back in document flow; playback view keeps its compact fixed transport. */
+      body:not(.live-mode).player-visible .main { padding-bottom: 22px; }
+      body:not(.live-mode) .player-bar { position: static; max-height: none; overflow-y: visible; overscroll-behavior: auto; }
+      body:not(.live-mode) .app-toast { bottom: calc(16px + env(safe-area-inset-bottom)); }
     }
 
     @media (prefers-reduced-motion: reduce) {
