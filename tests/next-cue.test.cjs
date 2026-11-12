@@ -183,3 +183,27 @@ test('focused native cue buttons keep native Space activation', () => {
   assert.ok(globalHandler.includes("event.target.closest('button, input"), 'native button keypress is excluded from global Space toggle');
   assert.ok(!globalHandler.includes("button:not(.cue-play)"), 'cue buttons must not be special-cased as non-native buttons');
 });
+
+
+test('cue edit preview cancels main playback even when audio.play is pending', async () => {
+  const h = fixture(), pendingPlay = deferred();
+  h.audio.pending.push(pendingPlay);
+  const pending = h.handleCuePress('c0');
+  await h.flush();
+  assert.equal(h.playbackRequested, true);
+  assert.equal(h.state.playback, 'stopped', 'main media intent still pending');
+  h.previewPlayButton = { handler: null, addEventListener(name, handler) { if (name === 'click') this.handler = handler; } };
+  h.updatePreviewUi = () => {};
+  const start = source.indexOf("      previewPlayButton.addEventListener('click', async () => {");
+  const end = source.indexOf("\n      previewRange.addEventListener", start);
+  assert.ok(start >= 0 && end > start, 'preview handler exists');
+  vm.runInContext(source.slice(start, end), h);
+  await h.previewPlayButton.handler();
+  assert.equal(h.state.playback, 'paused', 'main player canceled before preview');
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.editPreviewAudio.plays.length, 1);
+  pendingPlay.resolve();
+  await pending;
+  assert.equal(h.state.playback, 'paused', 'late main play completion remains canceled');
+  assert.equal(h.audio.paused, true);
+});
