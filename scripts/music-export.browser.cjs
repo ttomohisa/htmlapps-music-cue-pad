@@ -92,10 +92,10 @@ async function main() {
   const browser = await chromium.launch();
   try {
     for (const language of ['ja', 'en']) {
-      for (const width of [360, 800, 900, 1280]) {
+      for (const width of [320, 360, 800, 900, 1280]) {
         const label = language + ' ' + width;
         const context = await browser.newContext({
-          viewport: { width, height: 800 },
+          viewport: { width, height: width <= 360 ? 680 : 800 },
           locale: language,
           acceptDownloads: true,
           reducedMotion: 'reduce',
@@ -157,7 +157,7 @@ async function main() {
           assert.equal(await saveBackup.innerText(), language === 'ja' ? '保存する' : 'Save backup', label + ': concise backup save label');
           assert.equal(await loadBackup.innerText(), language === 'ja' ? '読み込む' : 'Load backup', label + ': concise backup import label');
           assert.equal(await saveBackup.getAttribute('aria-label'), language === 'ja' ? 'バックアップを書き出す' : 'Export board backup', label + ': descriptive accessible label');
-          if (width === 360) {
+          if (width <= 360) {
             for (const button of [saveBackup, loadBackup]) {
               assert.ok(await button.evaluate(el => {
                 const range = document.createRange();
@@ -202,7 +202,7 @@ async function main() {
           if (width === 1280 && language === 'ja') {
             await page.locator('#cueGrid').screenshot({ path: path.join(output, 'main-cue-aligned-3-col.png') });
           }
-          if (width === 360) {
+          if (width <= 360) {
             await assertScrollReachesLastContent(page, '.backup-panel', label + ': editor');
             await page.locator('#enterLiveModeButton').click();
             await page.waitForFunction(() => document.body.classList.contains('live-mode'));
