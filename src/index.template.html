@@ -3290,7 +3290,10 @@
         }
         renderLiveModeUi();
         const isFading = state.playback === 'fading';
-        const isPausedLike = state.playback !== 'playing' && !isFading;
+        // A pending audio.play() still counts as a play intent. Keep the
+        // transport's Pause label aligned with the active cue's pause icon.
+        const isPlayingIntent = state.playback === 'playing' || (state.playback === 'stopped' && playbackRequested);
+        const isPausedLike = !isPlayingIntent && !isFading;
         $('#pauseResumeLabel').textContent = translate(isPausedLike ? 'resume' : 'pause');
         $('#pauseResumeIcon').innerHTML = isPausedLike ? '<path d="M8 5.3v13.4L18.8 12 8 5.3Z" fill="currentColor" stroke="none"/>' : '<path d="M9 5v14M15 5v14"/>';
         pauseResumeButton.setAttribute('aria-label', translate(isPausedLike ? 'resume' : 'pause'));
@@ -3755,7 +3758,8 @@
       dropZone.addEventListener('drop', event => addFiles(event.dataTransfer.files));
 
       pauseResumeButton.addEventListener('click', () => {
-        if (state.playback === 'playing') pausePlayback(); else resumePlayback();
+        if (state.playback === 'playing' || (state.playback === 'stopped' && playbackRequested)) pausePlayback();
+        else resumePlayback();
       });
       $('#fadeStopButton').addEventListener('click', fadeStopPlayback);
       $('#stopButton').addEventListener('click', stopPlayback);
@@ -3863,10 +3867,11 @@
 
         // Preserve native Space activation on focused controls; otherwise Space is the global play/pause toggle.
         if (event.key === ' ') {
-          if (event.target instanceof Element && event.target.closest('button:not(.cue-play), input, select, textarea, summary, a[href]')) return;
+          if (event.target instanceof Element && event.target.closest('button, input, select, textarea, summary, a[href]')) return;
           if (!activeCue()) return;
           event.preventDefault();
-          if (state.playback === 'playing') pausePlayback(); else resumePlayback();
+          if (state.playback === 'playing' || (state.playback === 'stopped' && playbackRequested)) pausePlayback();
+          else resumePlayback();
           return;
         }
         if (event.key === 'Escape') {
@@ -3895,11 +3900,14 @@
         handleCuePress(cue.id);
       });
 
-      window.addEventListener('pagehide', () => {
+      window.addEventListener('pagehide', event => {
         invalidatePlayback();
         cancelLiveExitHold();
         releaseWakeLock();
         primaryAudio.pause();
+        // A page restored from the back/forward cache keeps its JS state.
+        // Revoking these URLs here would make every cue unplayable on Back.
+        if (event.persisted) return;
         primaryAudio.removeAttribute('src');
         clearTimeout(masterVolumeSaveTimer);
         clearTimeout(orphanCleanupTimer);
