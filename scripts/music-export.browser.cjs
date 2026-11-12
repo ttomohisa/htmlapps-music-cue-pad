@@ -32,6 +32,8 @@ async function assertMainCueRowAlignment(page, label, expectedInRow) {
       playBottom: play.bottom, toolsTop: tools.top, toolsBottom: tools.bottom,
       progressTop: progress.top, progressHeight: progress.height,
       progressVisible: getComputedStyle(progressElement).visibility !== 'hidden',
+      progressClass: progressElement.className,
+      cueClass: el.className,
     };
   }));
   const row = cards.filter(card => Math.abs(card.top - cards[0].top) <= 1);
@@ -134,7 +136,7 @@ async function main() {
           assert.ok(await first.locator('.cue-center').locator('svg rect').count() >= 2, label + ': play button changes to pause icon');
           const activeRow = await assertMainCueRowAlignment(page, label + ' active', rowCount);
           assert.equal(activeRow[0].progressVisible, true, label + ': active progress visible');
-          if (rowCount > 1) assert.ok(activeRow.slice(1, rowCount).every(card => !card.progressVisible), label + ': inactive progress hidden without losing layout height');
+          if (rowCount > 1) assert.ok(activeRow.slice(1, rowCount).every(card => !card.progressVisible), label + ': inactive progress hidden without losing layout height ' + JSON.stringify(activeRow));
           await first.focus();
           await page.keyboard.press('Enter');
           await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'false');
