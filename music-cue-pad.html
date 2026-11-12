@@ -182,7 +182,10 @@
       text-align: left;
       transition: border-color .15s ease, background .15s ease, transform .15s ease;
     }
-    .drop-zone.is-compact { min-height: 60px; padding: 9px 12px; gap: 10px; }
+    .import-panel.has-cues { padding: 10px 14px; }
+    .import-panel.has-cues .panel-head { display: none; }
+    .import-panel.has-cues .import-status:not(.is-warning) { display: none; }
+    .drop-zone.is-compact { min-height: 56px; padding: 8px 12px; gap: 10px; }
     .drop-zone.is-compact .drop-icon { width: 34px; height: 34px; border-radius: 9px; }
     .drop-zone.is-compact .drop-icon svg { width: 20px; height: 20px; }
     .drop-zone.is-compact .drop-title { font-size: 12px; }
@@ -1196,6 +1199,7 @@
           addAudioTitle: '音声ファイルを追加',
           addAudioBody: '複数選択できます。追加した音声は外部へ送信されません。',
           dropTitle: 'ここに音声ファイルをドロップ',
+          dropAddedTitle: '{count}曲を追加済み', dropLoadingTitle: '{count}曲を読み込み中', dropCheckTitle: '追加した音声を確認してください', addMoreFiles: '曲を追加',
           dropHelp: 'MP3 / WAV / M4A / OGG / WebM / FLAC など',
           chooseFiles: 'ファイルを選択',
           cueSectionTitle: '再生ボタン',
@@ -1258,6 +1262,7 @@
           addAudioTitle: 'Add audio files',
           addAudioBody: 'Multiple files are supported. Added audio is not sent outside this browser.',
           dropTitle: 'Drop audio files here',
+          dropAddedTitle: '{count} tracks added', dropLoadingTitle: 'Loading {count} tracks', dropCheckTitle: 'Check the added audio', addMoreFiles: 'Add tracks',
           dropHelp: 'MP3 / WAV / M4A / OGG / WebM / FLAC and more',
           chooseFiles: 'Choose files',
           cueSectionTitle: 'Playback buttons',
@@ -2951,6 +2956,7 @@
           if (state.playback === 'fading') return { key: 'stateFading', icon: 'playing' };
           if (state.playback === 'paused') return { key: 'statePaused', icon: 'play' };
           if (state.playback === 'ended') return { key: 'stateEnded', icon: 'play' };
+          if (state.playback === 'stopped' && playbackRequested) return { key: 'stateLoading', icon: 'playing' };
           if (state.playback === 'stopped') return { key: 'stateStopped', icon: 'play' };
         }
         return { key: 'stateReady', icon: 'play' };
@@ -2958,7 +2964,7 @@
 
       function cueIconMarkup(icon) {
         if (icon === 'loading') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v4"/></svg>';
-        if (icon === 'playing') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10v4h3l4 3V7L8 10H5Z"/><path d="M15 9.2c1.2 1.4 1.2 4.2 0 5.6"/><path d="M18 7c2.6 2.8 2.6 7.2 0 10"/></svg>';
+        if (icon === 'playing') return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
         if (icon === 'error') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 17h.01"/></svg>';
         return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.3v13.4L18.8 12 8 5.3Z"/></svg>';
       }
@@ -3105,7 +3111,15 @@
         const focusCueId = focusedCard?.dataset.cueId || '';
         const focusKind = focusedElement?.classList.contains('cue-play') ? 'play' : (focusedElement?.classList.contains('cue-tool-button') ? 'tool' : '');
         const focusLabel = focusKind === 'tool' ? focusedElement.getAttribute('aria-label') || '' : '';
-        dropZone.classList.toggle('is-compact', state.cues.length > 0);
+        const hasCues = state.cues.length > 0;
+        dropZone.classList.toggle('is-compact', hasCues);
+        dropZone.parentElement?.classList?.toggle('has-cues', hasCues);
+        const readyCount = state.cues.filter(cue => state.assets.get(cue.assetId)?.status === 'ready').length;
+        const loadingCount = state.cues.filter(cue => state.assets.get(cue.assetId)?.status === 'loading').length;
+        const dropHeading = dropZone.querySelector?.('.drop-title');
+        const dropAction = dropZone.querySelector?.('.drop-cta');
+        if (dropHeading) dropHeading.textContent = !hasCues ? translate('dropTitle') : loadingCount ? translate('dropLoadingTitle', { count: loadingCount }) : readyCount ? translate('dropAddedTitle', { count: readyCount }) : translate('dropCheckTitle');
+        if (dropAction) dropAction.textContent = translate(hasCues ? 'addMoreFiles' : 'chooseFiles');
         emptyState.hidden = state.cues.length > 0;
         cueGrid.hidden = state.cues.length === 0;
         cueGrid.replaceChildren();
@@ -3123,8 +3137,9 @@
           playButton.className = 'cue-play';
           playButton.disabled = asset?.status === 'loading' || isError;
           const shortcut = normalizeShortcutValue(cue.shortcut);
-          playButton.setAttribute('aria-label', `${index + 1}. ${cue.name}: ${translate(status.key)}${shortcut ? ` · ${translate('shortcutAssigned', { key: shortcut })}` : ''}`);
-          playButton.setAttribute('aria-pressed', isActive && (state.playback === 'playing' || state.playback === 'paused' || state.playback === 'fading') ? 'true' : 'false');
+          const canPause = isActive && (state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested));
+          playButton.setAttribute('aria-label', `${index + 1}. ${cue.name}: ${translate(canPause ? 'pause' : status.key)}${shortcut ? ` · ${translate('shortcutAssigned', { key: shortcut })}` : ''}`);
+          playButton.setAttribute('aria-pressed', canPause ? 'true' : 'false');
           if (shortcut) playButton.setAttribute('aria-keyshortcuts', shortcut);
           if (isActive) playButton.setAttribute('aria-current', 'true');
           const progress = isActive && asset?.status === 'ready' ? cueProgress(cue, asset, primaryAudio.currentTime) * 100 : 0;
@@ -3536,6 +3551,7 @@
         }
         if (asset.status !== 'ready') return;
         if (state.activeCueId === cue.id) {
+          if (state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested)) { pausePlayback(); return; }
           if (state.playback === 'paused') await resumePlayback();
           else if (state.playback === 'stopped' || state.playback === 'ended') await resumePlayback({ restart: true });
           return;
@@ -3585,7 +3601,7 @@
       }
 
       function pausePlayback() {
-        if (!activeCue() || state.playback !== 'playing') return;
+        if (!activeCue() || !(state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested))) return;
         invalidatePlayback();
         stopBoundaryMonitor();
         cancelManualFade({ restoreGain: true });
