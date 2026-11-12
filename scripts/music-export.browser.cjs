@@ -53,7 +53,7 @@ async function main() {
   const browser = await chromium.launch();
   try {
     for (const language of ['ja', 'en']) {
-      for (const width of [360, 900, 1280]) {
+      for (const width of [360, 800, 900, 1280]) {
         const label = language + ' ' + width;
         const context = await browser.newContext({
           viewport: { width, height: 800 },
@@ -125,7 +125,7 @@ async function main() {
           await page.locator('#saveCueEditButton').click();
           assert.equal(await page.locator('#cueEditDialog').isVisible(), false);
 
-          const rowCount = width === 1280 ? 3 : width === 900 ? 2 : 1;
+          const rowCount = width > 860 ? 3 : width > 620 ? 2 : 1;
           await assertMainCueRowAlignment(page, label + ' idle', rowCount);
           const first = page.locator('.cue-card .cue-play').first();
           await first.focus();
@@ -178,7 +178,7 @@ async function main() {
           assert.ok(Math.max(...boxes.map(b => b.remaining.height)) - Math.min(...boxes.map(b => b.remaining.height)) <= 2, label + ': remaining panels same height');
           if (width === 1280) {
             assert.ok(Math.max(...boxes.map(b => b.remaining.y)) - Math.min(...boxes.map(b => b.remaining.y)) <= 2, label + ': remaining panels aligned in row');
-          } else if (width === 900) {
+          } else if (width > 760) {
             assert.ok(Math.abs(boxes[0].remaining.y - boxes[1].remaining.y) <= 2, label + ': two-column remaining panels aligned');
           } else {
             assert.ok(boxes[0].card.width >= width - 35, label + ': full-width mobile cues');
