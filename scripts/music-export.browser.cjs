@@ -287,6 +287,32 @@ async function main() {
 
           await playerPage.screenshot({path: path.join(output, 'player-' + language + '-' + width + '.png'), fullPage: true});
           await playerPage.close();
+          if (language === 'ja' && width === 360) {
+            // Real file roundtrip, not only manifest/CRC unit tests. Confirm the
+            // audio bytes and cue order survive deletion and restoration.
+            await page.locator('#exportBackupButton:not([disabled])').waitFor();
+            const backupDownload = page.waitForEvent('download');
+            await page.locator('#exportBackupButton').click();
+            const backupFile = await backupDownload;
+            assert.match(backupFile.suggestedFilename(), /\.bkcue$/i);
+            const backupPath = path.join(output, 'board-roundtrip.bkcue');
+            await backupFile.saveAs(backupPath);
+            assert.ok(fs.statSync(backupPath).size > 100_000, 'backup includes real WAV audio');
+            await page.locator('#resetButton:not([disabled])').waitFor();
+            await page.locator('#resetButton').click();
+            await page.locator('#appConfirmDialog').waitFor({ state: 'visible' });
+            await page.locator('#appConfirmOk').click();
+            await page.waitForFunction(() => document.querySelectorAll('.cue-card').length === 0);
+            await page.locator('#backupFileInput').setInputFiles(backupPath);
+            await page.locator('#appConfirmDialog').waitFor({ state: 'visible' });
+            await page.locator('#appConfirmOk').click();
+            await page.waitForFunction(() => [...document.querySelectorAll('.cue-card .cue-play')].length === 3 && !document.querySelector('#exportPlayerButton').disabled);
+            assert.match(await page.locator('.cue-card .cue-name').first().innerText(), /very-long-audio-title/, 'restored original cue identity');
+            await page.locator('.cue-card .cue-play').first().click();
+            await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'true');
+            await page.locator('#stopButton').click();
+            console.log('PASS music-backup import/export/reset roundtrip ' + label);
+          }
           assert.deepEqual(errors, [], label + ': browser console');
           assert.deepEqual(remoteRequests, [], label + ': no external runtime requests');
           console.log('PASS music-export ' + label);
