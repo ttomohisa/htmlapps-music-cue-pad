@@ -3816,7 +3816,9 @@
       });
       previewPlayButton.addEventListener('click', async () => {
         if (!editPreviewAudio.paused) { editPreviewAudio.pause(); updatePreviewUi(); return; }
-        if (state.playback === 'playing') pausePlayback();
+        // The main audio.play() promise may still be pending; cancel it
+        // before preview starts so two tracks cannot begin simultaneously.
+        if (state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested)) pausePlayback();
         try { await editPreviewAudio.play(); updatePreviewUi(); } catch { showToast(translate('playbackFailed'), { tone: 'warning' }); }
       });
       previewRange.addEventListener('input', () => setPreviewPosition(Number(previewRange.value)));
