@@ -56,3 +56,52 @@ test('exported Fade Stop never crosses cue End or restarts a loop',async()=>{con
 
 test('exported browser pause renders paused and cue button resumes',async()=>{const h=fixture(),a=h.api;await a.playNext();a.audio.pause();assert.equal(a.playState,'paused');await h.$('grid').children[0].querySelector('button').click();await h.flush();assert.equal(a.playState,'playing');});
 for(const loop of [false,true])test(`exported pause-before-ended ordering (loop=${loop})`,async()=>{const h=fixture(),a=h.api;await a.playNext();a.data.cues[0].loop=loop;a.audio.ended=true;a.audio.paused=true;a.audio.fire('pause');a.audio.fire('ended');await h.flush();assert.equal(a.playState,loop?'playing':'ended');});
+
+for (const lang of ['ja','en']) test('exported cue button switches between pause and play icons and pauses on its second tap ('+lang+')', async()=>{
+ const h=fixture(3,lang),a=h.api;
+ const first=h.$('grid').children[0].querySelector('button');
+ await first.click();
+ assert.equal(a.playState,'playing');
+ assert.equal(first.attrs['aria-pressed'],'true');
+ assert.match(h.$('grid').children[0].querySelector('.center').innerHTML,/<rect/);
+ a.audio.currentTime=4.25;
+ const plays=a.audio.plays.length;
+ await first.click();
+ assert.equal(a.playState,'paused');
+ assert.equal(a.audio.paused,true);
+ assert.equal(a.audio.currentTime,4.25);
+ assert.equal(first.attrs['aria-pressed'],'false');
+ assert.match(h.$('grid').children[0].querySelector('.center').innerHTML,/<path/);
+ await first.click();
+ assert.equal(a.playState,'playing');
+ assert.equal(a.audio.currentTime,4.25);
+ assert.equal(a.audio.plays.length,plays+1);
+});
+
+test('exported second tap cancels a pending play instead of starting another', async()=>{
+ const h=fixture(),a=h.api,d=deferred();
+ a.audio.pending.push(d);
+ const first=h.$('grid').children[0].querySelector('button');
+ const pending=first.click();
+ await h.flush();
+ await first.click();
+ assert.equal(a.playState,'paused');
+ d.resolve();
+ await pending;
+ assert.equal(a.playState,'paused');
+ assert.equal(a.audio.paused,true);
+});
+
+test('exported card heights and shortcut footer have stable layout contracts',()=>{
+ const h=fixture();
+ assert.match(h.html,/grid-auto-rows:1fr/);
+ assert.match(h.html,/\.cue\{display:flex;align-self:stretch/);
+ assert.match(h.html,/\.cue button\{width:100%;height:100%/);
+ assert.match(h.html,/\.shortcut\{min-height:24px/);
+ assert.match(h.html,/@media\(max-width:1000px\)\{\.grid\{grid-template-columns:repeat\(2/);
+ assert.match(h.html,/Music Cue Pad/);
+ assert.match(h.html,/Audio and playback settings are included in this HTML file\./);
+ assert.doesNotMatch(h.html,/<h2>Playback buttons<\/h2>/);
+ assert.doesNotMatch(h.html,/<h2>再生ボタン<\/h2>/);
+ assert.doesNotMatch(h.html,/Playback HTML · Fully local/);
+});
