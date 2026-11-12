@@ -148,3 +148,48 @@ test('uninterrupted Fade Stop still applies a ramp and schedules its stop', asyn
   assert.deepEqual(h.calls.ramps.map(x => x[0]), ['set', 'ramp']);
   assert.equal(h.calls.timers.length, 1);
 });
+
+
+test('back/forward cache pagehide retains audio URLs, media source, and IndexedDB connection', () => {
+  const events = new Map(), revoked = [], cleared = [], calls = [];
+  const urls = new Set(['blob:track-a', 'blob:track-b']);
+  const audio = {
+    src: 'blob:track-a',
+    pause() { calls.push('pause'); },
+    removeAttribute(name) { calls.push('remove:' + name); this.src = ''; }
+  };
+  const db = { close() { calls.push('db-close'); } };
+  const graph = { state: 'running', close() { calls.push('audio-close'); } };
+  const context = vm.createContext({
+    window: { addEventListener(name, handler) { events.set(name, handler); } },
+    invalidatePlayback() { calls.push('cancel'); },
+    cancelLiveExitHold() {},
+    releaseWakeLock() {},
+    primaryAudio: audio,
+    masterVolumeSaveTimer: 1, orphanCleanupTimer: 2,
+    clearTimeout(id) { cleared.push(id); },
+    blobUrls: urls,
+    URL: { revokeObjectURL(url) { revoked.push(url); } },
+    persistenceDb: db, audioContext: graph,
+  });
+  const start = source.indexOf("      window.addEventListener('pagehide', event => {");
+  const end = source.indexOf("\n      $('#versionBadge')", start);
+  assert.ok(start >= 0 && end > start, 'pagehide listener present');
+  vm.runInContext(source.slice(start, end), context);
+  events.get('pagehide')({ persisted: true });
+  assert.equal(audio.src, 'blob:track-a');
+  assert.deepEqual(revoked, []);
+  assert.deepEqual(cleared, []);
+  assert.equal(urls.size, 2);
+  assert.ok(!calls.includes('db-close'));
+  assert.ok(!calls.includes('audio-close'));
+  assert.ok(calls.includes('pause'), 'background playback still pauses');
+
+  events.get('pagehide')({ persisted: false });
+  assert.equal(audio.src, '');
+  assert.deepEqual(new Set(revoked), new Set(['blob:track-a', 'blob:track-b']));
+  assert.equal(urls.size, 0);
+  assert.deepEqual(cleared, [1, 2]);
+  assert.ok(calls.includes('db-close'));
+  assert.ok(calls.includes('audio-close'));
+});
