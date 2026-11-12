@@ -59,7 +59,7 @@ The current app has no third-party runtime dependency. Python, Node.js, and a lo
 
 Help, cue editing and confirmation dialogs keep the background page still while open. Closing a dialog lets you continue at the same page position.
 
-On editing screens 480px tall or less, the player joins the page flow so it cannot cover cue controls. The compact fixed player in Playback view remains scrollable when needed.
+On phones, scrolling remains possible through the final cue and backup controls, with clearance based on the actual player height. On editing screens 480px tall or less, the player joins the page flow so it cannot cover cue controls. The compact fixed player in Playback view remains scrollable when needed.
 After a keyboard-started export, continue with Tab from the export button unless you have moved to another control.
 
 1. Add one or more audio files with the file picker or Drag & Drop.
