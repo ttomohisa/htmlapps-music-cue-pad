@@ -1782,13 +1782,20 @@
         } finally { setBoardMutationLocked(false); }
       }
 
+      function refreshBackupActionAvailability() {
+        // Cue count can change after an earlier operation disabled the exports.
+        // Always derive the controls from the current board, not the last
+        // backup operation (for example, Reset followed by adding audio).
+        const blocked = state.backupBusy || state.boardMutationLocked;
+        exportBackupButton.disabled = blocked || state.cues.length === 0;
+        exportPlayerButton.disabled = blocked || state.cues.length === 0;
+        importBackupButton.disabled = blocked;
+        boardNameInput.disabled = blocked;
+        playerFilenameInput.disabled = blocked;
+      }
       function setBackupBusy(busy, label = '', percent = 0) {
         state.backupBusy = Boolean(busy);
-        exportBackupButton.disabled = state.backupBusy || state.boardMutationLocked || state.cues.length === 0;
-        exportPlayerButton.disabled = state.backupBusy || state.boardMutationLocked || state.cues.length === 0;
-        importBackupButton.disabled = state.backupBusy || state.boardMutationLocked;
-        boardNameInput.disabled = state.backupBusy || state.boardMutationLocked;
-        playerFilenameInput.disabled = state.backupBusy || state.boardMutationLocked;
+        refreshBackupActionAvailability();
         backupProgress.hidden = !state.backupBusy;
         if (state.backupBusy) {
           backupProgressLabel.textContent = label || translate('backupPreparing');
@@ -1802,11 +1809,7 @@
         audioInput.disabled = state.boardMutationLocked;
         dropZone.disabled = state.boardMutationLocked;
         masterVolumeSlider.disabled = state.boardMutationLocked;
-        boardNameInput.disabled = state.boardMutationLocked || state.backupBusy;
-        playerFilenameInput.disabled = state.boardMutationLocked || state.backupBusy;
-        exportBackupButton.disabled = state.boardMutationLocked || state.backupBusy || !state.cues.length;
-        exportPlayerButton.disabled = state.boardMutationLocked || state.backupBusy || !state.cues.length;
-        importBackupButton.disabled = state.boardMutationLocked || state.backupBusy;
+        refreshBackupActionAvailability();
         renderCues(); renderStorageStatus();
       }
       function captureExportFocus(opener) {
@@ -2949,6 +2952,8 @@
       function updateCueCount() {
         $('#cueCount').textContent = translate('cueCount', { count: state.cues.length });
         $('#reorderHint').hidden = state.cues.length < 2;
+        // Re-enable exports when cues are added after Reset or an empty board.
+        refreshBackupActionAvailability();
         renderLiveModeUi();
       }
 
