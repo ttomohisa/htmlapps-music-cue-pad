@@ -53,6 +53,32 @@ async function main() {
             const cues = [...document.querySelectorAll('.cue-card .cue-play')];
             return cues.length === 3 && cues.every(button => !button.disabled);
           });
+          assert.equal(await page.locator('#exportPlayerButton').isEnabled(), true, label + ': playback export available after loading tracks');
+          assert.equal(await page.locator('#exportBackupButton').isEnabled(), true, label + ': board backup available after loading tracks');
+
+          if (language === 'ja' && width === 360) {
+            // A reset disables both exports on an empty board. Adding files must
+            // re-enable them without visiting the export screen or reloading.
+            await page.locator('#resetButton:not([disabled])').waitFor();
+            await page.locator('#resetButton').click();
+            await page.locator('#appConfirmDialog').waitFor({ state:'visible' });
+            await page.locator('#appConfirmOk').click();
+            await page.waitForFunction(() => document.querySelectorAll('.cue-card').length === 0);
+            assert.equal(await page.locator('#exportPlayerButton').isEnabled(), false, label + ': empty board disables playback export');
+            assert.equal(await page.locator('#exportBackupButton').isEnabled(), false, label + ': empty board disables backup');
+
+            await page.locator('#audioInput').setInputFiles([
+              { name: 'very-long-audio-title-for-a-test-of-the-card-layout.wav', mimeType: 'audio/wav', buffer: wav },
+              { name: 'short.wav', mimeType: 'audio/wav', buffer: wav },
+              { name: 'third.wav', mimeType: 'audio/wav', buffer: wav },
+            ]);
+            await page.waitForFunction(() => {
+              const cues = [...document.querySelectorAll('.cue-card .cue-play')];
+              return cues.length === 3 && cues.every(button => !button.disabled);
+            });
+            assert.equal(await page.locator('#exportPlayerButton').isEnabled(), true, label + ': export re-enabled after reset and re-import');
+            assert.equal(await page.locator('#exportBackupButton').isEnabled(), true, label + ': backup re-enabled after reset and re-import');
+          }
 
           const drop = page.locator('#dropZone');
           assert.ok(await drop.evaluate(el => el.classList.contains('is-compact')), label + ': compact drop after import');
