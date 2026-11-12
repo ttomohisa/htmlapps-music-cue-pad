@@ -157,7 +157,7 @@
     .header-icon-button svg { width: 20px; height: 20px; }
     .main { width: min(1180px, 100%); margin: 0 auto; padding: 22px clamp(14px, 2.8vw, 30px) 54px; transition: padding-bottom .15s ease; }
     .page-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 0 2px 18px; }
-    .page-intro h1 { margin: 0; font-size: clamp(22px, 3vw, 28px); line-height: 1.28; letter-spacing: -.025em; }
+    .page-intro h1 { margin: 0; font-size: 28px; line-height: 1.28; letter-spacing: -.025em; }
     .page-intro p { margin: 6px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
     .local-badge { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line)); border-radius: 999px; color: var(--accent); background: var(--accent-soft); font-size: 12px; font-weight: 700; white-space: nowrap; }
     .local-badge svg { width: 15px; height: 15px; }
@@ -182,6 +182,12 @@
       text-align: left;
       transition: border-color .15s ease, background .15s ease, transform .15s ease;
     }
+    .drop-zone.is-compact { min-height: 60px; padding: 9px 12px; gap: 10px; }
+    .drop-zone.is-compact .drop-icon { width: 34px; height: 34px; border-radius: 9px; }
+    .drop-zone.is-compact .drop-icon svg { width: 20px; height: 20px; }
+    .drop-zone.is-compact .drop-title { font-size: 12px; }
+    .drop-zone.is-compact .drop-help { display: none; }
+    .drop-zone.is-compact .drop-cta { padding: 7px 10px; }
     .drop-zone:hover, .drop-zone.is-dragging { border-color: var(--accent); background: var(--accent-soft); }
     .drop-zone:active { transform: translateY(1px); }
     .drop-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); }
@@ -285,7 +291,8 @@
     .cue-tool-button { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; }
     .cue-tool-button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
     .cue-tool-button:disabled { opacity: .32; cursor: default; }
-    .cue-tool-button.danger:hover:not(:disabled) { background: #fde8e6; color: var(--danger); }
+    .cue-tool-button.danger { color: var(--danger); }
+    .cue-tool-button.danger:hover:not(:disabled), .cue-tool-button.danger:focus-visible { background: #fde8e6; color: var(--danger); }
     .cue-tool-button svg { width: 18px; height: 18px; }
     .cue-drag-handle { margin-right: auto; cursor: grab; touch-action: none; color: var(--muted); background: var(--surface-muted); border-color: transparent; }
     .cue-drag-handle:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); background: var(--accent-soft); }
@@ -556,13 +563,19 @@
       footer { display: none; }
       :root { --player-height: 278px; }
       .page-intro { display: block; }
-      .local-badge { margin-top: 11px; }
+      .page-intro h1 { font-size: 22px; }
+      .local-badge { display: none; }
       .main { padding-top: 17px; }
       .import-panel { padding: 14px; }
       .panel-head { display: block; }
       .cue-count { display: inline-flex; margin-top: 9px; }
       .drop-zone { grid-template-columns: auto minmax(0, 1fr); min-height: 106px; }
       .drop-cta { grid-column: 1 / -1; width: 100%; text-align: center; }
+      .drop-zone.is-compact { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 56px; padding: 8px 10px; }
+      .drop-zone.is-compact .drop-cta { grid-column: auto; width: auto; text-align: center; }
+      .drop-zone.is-compact .drop-title { overflow-wrap: anywhere; }
+      .cue-section-head { flex-direction: column; align-items: stretch; }
+      .cue-section-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
       .cue-grid { grid-template-columns: 1fr; gap: 10px; }
       .cue-play { min-height: 142px; }
       .cue-tools { justify-content: space-between; min-height: 54px; padding: 6px; }
@@ -574,8 +587,8 @@
       .action-button { min-height: 46px; }
       .build-grid { grid-template-columns: 1fr; }
       .app-toast { left: 12px; right: 12px; max-width: none; }
-      .app-confirm-dialog { width: 100%; max-height: calc(100dvh - 12px); margin: auto 0 0; border-radius: 22px 22px 0 0; }
-      #cueEditDialog[open] { width: 100%; max-height: calc(100dvh - 12px); margin: auto 0 0; border-radius: 22px 22px 0 0; }
+      .app-confirm-dialog { width: calc(100% - 16px); max-height: calc(100dvh - 12px); margin: auto auto 0; border-radius: 22px 22px 0 0; }
+      #cueEditDialog[open] { width: calc(100% - 16px); max-width: none; max-height: calc(100dvh - 12px); margin: auto auto 0; border-radius: 22px 22px 0 0; }
       .cue-point-grid { grid-template-columns: 1fr; }
       .preview-controls { grid-template-columns: 1fr; }
       .preview-play { width: 100%; }
@@ -587,7 +600,10 @@
       .storage-actions { justify-content: stretch; }
       .storage-button { flex: 1 1 140px; min-height: 46px; }
       .cue-section-actions { width: 100%; justify-content: stretch; }
-      .master-volume { width: 100%; grid-template-columns: auto minmax(0, 1fr) 40px; }
+      .master-volume { width: 100%; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label value" "slider slider"; gap: 4px 10px; padding: 9px 12px; }
+      .master-volume label { grid-area: label; font-size: 12px; }
+      .master-volume input { grid-area: slider; height: 28px; margin: 0; }
+      .master-volume output { grid-area: value; font-size: 12px; }
       .app-confirm-actions { grid-template-columns: 1fr; }
     }
 
@@ -603,7 +619,6 @@
     }
 
     @media (max-width: 360px) {
-      .page-intro h1 { font-size: 21px; }
       .drop-icon { width: 40px; height: 40px; }
       .drop-zone { padding: 13px; gap: 10px; }
       .cue-play { padding: 13px; }
@@ -682,7 +697,7 @@
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><img id="appBrandIcon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTUiIGZpbGw9IiMxNjYyNGYiLz48ZyBmaWxsPSIjZmZmIj48cmVjdCBpZD0iYSIgeD0iMTEuMiIgeT0iMTcuNyIgd2lkdGg9IjEyLjYiIGhlaWdodD0iMTIuNCIgcng9IjIuNiIvPjx1c2UgaHJlZj0iI2EiIHg9IjE0LjQiLz48dXNlIGhyZWY9IiNhIiB4PSIyOC45Ii8+PHVzZSBocmVmPSIjYSIgeT0iMTMuNyIvPjx1c2UgaHJlZj0iI2EiIHg9IjE0LjQiIHk9IjEzLjciLz48dXNlIGhyZWY9IiNhIiB4PSIyOC45IiB5PSIxMy43Ii8+PHVzZSBocmVmPSIjYSIgeT0iMjcuNyIvPjx1c2UgaHJlZj0iI2EiIHg9IjE0LjQiIHk9IjI3LjciLz48dXNlIGhyZWY9IiNhIiB4PSIyOC45IiB5PSIyNy43Ii8+PGVsbGlwc2UgY3g9IjQ1LjUiIGN5PSIxNC45IiByeD0iMS41NSIgcnk9IjEuMjUiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA0NS41IDE0LjkpIi8+PGVsbGlwc2UgY3g9IjUwLjIiIGN5PSIxMy41IiByeD0iMS41NSIgcnk9IjEuMjUiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1MC4yIDEzLjUpIi8+PHBhdGggZD0iTTQ2IDE0LjVWOWw0LjYtMS4zdjUuNmwtLjktLjNWOS41bC0yLjguOHY0LjJ6Ii8+PC9nPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNNTMuOCAxMi44YzEuOSAxLjQgMS45IDMuMy45IDQuN001NS40IDExYzIuOSAyLjUgMy4xIDUuNiAxLjcgNy45IiBzdHJva2Utd2lkdGg9IjEuMSIvPjwvZz48cGF0aCBkPSJNMjkuNSAzNC40djYuNGw1LjYtMy4yeiIgZmlsbD0iIzE2NjI0ZiIvPjwvc3ZnPgo=" alt=""></div>
         <div class="brand-copy">
-          <p class="brand-name"><span id="brandName">Music Cue Pad</span><span class="version-badge" id="versionBadge">v1.0.2</span></p>
+          <p class="brand-name"><span id="brandName">Music Cue Pad</span><span class="version-badge" id="versionBadge">v1.0.3</span></p>
           <p class="brand-meta" data-i18n="brandMeta">曲を登録・ボタンですぐ再生</p>
         </div>
       </div>
@@ -698,8 +713,8 @@
   <main class="main">
     <section class="page-intro" aria-labelledby="heroTitle">
       <div>
-        <h1 id="heroTitle" data-i18n="introTitle">曲を登録して、ボタンですぐ再生</h1>
-        <p data-i18n="lead">イベントや練習で使う音源をまとめて追加し、大きな再生ボタンから必要な曲をすぐ鳴らせます。</p>
+        <h1 id="heroTitle" data-i18n="introTitle">曲を登録してボタンですぐ再生</h1>
+        <p data-i18n="lead">音声ファイルを追加すると、曲ごとの再生ボタンができます。</p>
       </div>
       <div class="local-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
@@ -734,7 +749,6 @@
       <div class="cue-section-head">
         <div>
           <h2 id="cueSectionTitle" data-i18n="cueSectionTitle">再生ボタン</h2>
-          <p data-i18n="cueSectionBody">再生ボタンの下から再生区間・音量・フェード・ループ・ショートカット・名前・並び順を編集できます。</p>
           <p class="keyboard-hint" data-i18n-html="keyboardHint"><kbd>Space</kbd> 再生/一時停止 · <kbd>R</kbd> 最初から · <kbd>F</kbd> フェード停止 · <kbd>Esc</kbd> 停止</p>
         </div>
         <div class="cue-section-actions">
@@ -742,7 +756,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M12 15v2"/></svg>
             <span data-i18n="enterLiveMode">再生専用表示</span>
           </button>
-          <span class="cue-reorder-hint" id="reorderHint" hidden data-i18n="reorderHint">グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます</span>
+          <span class="sr-only" id="reorderHint" hidden data-i18n="reorderHint">グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます</span>
           <div class="master-volume">
             <label for="masterVolumeSlider" data-i18n="masterVolume">マスター音量</label>
             <input id="masterVolumeSlider" type="range" min="0" max="100" step="1" value="100" data-i18n-aria-label="masterVolume" aria-label="マスター音量">
@@ -1025,7 +1039,7 @@
       </button>
     </div>
     <div class="dialog-body">
-      <!-- APP:HELP:BEGIN Music Cue Pad v1.0.2 help. -->
+      <!-- APP:HELP:BEGIN Music Cue Pad help. -->
       <h3 data-i18n="helpBasicsTitle">基本操作</h3>
       <ol>
         <li data-i18n="helpStep1">「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。</li>
@@ -1041,7 +1055,7 @@
       <p data-i18n="helpKeyboardBody">入力欄やダイアログを操作していないときは、Spaceで再生/一時停止、Rで最初から再生、Fでフェード停止、Escで即時停止できます。キューごとに0–9 / A–Zの1キーも割り当てられます。</p>
       <h3 data-i18n="helpPrivacyTitle">プライバシー</h3>
       <p data-i18n="helpPrivacyBody">追加した音声はこのブラウザ内だけで読み込まれ、このアプリから外部サーバーへ送信されません。実行時の外部通信も行いません。</p>
-      <h3 data-i18n="helpNotesTitle">v1.0.2 の注意事項</h3>
+      <h3 data-i18n="helpNotesTitle">注意事項</h3>
       <ul>
         <li data-i18n="helpNoteSession">音源とキュー設定はこのブラウザへ自動保存され、次回の起動時に復元されます。ブラウザのサイトデータを削除すると保存内容も削除されます。</li>
         <li data-i18n="helpNoteStorage">「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。バックアップは音源を含みます。</li>
@@ -1065,8 +1079,8 @@
     (() => {
       'use strict';
 
-      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-23T09:24:15.8439337Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
+      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.3","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-23T09:24:15.8439337Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.3"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -1171,8 +1185,8 @@
       const translations = {
         ja: {
           brandMeta: '曲を登録・ボタンですぐ再生',
-          introTitle: '曲を登録して、ボタンですぐ再生',
-          lead: 'イベントや練習で使う音源をまとめて追加し、大きな再生ボタンから必要な曲をすぐ鳴らせます。',
+          introTitle: '曲を登録してボタンですぐ再生',
+          lead: '音声ファイルを追加すると、曲ごとの再生ボタンができます。',
           localBadge: '完全ローカル処理',
           addAudioTitle: '音声ファイルを追加',
           addAudioBody: '複数選択できます。追加した音声は外部へ送信されません。',
@@ -1180,7 +1194,6 @@
           dropHelp: 'MP3 / WAV / M4A / OGG / WebM / FLAC など',
           chooseFiles: 'ファイルを選択',
           cueSectionTitle: '再生ボタン',
-          cueSectionBody: '左上の番号が再生順です。カード下部から再生区間・音量・フェード・ループ・ショートカット・表示名を編集できます。',
           reorderHint: 'グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます',
           keyboardHint: '<kbd>Space</kbd> 再生/一時停止 · <kbd>R</kbd> 最初から · <kbd>F</kbd> フェード停止 · <kbd>Esc</kbd> 停止',
           emptyTitle: 'まだ曲がありません',
@@ -1205,7 +1218,7 @@
           restoringSaved: '保存したデータを読み込み中…', restoredSaved: '{count}個の再生ボタンを復元しました。', storageTitle: '端末保存', storageBody: '音源とキュー設定は、このブラウザに自動保存されます。', storageLoading: '保存データを確認中', storageSaved: '保存済み', storageSaving: '保存中…', storageSessionOnly: 'このセッションのみ', storageError: '保存に問題があります', storageUsageLabel: 'このサイトの使用量', storageProtectionLabel: '保存の保護', storageProtected: '保護されています', storageNotProtected: '通常のブラウザ管理', storageUnavailable: '利用できません', requestPersistence: '保存を保護する', persistenceGranted: 'ブラウザに保存の保護を依頼しました。', persistenceDenied: 'このブラウザでは保存を保護できませんでした。通常の保存は引き続き利用できます。', retrySave: '保存を再試行', retrySaveSuccess: '保存を再試行しました。', resetAll: 'すべて削除', resetTitle: '保存した音源と設定を削除しますか？', resetMessage: 'このブラウザに保存した音源・キュー・音量設定をすべて削除します。この操作は元に戻せません。', resetConfirm: 'すべて削除', resetDone: '保存した音源と設定を削除しました。', resetFailed: '保存データを削除できませんでした。現在の内容はそのまま残しています。', persistenceUnavailableWarning: 'このブラウザでは端末保存を利用できません。このまま再生できますが、ページを閉じると追加内容は失われます。', persistenceQuotaWarning: '保存領域が不足しているため、一部の変更を端末へ保存できませんでした。このまま再生できますが、再読み込みすると未保存分は失われます。', persistenceWriteWarning: '端末への保存に失敗しました。このまま再生できますが、再読み込みすると未保存分は失われる可能性があります。',
           cueEditTitle: '再生ボタンを編集', cueNameLabel: '表示名', cueNameHelp: '再生ボタンに表示する名前です。元の音声ファイル名は変更されません。', save: '保存',
           renameCue: '編集', duplicateCue: '複製', deleteCue: '削除', moveUp: '上へ移動', moveDown: '下へ移動', dragCue: '並べ替え', dragMoveHere: 'ここに移動', dragMoved: '並び順を変更しました。',
-          renamedCue: '再生ボタンを更新しました。', duplicatedCue: '「{name}」を複製しました。', deletedCue: '「{name}」を削除しました。', undo: '元に戻す', emptyCueName: '表示名を入力してください。', copySuffix: '{name} のコピー',
+          renamedCue: '再生ボタンを更新しました。', duplicatedCue: '「{name}」を複製しました。', deletedCue: '「{name}」を削除しました。', deleteCueConfirmTitle: '「{name}」を削除しますか？', deleteCueConfirmMessage: 'この再生ボタンを削除します。削除後、短時間は元に戻せます。', undo: '元に戻す', emptyCueName: '表示名を入力してください。', copySuffix: '{name} のコピー',
           shortcutTitle: 'キーボードショートカット', shortcutLabel: 'この再生ボタンを呼び出すキー', shortcutPlaceholder: '未設定', shortcutClear: 'クリア', shortcutHelp: '欄を選んで 0–9 / A–Z のいずれかを押します。R と F は共通操作で使用するため割り当てできません。', shortcutCapture: 'キーを押してください', shortcutReserved: 'R と F は共通操作で使用するため割り当てできません。', shortcutConflict: 'このキーは「{name}」ですでに使われています。', shortcutInvalid: '0–9 または A–Z の1キーを指定してください。', shortcutAssigned: 'ショートカット {key}',
           previewTitle: '位置を確認', previewPlay: '試聴', previewPause: '試聴を一時停止', previewPosition: '試聴位置', previewRangeLabel: '再生区間をバーで調整', cueRangeStartAria: '再生区間の開始位置', cueRangeEndAria: '再生区間の終了位置', previewHelp: '上のバーで試聴位置、下の2つのつまみで再生区間を調整できます。時刻入力とも同期します。',
           cuePointsTitle: '再生区間', cueStartLabel: '開始位置', cueEndLabel: '終了位置', useCurrentPosition: '現在位置を使う', jumpToPoint: '移動', clearEnd: '末尾まで', untilEnd: '曲の最後まで', cuePointsHelp: '「1:23.500」のように入力できます。終了位置を空欄にすると曲の最後まで再生します。',
@@ -1223,7 +1236,7 @@
 
           helpShortPlayer: "下部プレイヤーの見えていない操作へは、プレイヤー内のスクロールやTabキーで移動できます。",
 
-          helpNotesTitle: 'v1.0.2 の注意事項',
+          helpNotesTitle: '注意事項',
           helpNoteSession: '音源とキュー設定はこのブラウザへ自動保存され、次回の起動時に復元されます。ブラウザのサイトデータを削除すると保存内容も削除されます。',
           helpNoteStorage: '「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。読み込み中や失敗した音声がある場合はバックアップを作れません。バックアップには音源を含むため、ファイルサイズは登録音源の合計に近くなります。',
           helpNoteFormat: '再生できる形式はブラウザによって異なります。MP3 / WAV / M4A / OGG / WebM / FLAC など、ブラウザが対応する音声を利用できます。',
@@ -1234,8 +1247,8 @@
         },
         en: {
           brandMeta: 'Add tracks · Play instantly',
-          introTitle: 'Add tracks, then play them with one button',
-          lead: 'Add the audio you need for an event or practice session and trigger any track immediately from a large playback button.',
+          introTitle: 'Add tracks and play with a button',
+          lead: 'Each audio file you add gets its own playback button.',
           localBadge: 'Fully local processing',
           addAudioTitle: 'Add audio files',
           addAudioBody: 'Multiple files are supported. Added audio is not sent outside this browser.',
@@ -1243,7 +1256,6 @@
           dropHelp: 'MP3 / WAV / M4A / OGG / WebM / FLAC and more',
           chooseFiles: 'Choose files',
           cueSectionTitle: 'Playback buttons',
-          cueSectionBody: 'The number at top left shows playback order. Use the controls below each button to edit its range, volume, fades, loop, shortcut, and label.',
           reorderHint: 'Drag the handle, or focus it and press ArrowUp / ArrowDown to reorder',
           keyboardHint: '<kbd>Space</kbd> play/pause · <kbd>R</kbd> restart · <kbd>F</kbd> fade stop · <kbd>Esc</kbd> stop',
           emptyTitle: 'No tracks yet',
@@ -1268,7 +1280,7 @@
           restoringSaved: 'Loading saved data…', restoredSaved: 'Restored {count} playback buttons.', storageTitle: 'On-device storage', storageBody: 'Audio and cue settings are saved automatically in this browser.', storageLoading: 'Checking saved data', storageSaved: 'Saved', storageSaving: 'Saving…', storageSessionOnly: 'This session only', storageError: 'Storage needs attention', storageUsageLabel: 'Site storage usage', storageProtectionLabel: 'Storage protection', storageProtected: 'Protected', storageNotProtected: 'Normal browser management', storageUnavailable: 'Unavailable', requestPersistence: 'Protect saved data', persistenceGranted: 'Asked the browser to protect this saved data.', persistenceDenied: 'This browser did not grant protected storage. Normal local storage still works.', retrySave: 'Retry save', retrySaveSuccess: 'Retried saving the current board.', resetAll: 'Delete all', resetTitle: 'Delete saved audio and settings?', resetMessage: 'This deletes all audio, cues, and volume settings saved by Music Cue Pad in this browser. This cannot be undone.', resetConfirm: 'Delete all', resetDone: 'Deleted the saved audio and settings.', resetFailed: 'Saved data could not be deleted. The current board was left unchanged.', persistenceUnavailableWarning: 'On-device storage is unavailable in this browser. Playback still works, but added content will be lost when this page is closed.', persistenceQuotaWarning: 'Browser storage is full, so some changes could not be saved on this device. Playback still works, but unsaved changes will be lost after reload.', persistenceWriteWarning: 'Saving to this device failed. Playback still works, but unsaved changes may be lost after reload.',
           cueEditTitle: 'Edit playback button', cueNameLabel: 'Button label', cueNameHelp: 'This is the label shown on the playback button. The source audio filename is not changed.', save: 'Save',
           renameCue: 'Edit', duplicateCue: 'Duplicate', deleteCue: 'Delete', moveUp: 'Move up', moveDown: 'Move down', dragCue: 'Reorder cue', dragMoveHere: 'Move here', dragMoved: 'Order updated.',
-          renamedCue: 'Cue updated.', duplicatedCue: 'Duplicated “{name}”.', deletedCue: 'Deleted “{name}”.', undo: 'Undo', emptyCueName: 'Enter a cue name.', copySuffix: '{name} copy',
+          renamedCue: 'Cue updated.', duplicatedCue: 'Duplicated “{name}”.', deletedCue: 'Deleted “{name}”.', deleteCueConfirmTitle: 'Delete “{name}”?', deleteCueConfirmMessage: 'This removes the playback button. You can undo the deletion for a short time.', undo: 'Undo', emptyCueName: 'Enter a cue name.', copySuffix: '{name} copy',
           shortcutTitle: 'Keyboard shortcut', shortcutLabel: 'Key to play this cue', shortcutPlaceholder: 'Not set', shortcutClear: 'Clear', shortcutHelp: 'Focus this field and press one key from 0–9 or A–Z. R and F are reserved for global playback controls.', shortcutCapture: 'Press a key', shortcutReserved: 'R and F are reserved for global playback controls.', shortcutConflict: 'This key is already assigned to “{name}”.', shortcutInvalid: 'Choose one key from 0–9 or A–Z.', shortcutAssigned: 'Shortcut {key}',
           previewTitle: 'Check position', previewPlay: 'Preview', previewPause: 'Pause preview', previewPosition: 'Preview position', previewRangeLabel: 'Adjust playback range', cueRangeStartAria: 'Playback range start', cueRangeEndAria: 'Playback range end', previewHelp: 'Use the upper bar to preview a position and the two handles below to adjust the playback range. Time fields stay in sync.',
           cuePointsTitle: 'Playback range', cueStartLabel: 'Start', cueEndLabel: 'End', useCurrentPosition: 'Use current position', jumpToPoint: 'Go', clearEnd: 'To end', untilEnd: 'To end of track', cuePointsHelp: 'You can enter a time such as “1:23.500”. Leave End blank to play to the end of the track.',
@@ -1286,7 +1298,7 @@
 
           helpShortPlayer: "Scroll the bottom player or press Tab to reach controls that are out of view.",
 
-          helpNotesTitle: 'v1.0.2 notes',
+          helpNotesTitle: 'Notes and limitations',
           helpNoteSession: 'Audio and cue settings are saved automatically in this browser and restored on the next launch. Clearing browser site data also removes this saved content.',
           helpNoteStorage: 'Protect saved data is not a backup guarantee. Keep a .bkcue backup for important boards. A backup cannot be exported while referenced audio is loading or unavailable. Backups include the audio itself, so their size is close to the total source audio size.',
           helpNoteFormat: 'Playable formats depend on the browser. Use browser-supported audio such as MP3, WAV, M4A, OGG, WebM, or FLAC.',
@@ -2614,6 +2626,21 @@
         enqueuePersistence(putAllCueMetadata);
         showToast(translate('duplicatedCue', { name: source.name }), { tone: 'success' });
       }
+      async function requestDeleteCue(cueId) {
+        if (state.boardMutationLocked) return;
+        const cue = cueForId(cueId);
+        if (!cue) return;
+        const generation = persistenceGeneration;
+        const confirmed = await AppConfirm.ask({
+          title: translate('deleteCueConfirmTitle', { name: cue.name }),
+          message: translate('deleteCueConfirmMessage'),
+          confirmLabel: translate('deleteCue'),
+          cancelLabel: translate('cancel'),
+          tone: 'danger'
+        });
+        if (!confirmed || state.boardMutationLocked || generation !== persistenceGeneration || cueForId(cueId) !== cue) return;
+        deleteCue(cueId);
+      }
       function deleteCue(cueId) {
         if (state.boardMutationLocked) return;
         const index = cueIndex(cueId);
@@ -3073,6 +3100,7 @@
         const focusCueId = focusedCard?.dataset.cueId || '';
         const focusKind = focusedElement?.classList.contains('cue-play') ? 'play' : (focusedElement?.classList.contains('cue-tool-button') ? 'tool' : '');
         const focusLabel = focusKind === 'tool' ? focusedElement.getAttribute('aria-label') || '' : '';
+        dropZone.classList.toggle('is-compact', state.cues.length > 0);
         emptyState.hidden = state.cues.length > 0;
         cueGrid.hidden = state.cues.length === 0;
         cueGrid.replaceChildren();
@@ -3140,7 +3168,7 @@
           const duplicate = cueToolButton({ label: translate('duplicateCue'), icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>' });
           duplicate.addEventListener('click', () => duplicateCue(cue.id));
           const remove = cueToolButton({ className: 'danger', label: translate('deleteCue'), icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg>' });
-          remove.addEventListener('click', () => deleteCue(cue.id));
+          remove.addEventListener('click', () => requestDeleteCue(cue.id));
           tools.append(drag, rename, duplicate, remove);
 
           card.append(playButton, tools);
