@@ -3239,9 +3239,11 @@
         const asset = activeAsset();
         renderNextCue();
         const visible = state.cues.length > 0;
+        const wasHidden = playerBar.hidden;
         playerBar.hidden = !visible;
         document.body.classList.toggle('player-visible', visible);
-        if (visible) requestAnimationFrame(updatePlayerClearance);
+        // Measure at first reveal; ResizeObserver handles subsequent height changes.
+        if (wasHidden && visible) updatePlayerClearance();
         const selected = Boolean(cue && asset?.status === 'ready');
         pauseResumeButton.disabled = !selected;
         $('#stopButton').disabled = !selected;
