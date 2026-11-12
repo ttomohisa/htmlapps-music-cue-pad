@@ -152,3 +152,34 @@ test('playing cue uses pause icon while paused and stopped cues use play', async
   assert.equal(h.statusForCue(h.state.cues[0]).icon, 'play');
   assert.match(h.cueIconMarkup('play'), /<path/);
 });
+
+
+test('transport button pauses a pending audio.play intent instead of starting it again', async () => {
+  const h = fixture(), pendingPlay = deferred();
+  h.audio.pending.push(pendingPlay);
+  const pending = h.handleCuePress('c0');
+  await h.flush();
+  assert.equal(h.playbackRequested, true);
+  assert.equal(h.state.playback, 'stopped', 'audio.play is still awaiting a promise');
+  assert.equal(h.$('#pauseResumeLabel').textContent, 'pause', 'transport advertises Pause during pending intent');
+  const match = source.match(/pauseResumeButton\.addEventListener\('click', \(\) => \{([\s\S]*?)\n      \}\);/);
+  assert.ok(match, 'transport click handler exists');
+  vm.runInContext('function clickTransport() {' + match[1] + '\n}', h);
+  h.clickTransport();
+  assert.equal(h.state.playback, 'paused');
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.$('#pauseResumeLabel').textContent, 'resume');
+  assert.equal(h.audio.plays.length, 1, 'no second play() call');
+  pendingPlay.resolve();
+  await pending;
+  assert.equal(h.state.playback, 'paused', 'late play() completion cannot resume');
+});
+
+test('focused native cue buttons keep native Space activation', () => {
+  const globalHandler = source.slice(
+    source.lastIndexOf("      document.addEventListener('keydown', event => {"),
+    source.indexOf("\n      window.addEventListener('pagehide'"));
+  );
+  assert.ok(globalHandler.includes("event.target.closest('button, input"), 'native button keypress is excluded from global Space toggle');
+  assert.ok(!globalHandler.includes("button:not(.cue-play)"), 'cue buttons must not be special-cased as non-native buttons');
+});
