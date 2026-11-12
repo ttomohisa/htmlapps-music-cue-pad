@@ -322,6 +322,16 @@ Required behavior:
 - MIDI or remote triggering.
 - User-remappable global keys.
 
+## Current v1.0.3 UX and release contract
+
+- Mobile (at or below 620 CSS px) hides the local-processing badge, stacks cue section controls, and gives Master volume a label/value row plus a full-width range input.
+- The cue editor and destructive confirmation dialogs remain horizontally centered on phones and within the viewport.
+- After at least one cue is present, the audio drop zone becomes compact but remains a functional file picker and drag-and-drop target.
+- The cue-list descriptive paragraph is removed as redundant; the grip's localized reordering explanation remains available to assistive technology, and full instructions remain in Help.
+- Cue deletion now opens a localized danger confirmation with the cue name. Cancel never changes the board, and pending confirmation cannot delete after board replacement; after confirmation, the existing time-limited Undo remains.
+- In-app Help uses an unversioned notes heading; hero title type sizes are fixed for both languages at each breakpoint.
+- The stable version is v1.0.3. A version change merged to main automatically starts a build-verified, checksum-verified release workflow that creates the matching Git tag and GitHub Release only after the checks succeed. Existing versions must not be overwritten.
+
 ## 7. Playback behavior
 
 - Use one primary `HTMLAudioElement` for playback.
