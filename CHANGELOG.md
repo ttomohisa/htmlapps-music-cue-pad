@@ -2,6 +2,8 @@
 
 ## v1.0.3 — 2026-11-12
 
+- Keep `.bkcue` and playback HTML export buttons in sync with the current cue count so they are re-enabled after a board reset, deleting the final cue, or loading audio again.
+
 - Prevent incomplete .bkcue backups when an audio file is still loading or has failed; snapshot audio and cue settings before export.
 - Ignore stale audio imports after reset/restore, preserve duplicates created while audio metadata loads, and exclude deleted cues from late saves.
 - Block conflicting board mutations while reset/restore commits, and allow reselecting a canceled or invalid backup.
