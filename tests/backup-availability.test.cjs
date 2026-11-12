@@ -15,7 +15,7 @@ function fixture() {
   const ids = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressValue', 'backupProgressBar', 'cueCount', 'reorderHint'];
   const elements = Object.fromEntries(ids.map(id => [id, { id, disabled: false, hidden: false, textContent: '', value: '' }]));
   const context = vm.createContext({
-    state, ...elements, $: id => elements[id], translate: (key, params) => key + ':' + (params?.count ?? ''),
+    state, ...elements, $: id => elements[id.replace(/^#/, '')], translate: (key, params) => key + ':' + (params?.count ?? ''),
     renderLiveModeUi() {},
   });
   vm.runInContext(['refreshBackupActionAvailability','setBackupBusy','updateCueCount'].map(fn).join('\n'), context);
