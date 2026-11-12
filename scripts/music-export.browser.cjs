@@ -1,0 +1,147 @@
+'use strict';
+// End-to-end browser test for the actual HTML exported from the single-file app.
+// Source and exported-player unit tests cannot test responsive layout or native media events.
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+const { chromium } = require('playwright');
+
+function silentWav(seconds) {
+  const samples = Math.round(8000 * seconds);
+  const bytes = Buffer.alloc(44 + samples * 2);
+  bytes.write('RIFF', 0); bytes.writeUInt32LE(bytes.length - 8, 4);
+  bytes.write('WAVEfmt ', 8); bytes.writeUInt32LE(16, 16);
+  bytes.writeUInt16LE(1, 20); bytes.writeUInt16LE(1, 22);
+  bytes.writeUInt32LE(8000, 24); bytes.writeUInt32LE(16000, 28);
+  bytes.writeUInt16LE(2, 32); bytes.writeUInt16LE(16, 34);
+  bytes.write('data', 36); bytes.writeUInt32LE(samples * 2, 40);
+  return bytes;
+}
+
+async function main() {
+  const output = path.resolve(__dirname, '..', 'test-results', 'music-export');
+  fs.mkdirSync(output, { recursive: true });
+  const browser = await chromium.launch();
+  try {
+    for (const language of ['ja', 'en']) {
+      for (const width of [360, 1280]) {
+        const label = language + ' ' + width;
+        const context = await browser.newContext({
+          viewport: { width, height: 800 },
+          locale: language,
+          acceptDownloads: true,
+          reducedMotion: 'reduce',
+        });
+        const page = await context.newPage();
+        const errors = [], remoteRequests = [];
+        page.on('pageerror', e => errors.push(e.message));
+        page.on('request', r => { if (/^https?:/i.test(r.url())) remoteRequests.push(r.url()); });
+        try {
+          await page.goto(pathToFileURL(path.resolve(__dirname, '..', 'dist', 'index.html')).href);
+          await page.locator('#audioInput:not([disabled])').waitFor();
+          if (await page.locator('html').getAttribute('lang') !== language) {
+            await page.locator('#languageButton').click();
+          }
+          const wav = silentWav(12);
+          await page.locator('#audioInput').setInputFiles([
+            { name: 'very-long-audio-title-for-a-test-of-the-card-layout.wav', mimeType: 'audio/wav', buffer: wav },
+            { name: 'short.wav', mimeType: 'audio/wav', buffer: wav },
+            { name: 'third.wav', mimeType: 'audio/wav', buffer: wav },
+          ]);
+          await page.waitForFunction(() => {
+            const cues = [...document.querySelectorAll('.cue-card .cue-play')];
+            return cues.length === 3 && cues.every(button => !button.disabled);
+          });
+
+          const drop = page.locator('#dropZone');
+          assert.ok(await drop.evaluate(el => el.classList.contains('is-compact')), label + ': compact drop after import');
+          assert.match(await drop.locator('.drop-title').innerText(), language === 'ja' ? /3曲を追加済み/ : /3 tracks added/, label);
+          assert.equal(await page.locator('.import-panel .panel-head').isVisible(), false, label + ': redundant import heading hidden');
+          await drop.focus();
+          assert.equal(await drop.isEnabled(), true, label + ': still a file picker');
+
+          // Keyboard-captured shortcuts are optional; add one to exercise reserved footer height.
+          await page.locator('.cue-card').first().locator('.cue-tool-button').nth(1).focus();
+          await page.keyboard.press('Enter');
+          await page.locator('#cueShortcutInput').focus();
+          await page.keyboard.press('n');
+          await page.locator('#saveCueEditButton').click();
+          assert.equal(await page.locator('#cueEditDialog').isVisible(), false);
+
+          const first = page.locator('.cue-card .cue-play').first();
+          await first.focus();
+          await page.keyboard.press('Enter');
+          await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'true');
+          assert.ok(await first.locator('.cue-center').locator('svg rect').count() >= 2, label + ': play button changes to pause icon');
+          await first.focus();
+          await page.keyboard.press('Enter');
+          await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'false');
+          assert.ok(await first.locator('.cue-center').locator('svg path').count() >= 1, label + ': paused button changes to play icon');
+          await first.focus();
+          await page.keyboard.press('Enter');
+          await page.waitForFunction(() => document.querySelector('.cue-card .cue-play')?.getAttribute('aria-pressed') === 'true');
+          await page.locator('#stopButton').focus();
+          await page.keyboard.press('Enter');
+
+          const download = page.waitForEvent('download');
+          await page.locator('#exportPlayerButton').focus();
+          await page.keyboard.press('Enter');
+          const outFile = await download;
+          assert.match(outFile.suggestedFilename(), /\.html$/, label);
+          const filePath = path.join(output, 'player-' + language + '-' + width + '.html');
+          await outFile.saveAs(filePath);
+          const playerPage = await context.newPage();
+          playerPage.on('pageerror', e => errors.push(e.message));
+          playerPage.on('request', r => { if (/^https?:/i.test(r.url())) remoteRequests.push(r.url()); });
+          await playerPage.goto(pathToFileURL(filePath).href);
+
+          const expected = language === 'ja'
+            ? '音源と再生設定はこのHTML内に含まれています。'
+            : 'Audio and playback settings are included in this HTML file.';
+          assert.equal(await playerPage.locator('.title p').innerText(), expected, label + ': new header description');
+          assert.equal(await playerPage.locator('.top h2').count(), 0, label + ': no extra hero');
+          assert.equal(await playerPage.locator('.grid .cue').count(), 3, label);
+          const boxes = await playerPage.locator('.grid .cue').evaluateAll(cards =>
+            cards.map(c => ({card: c.getBoundingClientRect().toJSON(), remaining: c.querySelector('.remaining').getBoundingClientRect().toJSON()})));
+          for (const b of boxes) {
+            assert.ok(b.card.left >= 0 && b.card.right <= width + 1, label + ': card fits');
+            assert.ok(b.remaining.height >= 40, label + ': remaining background has adequate height');
+          }
+          assert.ok(Math.max(...boxes.map(b => b.card.height)) - Math.min(...boxes.map(b => b.card.height)) <= 2, label + ': all cue cards same height');
+          assert.ok(Math.max(...boxes.map(b => b.remaining.height)) - Math.min(...boxes.map(b => b.remaining.height)) <= 2, label + ': remaining panels same height');
+          if (width === 1280) {
+            assert.ok(Math.max(...boxes.map(b => b.remaining.y)) - Math.min(...boxes.map(b => b.remaining.y)) <= 2, label + ': remaining panels aligned in row');
+          } else {
+            assert.ok(boxes[0].card.width >= width - 35, label + ': full-width mobile cues');
+          }
+
+          const exportedFirst = playerPage.locator('.grid .cue button').first();
+          await exportedFirst.click();
+          await playerPage.waitForFunction(() => document.querySelector('.grid .cue button')?.getAttribute('aria-pressed') === 'true');
+          assert.equal(await exportedFirst.locator('.center svg rect').count(), 2, label + ': exported play changes to pause icon');
+          await exportedFirst.click();
+          await playerPage.waitForFunction(() => document.querySelector('.grid .cue button')?.getAttribute('aria-pressed') === 'false');
+          assert.equal(await exportedFirst.locator('.center svg path').count(), 1, label + ': exported pause changes to play icon');
+          await exportedFirst.click();
+          await playerPage.waitForFunction(() => document.querySelector('.grid .cue button')?.getAttribute('aria-pressed') === 'true');
+          assert.ok(await playerPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': no exported horizontal scroll');
+
+          await playerPage.screenshot({path: path.join(output, 'player-' + language + '-' + width + '.png'), fullPage: true});
+          await playerPage.close();
+          assert.deepEqual(errors, [], label + ': browser console');
+          assert.deepEqual(remoteRequests, [], label + ': no external runtime requests');
+          console.log('PASS music-export ' + label);
+        } catch (error) {
+          await page.screenshot({path: path.join(output, 'failure-' + language + '-' + width + '.png')}).catch(() => {});
+          throw error;
+        } finally {
+          await context.close();
+        }
+      }
+    }
+  } finally {
+    await browser.close();
+  }
+}
+main().catch(e => { console.error(e); process.exitCode = 1; });
