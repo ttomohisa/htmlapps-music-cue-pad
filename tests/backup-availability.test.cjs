@@ -11,12 +11,13 @@ function fn(name) {
   return source.slice(start, source.indexOf('\n      }', lineEnd) + 8);
 }
 function fixture() {
-  const state = { cues: [], backupBusy: false, boardMutationLocked: false };
-  const ids = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressValue', 'backupProgressBar', 'cueCount', 'reorderHint'];
+  const state = { cues: [], backupBusy: false, boardMutationLocked: false, persistence: { ready: true, saving: false } };
+  const ids = ['exportBackupButton', 'exportPlayerButton', 'importBackupButton', 'boardNameInput', 'playerFilenameInput', 'backupProgress', 'backupProgressLabel', 'backupProgressValue', 'backupProgressBar', 'cueCount', 'reorderHint', 'resetButton'];
   const elements = Object.fromEntries(ids.map(id => [id, { id, disabled: false, hidden: false, textContent: '', value: '' }]));
   const context = vm.createContext({
     state, ...elements, $: id => elements[id.replace(/^#/, '')], translate: (key, params) => key + ':' + (params?.count ?? ''),
     renderLiveModeUi() {},
+    renderStorageStatus() { elements.resetButton.disabled = state.boardMutationLocked || state.backupBusy || !state.persistence.ready || state.persistence.saving; },
   });
   vm.runInContext(['refreshBackupActionAvailability','setBackupBusy','updateCueCount'].map(fn).join('\n'), context);
   return { state, elements, context };
@@ -78,4 +79,19 @@ test('loading cues keep export button enabled, with incomplete audio rejected by
   h.state.cues.push({id:'importing'});
   h.context.updateCueCount();
   assertExportState(h, false, 'cue exists; actual asset readiness is checked on export');
+});
+
+
+test('backup work disables destructive Reset until the operation releases its busy state', () => {
+  const h = fixture();
+  h.state.cues.push({id:'cue1'});
+  h.context.updateCueCount();
+  h.context.setBackupBusy(false);
+  assert.equal(h.elements.resetButton.disabled, false, 'Reset is available when idle');
+  h.context.setBackupBusy(true, 'Writing ZIP', 50);
+  assert.equal(h.elements.resetButton.disabled, true, 'Reset must be disabled during backup');
+  assertExportState(h, true, 'busy backup');
+  h.context.setBackupBusy(false);
+  assert.equal(h.elements.resetButton.disabled, false, 'Reset becomes available after backup');
+  assertExportState(h, false, 'backup complete');
 });
