@@ -26,8 +26,9 @@ async function main() {
             await page.goto(pathToFileURL(path.resolve(__dirname, '..', file)).href);
             await page.locator('#helpButton').waitFor();
             if (await page.locator('html').getAttribute('lang') !== language) await page.locator('#languageButton').click();
-            assert.equal(await page.locator('[data-i18n="localBadge"]').innerText(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
-            assert.ok(await page.locator('.local-badge').evaluate(el => {
+            assert.equal(await page.locator('[data-i18n="localBadge"]').textContent(), language === 'en' ? 'Fully local processing' : '完全ローカル処理', label);
+            assert.equal(await page.locator('.local-badge').isVisible(), width > 620, label + ': desktop-only badge');
+            if (width > 620) assert.ok(await page.locator('.local-badge').evaluate(el => {
               const box = el.getBoundingClientRect();
               const range = document.createRange();
               range.selectNodeContents(el.querySelector('[data-i18n="localBadge"]'));
@@ -38,6 +39,68 @@ async function main() {
             assert.equal(await page.locator('footer').isVisible(), width > 620, label);
 
             assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), label + ': page width');
+            const titleSize = await page.locator('#heroTitle').evaluate(el => getComputedStyle(el).fontSize);
+            await page.locator('#languageButton').click();
+            assert.equal(await page.locator('#heroTitle').evaluate(el => getComputedStyle(el).fontSize), titleSize, label + ': same title size after language change');
+            await page.locator('#languageButton').click();
+
+            if (file === 'dist/index.html' && [320, 360, 393].includes(width)) {
+              const wav = Buffer.alloc(1644);
+              wav.write('RIFF', 0); wav.writeUInt32LE(1636, 4); wav.write('WAVEfmt ', 8);
+              wav.writeUInt32LE(16, 16); wav.writeUInt16LE(1, 20); wav.writeUInt16LE(1, 22);
+              wav.writeUInt32LE(8000, 24); wav.writeUInt32LE(16000, 28);
+              wav.writeUInt16LE(2, 32); wav.writeUInt16LE(16, 34);
+              wav.write('data', 36); wav.writeUInt32LE(1600, 40);
+              const drop = page.locator('#dropZone');
+              const initialHeight = await drop.evaluate(el => el.getBoundingClientRect().height);
+              await page.locator('#audioInput').setInputFiles({ name: 'first.wav', mimeType: 'audio/wav', buffer: wav });
+              await page.locator('#cueGrid .cue-card').first().waitFor();
+              await page.waitForFunction(() => document.querySelector('#dropZone')?.classList.contains('is-compact'));
+              const compactHeight = await drop.evaluate(el => el.getBoundingClientRect().height);
+              assert.ok(compactHeight < initialHeight && compactHeight <= 95, label + ': compact import target');
+              assert.equal(await drop.isEnabled(), true, label + ': compact target enabled');
+
+              assert.ok(await page.locator('.master-volume').evaluate(el => {
+                const outer = el.getBoundingClientRect();
+                const labelBox = el.querySelector('label').getBoundingClientRect();
+                const slider = el.querySelector('input').getBoundingClientRect();
+                const value = el.querySelector('output').getBoundingClientRect();
+                return outer.left >= 0 && outer.right <= innerWidth + 1 &&
+                  slider.width >= 120 && slider.left >= outer.left && slider.right <= outer.right + 1 &&
+                  labelBox.right + 8 <= value.left && value.right <= outer.right + 1;
+              }), label + ': Master volume fits');
+
+              await page.locator('.cue-card .cue-tools .cue-tool-button').nth(1).click();
+              const editor = page.locator('#cueEditDialog');
+              await editor.waitFor({ state: 'visible' });
+              const bounds = await editor.boundingBox();
+              assert.ok(bounds && Math.abs(bounds.x - (width - bounds.width) / 2) <= 1.5, label + ': editor centered');
+              assert.ok(bounds.x >= 0 && bounds.x + bounds.width <= width + 1, label + ': editor within viewport');
+              await page.locator('#closeCueEditButton').click();
+
+              const deleteButton = page.locator('.cue-card .cue-tool-button.danger').first();
+              assert.equal(await deleteButton.evaluate(el => getComputedStyle(el).color), 'rgb(179, 38, 30)', label + ': red trash button');
+              await deleteButton.click();
+              assert.equal(await page.locator('#appConfirmDialog').isVisible(), true, label + ': delete confirmation');
+              await page.locator('#appConfirmCancel').click();
+              assert.equal(await page.locator('#cueGrid .cue-card').count(), 1, label + ': delete canceled');
+              await deleteButton.click();
+              await page.locator('#appConfirmOk').click();
+              assert.equal(await page.locator('#cueGrid .cue-card').count(), 0, label + ': delete confirmed');
+              await page.locator('#appToastAction').click();
+              assert.equal(await page.locator('#cueGrid .cue-card').count(), 1, label + ': deletion Undo');
+
+              await drop.evaluate((el, bytes) => {
+                const transfer = new DataTransfer();
+                transfer.items.add(new File([Uint8Array.from(bytes)], 'dropped.wav', { type: 'audio/wav' }));
+                el.dispatchEvent(new DragEvent('dragenter', { bubbles: true, cancelable: true, dataTransfer: transfer }));
+                el.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: transfer }));
+              }, [...wav]);
+              await page.waitForFunction(() => document.querySelectorAll('#cueGrid .cue-card').length === 2);
+              assert.equal(await drop.isEnabled(), true, label + ': drag-drop works after compacting');
+              await page.screenshot({ path: path.join(results, 'cues-' + language + '-' + width + '.png') });
+            }
+
 
             await page.locator('#helpButton').click();
             const body = page.locator('#helpDialog .dialog-body');
