@@ -62,6 +62,15 @@ for (const [width, height] of [[393, 252], [320, 252], [393, 480], [620, 480]]) 
     test(`CSS contract: ${width}x${height} ${live ? 'Live' : 'edit'} player has a scrollable cap shared by page/Undo clearance`, () => {
       const player = declarations('.player-bar', width, height);
       const root = declarations(':root', width, height);
+      if (!live) {
+        const flow = declarations('body:not(.live-mode) .player-bar', width, height);
+        const clearance = declarations('body:not(.live-mode).player-visible .main', width, height);
+        assert.equal(flow.position, 'static', 'short edit viewport must not hide cue actions behind the player');
+        assert.equal(flow['max-height'], 'none');
+        assert.equal(flow['overflow-y'], 'visible');
+        assert.equal(clearance['padding-bottom'], '22px', 'flowing player needs no fixed clearance');
+        return;
+      }
       const body = live ? declarations('body.live-mode', width, height) : {};
       assert.equal(player['max-height'], 'var(--player-height)', 'the fixed player must use the shared height cap');
       assert.equal(player['overflow-y'], 'auto', 'lower controls must remain scrollable');

@@ -44,7 +44,9 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
-    body.player-visible .main { padding-bottom: calc(var(--player-height) + 42px + env(safe-area-inset-bottom)); }
+    /* Actual player size can exceed the static mobile estimate due to font scaling. */
+    body.player-visible .main { padding-bottom: calc(var(--player-actual-height, var(--player-height)) + 32px); }
+    body.player-visible { scroll-padding-bottom: calc(var(--player-actual-height, var(--player-height)) + 16px); }
     button, input { font: inherit; }
     button { color: inherit; }
     button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible {
@@ -157,7 +159,7 @@
     .header-icon-button svg { width: 20px; height: 20px; }
     .main { width: min(1180px, 100%); margin: 0 auto; padding: 22px clamp(14px, 2.8vw, 30px) 54px; transition: padding-bottom .15s ease; }
     .page-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 0 2px 18px; }
-    .page-intro h1 { margin: 0; font-size: clamp(22px, 3vw, 28px); line-height: 1.28; letter-spacing: -.025em; }
+    .page-intro h1 { margin: 0; font-size: 28px; line-height: 1.28; letter-spacing: -.025em; }
     .page-intro p { margin: 6px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
     .local-badge { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line)); border-radius: 999px; color: var(--accent); background: var(--accent-soft); font-size: 12px; font-weight: 700; white-space: nowrap; }
     .local-badge svg { width: 15px; height: 15px; }
@@ -182,6 +184,15 @@
       text-align: left;
       transition: border-color .15s ease, background .15s ease, transform .15s ease;
     }
+    .import-panel.has-cues { padding: 10px 14px; }
+    .import-panel.has-cues .panel-head { display: none; }
+    .import-panel.has-cues .import-status:not(.is-warning) { display: none; }
+    .drop-zone.is-compact { min-height: 56px; padding: 8px 12px; gap: 10px; }
+    .drop-zone.is-compact .drop-icon { width: 34px; height: 34px; border-radius: 9px; }
+    .drop-zone.is-compact .drop-icon svg { width: 20px; height: 20px; }
+    .drop-zone.is-compact .drop-title { font-size: 12px; }
+    .drop-zone.is-compact .drop-help { display: none; }
+    .drop-zone.is-compact .drop-cta { padding: 7px 10px; }
     .drop-zone:hover, .drop-zone.is-dragging { border-color: var(--accent); background: var(--accent-soft); }
     .drop-zone:active { transform: translateY(1px); }
     .drop-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); }
@@ -201,6 +212,9 @@
     .cue-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .cue-card {
       position: relative;
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
       min-width: 0;
       width: 100%;
       border: 1px solid var(--line);
@@ -211,7 +225,7 @@
       transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease, background .15s ease;
     }
     .cue-card:hover { border-color: var(--line-strong); box-shadow: 0 5px 16px rgba(25, 28, 24, .08); }
-    .cue-card.is-active { border-color: var(--accent); background: linear-gradient(180deg, var(--surface) 0%, #f7fbf9 100%); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 12%, transparent), var(--shadow-sm); }
+    .cue-card.is-active { border-color: var(--accent); background: linear-gradient(180deg, var(--surface) 0%, #f7fbf9 100%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 12%, transparent), var(--shadow-sm); }
     .cue-card.is-error { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); background: #fffafa; }
     .cue-card.is-drag-source { display: none; }
     .cue-drop-placeholder {
@@ -249,6 +263,7 @@
     body.cue-drag-active { cursor: grabbing; user-select: none; }
     body.cue-drag-active .cue-card:not(.is-drag-source) { transition: border-color .12s ease, box-shadow .12s ease, background .12s ease; }
     .cue-play {
+      flex: 1 1 auto;
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 12px;
@@ -268,7 +283,7 @@
     .cue-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 9px; min-width: 0; }
     .cue-order { display: inline-flex; align-items: center; justify-content: center; min-width: 30px; height: 25px; padding: 0 7px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: .03em; }
     .cue-name { min-width: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; font-size: 16px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; word-break: break-word; }
-    .cue-state { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 999px; background: var(--surface-muted); color: var(--muted); font-size: 10px; font-weight: 800; }
+    .cue-state { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 999px; background: var(--surface-muted); color: var(--muted); font-size: 10px; font-weight: 800; white-space: nowrap; }
     .cue-card.is-active .cue-state { background: var(--accent-soft); color: var(--accent); }
     .cue-card.is-error .cue-state { background: #fde8e6; color: var(--danger); }
     .cue-center { display: grid; place-items: center; align-content: center; gap: 7px; min-height: 50px; color: var(--accent); }
@@ -279,13 +294,15 @@
     .cue-range-text strong { color: var(--accent); font-weight: 800; }
     .cue-audio-text { max-width: 100%; color: var(--muted); font-size: 10px; text-align: center; }
     .cue-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 11px; }
-    .cue-progress-track { height: 4px; margin-top: -3px; border-radius: 999px; background: var(--surface-muted); overflow: hidden; }
-    .cue-progress-fill { width: 0%; height: 100%; border-radius: inherit; background: var(--accent); transition: width .12s linear; }
-    .cue-tools { display: flex; align-items: center; justify-content: flex-end; gap: 4px; min-height: 48px; padding: 5px 7px; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--surface-muted) 42%, var(--surface)); }
+    .cue-progress-track { display: block; height: 4px; margin-top: -3px; border-radius: 999px; background: var(--surface-muted); overflow: hidden; }
+    .cue-progress-track.is-inactive { visibility: hidden; }
+    .cue-progress-fill { display: block; width: 0%; height: 100%; border-radius: inherit; background: var(--accent); transition: width .12s linear; }
+    .cue-tools { flex: 0 0 auto; display: flex; align-items: center; justify-content: flex-end; gap: 4px; min-height: 48px; padding: 5px 7px; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--surface-muted) 42%, var(--surface)); }
     .cue-tool-button { display: inline-grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer; }
     .cue-tool-button:hover:not(:disabled) { background: var(--surface-hover); color: var(--text); }
     .cue-tool-button:disabled { opacity: .32; cursor: default; }
-    .cue-tool-button.danger:hover:not(:disabled) { background: #fde8e6; color: var(--danger); }
+    .cue-tool-button.danger { color: var(--danger); }
+    .cue-tool-button.danger:hover:not(:disabled), .cue-tool-button.danger:focus-visible { background: #fde8e6; color: var(--danger); }
     .cue-tool-button svg { width: 18px; height: 18px; }
     .cue-drag-handle { margin-right: auto; cursor: grab; touch-action: none; color: var(--muted); background: var(--surface-muted); border-color: transparent; }
     .cue-drag-handle:hover { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); background: var(--accent-soft); }
@@ -341,7 +358,7 @@
     .backup-name-field label { font-size: 12px; font-weight: 800; }
     .backup-name-field input { width: 100%; min-height: 42px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--surface); color: var(--text); padding: 8px 10px; font: inherit; }
     .backup-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-    .backup-button { min-height: 42px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--surface); color: var(--text); padding: 8px 12px; font: inherit; font-weight: 800; cursor: pointer; }
+    .backup-button { white-space: nowrap; min-height: 42px; border: 1px solid var(--line-strong); border-radius: 9px; background: var(--surface); color: var(--text); padding: 8px 12px; font: inherit; font-weight: 800; cursor: pointer; }
     .backup-button.primary { background: var(--accent); color: white; border-color: var(--accent); }
     .backup-button:disabled { opacity: .5; cursor: not-allowed; }
     .backup-progress { margin-top: 12px; border-radius: 10px; background: var(--surface-muted); padding: 10px 12px; }
@@ -556,13 +573,19 @@
       footer { display: none; }
       :root { --player-height: 278px; }
       .page-intro { display: block; }
-      .local-badge { margin-top: 11px; }
+      .page-intro h1 { font-size: 22px; }
+      .local-badge { display: none; }
       .main { padding-top: 17px; }
       .import-panel { padding: 14px; }
       .panel-head { display: block; }
       .cue-count { display: inline-flex; margin-top: 9px; }
       .drop-zone { grid-template-columns: auto minmax(0, 1fr); min-height: 106px; }
       .drop-cta { grid-column: 1 / -1; width: 100%; text-align: center; }
+      .drop-zone.is-compact { grid-template-columns: auto minmax(0, 1fr) auto; min-height: 56px; padding: 8px 10px; }
+      .drop-zone.is-compact .drop-cta { grid-column: auto; width: auto; text-align: center; }
+      .drop-zone.is-compact .drop-title { overflow-wrap: anywhere; }
+      .cue-section-head { flex-direction: column; align-items: stretch; }
+      .cue-section-actions { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
       .cue-grid { grid-template-columns: 1fr; gap: 10px; }
       .cue-play { min-height: 142px; }
       .cue-tools { justify-content: space-between; min-height: 54px; padding: 6px; }
@@ -574,8 +597,8 @@
       .action-button { min-height: 46px; }
       .build-grid { grid-template-columns: 1fr; }
       .app-toast { left: 12px; right: 12px; max-width: none; }
-      .app-confirm-dialog { width: 100%; max-height: calc(100dvh - 12px); margin: auto 0 0; border-radius: 22px 22px 0 0; }
-      #cueEditDialog[open] { width: 100%; max-height: calc(100dvh - 12px); margin: auto 0 0; border-radius: 22px 22px 0 0; }
+      .app-confirm-dialog { width: calc(100% - 16px); max-height: calc(100dvh - 12px); margin: auto auto 0; border-radius: 22px 22px 0 0; }
+      #cueEditDialog[open] { width: calc(100% - 16px); max-width: none; max-height: calc(100dvh - 12px); margin: auto auto 0; border-radius: 22px 22px 0 0; }
       .cue-point-grid { grid-template-columns: 1fr; }
       .preview-controls { grid-template-columns: 1fr; }
       .preview-play { width: 100%; }
@@ -587,7 +610,10 @@
       .storage-actions { justify-content: stretch; }
       .storage-button { flex: 1 1 140px; min-height: 46px; }
       .cue-section-actions { width: 100%; justify-content: stretch; }
-      .master-volume { width: 100%; grid-template-columns: auto minmax(0, 1fr) 40px; }
+      .master-volume { width: 100%; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "label value" "slider slider"; gap: 4px 10px; padding: 9px 12px; }
+      .master-volume label { grid-area: label; font-size: 12px; }
+      .master-volume input { grid-area: slider; height: 28px; margin: 0; }
+      .master-volume output { grid-area: value; font-size: 12px; }
       .app-confirm-actions { grid-template-columns: 1fr; }
     }
 
@@ -603,7 +629,6 @@
     }
 
     @media (max-width: 360px) {
-      .page-intro h1 { font-size: 21px; }
       .drop-icon { width: 40px; height: 40px; }
       .drop-zone { padding: 13px; gap: 10px; }
       .cue-play { padding: 13px; }
@@ -615,7 +640,7 @@
       .player-export-controls { grid-template-columns: 1fr; }
       .player-export-controls .backup-button { width: 100%; min-height: 46px; }
       .backup-actions { justify-content: stretch; }
-      .backup-actions .backup-button { flex: 1 1 150px; }
+      .backup-actions .backup-button { flex: 1 1 0; min-width: 0; }
       body.live-mode .cue-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .live-toolbar { align-items: stretch; flex-direction: column; }
       .live-toolbar-status, .live-toolbar-actions { justify-content: space-between; }
@@ -626,6 +651,7 @@
       body.live-mode .app-header { min-height: 54px; }
       body.live-mode .header-inner { min-height: 54px; padding-top: 7px; padding-bottom: 7px; }
       body.live-mode .main { padding: 10px 10px 36px; }
+      body.live-mode.player-visible .main { padding-bottom: calc(var(--player-actual-height, var(--player-height)) + 32px); }
       body.live-mode .cue-section-actions { width: 100%; }
       body.live-mode .master-volume { width: 100%; }
       body.live-mode .cue-grid { grid-template-columns: 1fr; gap: 10px; }
@@ -669,6 +695,11 @@
       @media (orientation: landscape) {
         body.live-mode { --player-height: min(134px, 50dvh); }
       }
+      /* In extremely short edit viewports, a pinned transport can cover every cue action.
+         Put the player back in document flow; playback view keeps its compact fixed transport. */
+      body:not(.live-mode).player-visible .main { padding-bottom: 22px; }
+      body:not(.live-mode) .player-bar { position: static; max-height: none; overflow-y: visible; overscroll-behavior: auto; }
+      body:not(.live-mode) .app-toast { bottom: calc(16px + env(safe-area-inset-bottom)); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -682,7 +713,7 @@
       <div class="brand">
         <div class="brand-mark" aria-hidden="true"><img id="appBrandIcon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3QgeD0iMiIgeT0iMiIgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiByeD0iMTUiIGZpbGw9IiMxNjYyNGYiLz48ZyBmaWxsPSIjZmZmIj48cmVjdCBpZD0iYSIgeD0iMTEuMiIgeT0iMTcuNyIgd2lkdGg9IjEyLjYiIGhlaWdodD0iMTIuNCIgcng9IjIuNiIvPjx1c2UgaHJlZj0iI2EiIHg9IjE0LjQiLz48dXNlIGhyZWY9IiNhIiB4PSIyOC45Ii8+PHVzZSBocmVmPSIjYSIgeT0iMTMuNyIvPjx1c2UgaHJlZj0iI2EiIHg9IjE0LjQiIHk9IjEzLjciLz48dXNlIGhyZWY9IiNhIiB4PSIyOC45IiB5PSIxMy43Ii8+PHVzZSBocmVmPSIjYSIgeT0iMjcuNyIvPjx1c2UgaHJlZj0iI2EiIHg9IjE0LjQiIHk9IjI3LjciLz48dXNlIGhyZWY9IiNhIiB4PSIyOC45IiB5PSIyNy43Ii8+PGVsbGlwc2UgY3g9IjQ1LjUiIGN5PSIxNC45IiByeD0iMS41NSIgcnk9IjEuMjUiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA0NS41IDE0LjkpIi8+PGVsbGlwc2UgY3g9IjUwLjIiIGN5PSIxMy41IiByeD0iMS41NSIgcnk9IjEuMjUiIHRyYW5zZm9ybT0icm90YXRlKC0xOCA1MC4yIDEzLjUpIi8+PHBhdGggZD0iTTQ2IDE0LjVWOWw0LjYtMS4zdjUuNmwtLjktLjNWOS41bC0yLjguOHY0LjJ6Ii8+PC9nPjxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJNNTMuOCAxMi44YzEuOSAxLjQgMS45IDMuMy45IDQuN001NS40IDExYzIuOSAyLjUgMy4xIDUuNiAxLjcgNy45IiBzdHJva2Utd2lkdGg9IjEuMSIvPjwvZz48cGF0aCBkPSJNMjkuNSAzNC40djYuNGw1LjYtMy4yeiIgZmlsbD0iIzE2NjI0ZiIvPjwvc3ZnPgo=" alt=""></div>
         <div class="brand-copy">
-          <p class="brand-name"><span id="brandName">Music Cue Pad</span><span class="version-badge" id="versionBadge">v1.0.2</span></p>
+          <p class="brand-name"><span id="brandName">Music Cue Pad</span><span class="version-badge" id="versionBadge">v1.0.3</span></p>
           <p class="brand-meta" data-i18n="brandMeta">曲を登録・ボタンですぐ再生</p>
         </div>
       </div>
@@ -698,8 +729,8 @@
   <main class="main">
     <section class="page-intro" aria-labelledby="heroTitle">
       <div>
-        <h1 id="heroTitle" data-i18n="introTitle">曲を登録して、ボタンですぐ再生</h1>
-        <p data-i18n="lead">イベントや練習で使う音源をまとめて追加し、大きな再生ボタンから必要な曲をすぐ鳴らせます。</p>
+        <h1 id="heroTitle" data-i18n="introTitle">曲を登録してボタンですぐ再生</h1>
+        <p data-i18n="lead">音声ファイルを追加すると、曲ごとの再生ボタンができます。</p>
       </div>
       <div class="local-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
@@ -734,7 +765,6 @@
       <div class="cue-section-head">
         <div>
           <h2 id="cueSectionTitle" data-i18n="cueSectionTitle">再生ボタン</h2>
-          <p data-i18n="cueSectionBody">再生ボタンの下から再生区間・音量・フェード・ループ・ショートカット・名前・並び順を編集できます。</p>
           <p class="keyboard-hint" data-i18n-html="keyboardHint"><kbd>Space</kbd> 再生/一時停止 · <kbd>R</kbd> 最初から · <kbd>F</kbd> フェード停止 · <kbd>Esc</kbd> 停止</p>
         </div>
         <div class="cue-section-actions">
@@ -742,7 +772,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M12 15v2"/></svg>
             <span data-i18n="enterLiveMode">再生専用表示</span>
           </button>
-          <span class="cue-reorder-hint" id="reorderHint" hidden data-i18n="reorderHint">グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます</span>
+          <span class="sr-only" id="reorderHint" hidden data-i18n="reorderHint">グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます</span>
           <div class="master-volume">
             <label for="masterVolumeSlider" data-i18n="masterVolume">マスター音量</label>
             <input id="masterVolumeSlider" type="range" min="0" max="100" step="1" value="100" data-i18n-aria-label="masterVolume" aria-label="マスター音量">
@@ -815,8 +845,8 @@
           <input id="boardNameInput" type="text" maxlength="120" autocomplete="off" spellcheck="false" data-i18n-placeholder="boardNamePlaceholder" placeholder="My cue board">
         </div>
         <div class="backup-actions">
-          <button class="backup-button primary" id="exportBackupButton" type="button" data-i18n="exportBackup">バックアップを書き出す</button>
-          <button class="backup-button" id="importBackupButton" type="button" data-i18n="importBackup">バックアップを読み込む</button>
+          <button class="backup-button primary" id="exportBackupButton" type="button" data-i18n="exportBackup" data-i18n-aria-label="exportBackupFull" aria-label="バックアップを書き出す">保存する</button>
+          <button class="backup-button" id="importBackupButton" type="button" data-i18n="importBackup" data-i18n-aria-label="importBackupFull" aria-label="バックアップを読み込む">読み込む</button>
           <input id="backupFileInput" type="file" accept=".bkcue,application/zip" hidden>
         </div>
       </div>
@@ -844,7 +874,7 @@
         <div class="backup-progress-row"><span id="backupProgressLabel">—</span><span id="backupProgressValue">0%</span></div>
         <progress id="backupProgressBar" max="100" value="0"></progress>
       </div>
-      <p class="backup-note" data-i18n="backupNote">.bkcue はMusic Cue Pad用のZIPコンテナです。読み込み前に内容を検証し、問題がある場合は現在のボードを変更しません。</p>
+      <p class="backup-note" data-i18n="backupNote">.bkcue はMusic Cue Pad用のZIPコンテナです。</p>
     </section>
     <!-- APP:END -->
   </main>
@@ -1025,11 +1055,11 @@
       </button>
     </div>
     <div class="dialog-body">
-      <!-- APP:HELP:BEGIN Music Cue Pad v1.0.2 help. -->
+      <!-- APP:HELP:BEGIN Music Cue Pad help. -->
       <h3 data-i18n="helpBasicsTitle">基本操作</h3>
       <ol>
         <li data-i18n="helpStep1">「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。</li>
-        <li data-i18n="helpStep2">追加されたキューボタンを押すと再生します。別のキューを押すと、前の曲を止めてその曲へ切り替わります。</li>
+        <li data-i18n="helpStep2">再生ボタンを押すと曲が流れ、もう一度押すと一時停止します。再度押すと続きから再生できます。別の曲を押すと切り替わります。</li>
         <li data-i18n="helpStep3">画面下部のプレイヤーから一時停止・再開・停止できます。</li>
         <li data-i18n="helpStep4">各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグするか、Tabでグリップを選択して↑ / ↓キーを押します。Escでドラッグを取り消せます。選択中のキューがあれば即時停止も行います。</li>
         <li data-i18n="helpStep5">「再生専用表示」にすると編集操作を隠し、曲を鳴らす操作だけに集中できます。編集へ戻るには解除ボタンを長押しします。</li>
@@ -1041,7 +1071,7 @@
       <p data-i18n="helpKeyboardBody">入力欄やダイアログを操作していないときは、Spaceで再生/一時停止、Rで最初から再生、Fでフェード停止、Escで即時停止できます。キューごとに0–9 / A–Zの1キーも割り当てられます。</p>
       <h3 data-i18n="helpPrivacyTitle">プライバシー</h3>
       <p data-i18n="helpPrivacyBody">追加した音声はこのブラウザ内だけで読み込まれ、このアプリから外部サーバーへ送信されません。実行時の外部通信も行いません。</p>
-      <h3 data-i18n="helpNotesTitle">v1.0.2 の注意事項</h3>
+      <h3 data-i18n="helpNotesTitle">注意事項</h3>
       <ul>
         <li data-i18n="helpNoteSession">音源とキュー設定はこのブラウザへ自動保存され、次回の起動時に復元されます。ブラウザのサイトデータを削除すると保存内容も削除されます。</li>
         <li data-i18n="helpNoteStorage">「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。バックアップは音源を含みます。</li>
@@ -1065,8 +1095,8 @@
     (() => {
       'use strict';
 
-      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-23T09:24:15.8439337Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.2"},"dependencies":[]};
+      const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Music Cue Pad","nameJa":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.3","description":"A local cue player that turns multiple audio files into large, easy-to-trigger playback buttons.","descriptionJa":"複数の音声ファイルを大きなボタンからすぐ再生できる、完全ローカル処理のキュープレイヤーです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-music-cue-pad"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":3}}};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.3","generatedAtUtc":"2026-10-23T09:24:15.8439337Z","app":{"name":"Music Cue Pad","slug":"music-cue-pad","version":"1.0.3"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -1171,16 +1201,16 @@
       const translations = {
         ja: {
           brandMeta: '曲を登録・ボタンですぐ再生',
-          introTitle: '曲を登録して、ボタンですぐ再生',
-          lead: 'イベントや練習で使う音源をまとめて追加し、大きな再生ボタンから必要な曲をすぐ鳴らせます。',
+          introTitle: '曲を登録してボタンですぐ再生',
+          lead: '音声ファイルを追加すると、曲ごとの再生ボタンができます。',
           localBadge: '完全ローカル処理',
           addAudioTitle: '音声ファイルを追加',
           addAudioBody: '複数選択できます。追加した音声は外部へ送信されません。',
           dropTitle: 'ここに音声ファイルをドロップ',
+          dropAddedTitle: '{count}曲を追加済み', dropLoadingTitle: '{count}曲を読み込み中', dropCheckTitle: '追加した音声を確認してください', addMoreFiles: '曲を追加',
           dropHelp: 'MP3 / WAV / M4A / OGG / WebM / FLAC など',
           chooseFiles: 'ファイルを選択',
           cueSectionTitle: '再生ボタン',
-          cueSectionBody: '左上の番号が再生順です。カード下部から再生区間・音量・フェード・ループ・ショートカット・表示名を編集できます。',
           reorderHint: 'グリップをドラッグ、または選択して ↑ / ↓ キーで並べ替えできます',
           keyboardHint: '<kbd>Space</kbd> 再生/一時停止 · <kbd>R</kbd> 最初から · <kbd>F</kbd> フェード停止 · <kbd>Esc</kbd> 停止',
           emptyTitle: 'まだ曲がありません',
@@ -1201,11 +1231,11 @@
           playbackFailed: '音声を再生できませんでした。ブラウザの対応形式か確認してください。',
           selectedFiles: '{count}件を確認中…',
           cueCount: '{count}ボタン',
-          backupTitle: '持ち出し・バックアップ', backupBody: '編集を続けるなら .bkcue、再生だけなら音源込みの単一HTMLとして持ち出せます。', boardNameLabel: 'ボード名', boardNamePlaceholder: '例: 2026 夏祭り', exportBackup: 'バックアップを書き出す', importBackup: 'バックアップを読み込む', playerExportTitle: '再生用HTMLを書き出す', playerExportBody: '現在の音源とキューを1つのHTMLにまとめます。別端末でもファイルを開くだけで再生できます。', playerFilenameLabel: '出力ファイル名', playerFilenameHint: '拡張子は自動で .html が付きます', exportPlayer: '再生用HTMLを書き出す', playerExportNote: '音源もHTML内に含めます。音源合計100 MiBを超える場合は確認し、250 MiBを超える場合は .bkcue を利用してください。', playerExportEstimate: '音源 {audio} → HTML 約 {html}。100 MiB超は確認、250 MiB超は .bkcue を利用してください。', playerExportPreparing: '再生用HTMLを準備中…', playerExportEncoding: '音源をHTMLへ埋め込み中 {current}/{total}', playerExportWriting: 'HTMLを作成中…', playerExported: '再生用HTMLを書き出しました。', playerExportTooLarge: '音源合計が250 MiBを超えるため、単一HTMLには書き出せません。.bkcue バックアップを利用してください。', playerExportLargeTitle: '大きなHTMLを書き出しますか？', playerExportLargeMessage: '音源合計が100 MiBを超えています。生成するHTMLはさらに大きくなり、端末によっては作成や起動に時間がかかります。', playerExportLargeConfirm: '書き出す', backupNote: '.bkcue はMusic Cue Pad用のZIPコンテナです。読み込み前に内容を検証し、問題がある場合は現在のボードを変更しません。', backupPreparing: 'バックアップを準備中…', backupHashing: '音源を確認中 {current}/{total}', backupWriting: 'バックアップを作成中…', backupExported: '「{name}」のバックアップを書き出しました。', backupEmpty: 'バックアップするキューがありません。', backupReading: 'バックアップを確認中…', backupVerifying: '音源を検証中 {current}/{total}', backupInvalid: 'このバックアップを読み込めません。ファイルが破損しているか、Music Cue Padの対応形式ではありません。', backupUnsupportedVersion: 'このバックアップの形式は、このバージョンでは読み込めません。', backupReplaceTitle: '現在のボードを置き換えますか？', backupReplaceMessage: '「{name}」を読み込むと、現在の音源とキュー設定を置き換えます。現在のボードが必要な場合は先にバックアップしてください。', backupReplaceConfirm: '置き換える', backupImported: '「{name}」を読み込みました。', backupImportFailed: 'バックアップを読み込めませんでした。現在のボードは変更していません。', backupSaveFailed: '読み込んだボードを端末へ保存できなかったため、現在のボードは変更していません。', backupNoManifest: 'manifest.json がありません。', backupNoAudio: 'バックアップ内の音源が見つかりません。', backupChecksumFailed: 'バックアップ内の音源が破損しています。', backupStoreOnly: 'この .bkcue の圧縮方式には対応していません。', backupNameFallback: 'Music Cue Pad Board', backupProgressDone: '完了', boardNameSaved: 'ボード名を保存しました。',
+          backupTitle: '持ち出し・バックアップ', backupBody: '編集を続けるなら .bkcue、再生だけなら音源込みの単一HTMLとして持ち出せます。', boardNameLabel: 'ボード名', boardNamePlaceholder: '例: 2026 夏祭り', exportBackup: '保存する', importBackup: '読み込む', exportBackupFull: 'バックアップを書き出す', importBackupFull: 'バックアップを読み込む', playerExportTitle: '再生用HTMLを書き出す', playerExportBody: '現在の音源とキューを1つのHTMLにまとめます。別端末でもファイルを開くだけで再生できます。', playerFilenameLabel: '出力ファイル名', playerFilenameHint: '拡張子は自動で .html が付きます', exportPlayer: '再生用HTMLを書き出す', playerExportNote: '音源もHTML内に含めます。音源合計100 MiBを超える場合は確認し、250 MiBを超える場合は .bkcue を利用してください。', playerExportEstimate: '音源 {audio} → HTML 約 {html}。100 MiB超は確認、250 MiB超は .bkcue を利用してください。', playerExportPreparing: '再生用HTMLを準備中…', playerExportEncoding: '音源をHTMLへ埋め込み中 {current}/{total}', playerExportWriting: 'HTMLを作成中…', playerExported: '再生用HTMLを書き出しました。', playerExportTooLarge: '音源合計が250 MiBを超えるため、単一HTMLには書き出せません。.bkcue バックアップを利用してください。', playerExportLargeTitle: '大きなHTMLを書き出しますか？', playerExportLargeMessage: '音源合計が100 MiBを超えています。生成するHTMLはさらに大きくなり、端末によっては作成や起動に時間がかかります。', playerExportLargeConfirm: '書き出す', backupNote: '.bkcue はMusic Cue Pad用のZIPコンテナです。', backupPreparing: 'バックアップを準備中…', backupHashing: '音源を確認中 {current}/{total}', backupWriting: 'バックアップを作成中…', backupExported: '「{name}」のバックアップを書き出しました。', backupEmpty: 'バックアップするキューがありません。', backupIncomplete: '読み込み中、または再生できない音声があります。問題のある曲を削除するか、読み込み完了後にバックアップしてください。', backupReading: 'バックアップを確認中…', backupVerifying: '音源を検証中 {current}/{total}', backupInvalid: 'このバックアップを読み込めません。ファイルが破損しているか、Music Cue Padの対応形式ではありません。', backupUnsupportedVersion: 'このバックアップの形式は、このバージョンでは読み込めません。', backupReplaceTitle: '現在のボードを置き換えますか？', backupReplaceMessage: '「{name}」を読み込むと、現在の音源とキュー設定を置き換えます。現在のボードが必要な場合は先にバックアップしてください。', backupReplaceConfirm: '置き換える', backupImported: '「{name}」を読み込みました。', backupImportFailed: 'バックアップを読み込めませんでした。現在のボードは変更していません。', backupSaveFailed: '読み込んだボードを端末へ保存できなかったため、現在のボードは変更していません。', backupNoManifest: 'manifest.json がありません。', backupNoAudio: 'バックアップ内の音源が見つかりません。', backupChecksumFailed: 'バックアップ内の音源が破損しています。', backupStoreOnly: 'この .bkcue の圧縮方式には対応していません。', backupNameFallback: 'Music Cue Pad Board', backupProgressDone: '完了', boardNameSaved: 'ボード名を保存しました。',
           restoringSaved: '保存したデータを読み込み中…', restoredSaved: '{count}個の再生ボタンを復元しました。', storageTitle: '端末保存', storageBody: '音源とキュー設定は、このブラウザに自動保存されます。', storageLoading: '保存データを確認中', storageSaved: '保存済み', storageSaving: '保存中…', storageSessionOnly: 'このセッションのみ', storageError: '保存に問題があります', storageUsageLabel: 'このサイトの使用量', storageProtectionLabel: '保存の保護', storageProtected: '保護されています', storageNotProtected: '通常のブラウザ管理', storageUnavailable: '利用できません', requestPersistence: '保存を保護する', persistenceGranted: 'ブラウザに保存の保護を依頼しました。', persistenceDenied: 'このブラウザでは保存を保護できませんでした。通常の保存は引き続き利用できます。', retrySave: '保存を再試行', retrySaveSuccess: '保存を再試行しました。', resetAll: 'すべて削除', resetTitle: '保存した音源と設定を削除しますか？', resetMessage: 'このブラウザに保存した音源・キュー・音量設定をすべて削除します。この操作は元に戻せません。', resetConfirm: 'すべて削除', resetDone: '保存した音源と設定を削除しました。', resetFailed: '保存データを削除できませんでした。現在の内容はそのまま残しています。', persistenceUnavailableWarning: 'このブラウザでは端末保存を利用できません。このまま再生できますが、ページを閉じると追加内容は失われます。', persistenceQuotaWarning: '保存領域が不足しているため、一部の変更を端末へ保存できませんでした。このまま再生できますが、再読み込みすると未保存分は失われます。', persistenceWriteWarning: '端末への保存に失敗しました。このまま再生できますが、再読み込みすると未保存分は失われる可能性があります。',
           cueEditTitle: '再生ボタンを編集', cueNameLabel: '表示名', cueNameHelp: '再生ボタンに表示する名前です。元の音声ファイル名は変更されません。', save: '保存',
           renameCue: '編集', duplicateCue: '複製', deleteCue: '削除', moveUp: '上へ移動', moveDown: '下へ移動', dragCue: '並べ替え', dragMoveHere: 'ここに移動', dragMoved: '並び順を変更しました。',
-          renamedCue: '再生ボタンを更新しました。', duplicatedCue: '「{name}」を複製しました。', deletedCue: '「{name}」を削除しました。', undo: '元に戻す', emptyCueName: '表示名を入力してください。', copySuffix: '{name} のコピー',
+          renamedCue: '再生ボタンを更新しました。', duplicatedCue: '「{name}」を複製しました。', deletedCue: '「{name}」を削除しました。', deleteCueConfirmTitle: '「{name}」を削除しますか？', deleteCueConfirmMessage: 'この再生ボタンを削除します。削除後、短時間は元に戻せます。', undo: '元に戻す', emptyCueName: '表示名を入力してください。', copySuffix: '{name} のコピー',
           shortcutTitle: 'キーボードショートカット', shortcutLabel: 'この再生ボタンを呼び出すキー', shortcutPlaceholder: '未設定', shortcutClear: 'クリア', shortcutHelp: '欄を選んで 0–9 / A–Z のいずれかを押します。R と F は共通操作で使用するため割り当てできません。', shortcutCapture: 'キーを押してください', shortcutReserved: 'R と F は共通操作で使用するため割り当てできません。', shortcutConflict: 'このキーは「{name}」ですでに使われています。', shortcutInvalid: '0–9 または A–Z の1キーを指定してください。', shortcutAssigned: 'ショートカット {key}',
           previewTitle: '位置を確認', previewPlay: '試聴', previewPause: '試聴を一時停止', previewPosition: '試聴位置', previewRangeLabel: '再生区間をバーで調整', cueRangeStartAria: '再生区間の開始位置', cueRangeEndAria: '再生区間の終了位置', previewHelp: '上のバーで試聴位置、下の2つのつまみで再生区間を調整できます。時刻入力とも同期します。',
           cuePointsTitle: '再生区間', cueStartLabel: '開始位置', cueEndLabel: '終了位置', useCurrentPosition: '現在位置を使う', jumpToPoint: '移動', clearEnd: '末尾まで', untilEnd: '曲の最後まで', cuePointsHelp: '「1:23.500」のように入力できます。終了位置を空欄にすると曲の最後まで再生します。',
@@ -1215,7 +1245,7 @@
           helpTitle: '使い方と注意事項', close: '閉じる',
           helpBasicsTitle: '基本操作',
           helpStep1: '「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。',
-          helpStep2: '追加された再生ボタンを押すと音源を再生します。別のボタンを押すと、前の音源を止めて切り替わります。',
+          helpStep2: '再生ボタンを押すと曲が流れ、もう一度押すと一時停止します。再度押すと続きから再生できます。別の曲を押すと切り替わります。',
           helpStep3: '画面下部で一時停止・再開・フェード停止・即時停止できます。「次を再生」は表示中の次の曲を手動で再生します。未選択なら先頭、停止・終了後は次の曲へ進みます。自動送り・末尾からの折り返し・再生できない曲のスキップはしません。選択中の曲を削除すると先頭に戻り、取り消すとその曲が停止状態で選択されます。マスター音量は一覧の上で調整できます。',
           helpStep4: '各再生ボタンの編集から、表示名・開始位置・終了位置・音量・フェード・ループ・キーボードショートカットを設定できます。並べ替えはカード下部のグリップをドラッグするか、Tabでグリップを選択して↑ / ↓キーを押します。Escでドラッグを取り消せます。選択中のキューがあれば即時停止も行います。', helpStep5: '「再生専用表示」にすると編集操作を隠し、曲を鳴らす操作だけに集中できます。編集へ戻るには解除ボタンを長押しします。', helpLiveTitle: '再生専用表示', helpLiveBody: '再生専用表示では、必要に応じて全画面表示と画面の点灯維持を有効にできます。どちらもブラウザが対応している場合だけ利用できます。',
           helpPrivacyTitle: 'プライバシー',
@@ -1223,9 +1253,9 @@
 
           helpShortPlayer: "下部プレイヤーの見えていない操作へは、プレイヤー内のスクロールやTabキーで移動できます。",
 
-          helpNotesTitle: 'v1.0.2 の注意事項',
+          helpNotesTitle: '注意事項',
           helpNoteSession: '音源とキュー設定はこのブラウザへ自動保存され、次回の起動時に復元されます。ブラウザのサイトデータを削除すると保存内容も削除されます。',
-          helpNoteStorage: '「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。バックアップは音源を含むため、ファイルサイズは登録音源の合計に近くなります。',
+          helpNoteStorage: '「保存を保護する」は保存を保証するものではありません。重要なボードは .bkcue バックアップも保存してください。読み込み中や失敗した音声がある場合はバックアップを作れません。バックアップには音源を含むため、ファイルサイズは登録音源の合計に近くなります。',
           helpNoteFormat: '再生できる形式はブラウザによって異なります。MP3 / WAV / M4A / OGG / WebM / FLAC など、ブラウザが対応する音声を利用できます。',
           helpNoteSize: '1ファイル2 GiBを上限としています。大きな音声は端末やブラウザの性能によって読み込みに時間がかかる場合があります。',
           helpKeyboardTitle: 'キーボード操作', helpKeyboardBody: '入力欄やダイアログを操作していないときは、Spaceで再生/一時停止、Rで最初から再生、Fでフェード停止、Escで即時停止できます。再生ボタンごとに0–9 / A–Zの1キーも割り当てられます。',
@@ -1234,16 +1264,16 @@
         },
         en: {
           brandMeta: 'Add tracks · Play instantly',
-          introTitle: 'Add tracks, then play them with one button',
-          lead: 'Add the audio you need for an event or practice session and trigger any track immediately from a large playback button.',
+          introTitle: 'Add tracks and play with a button',
+          lead: 'Each audio file you add gets its own playback button.',
           localBadge: 'Fully local processing',
           addAudioTitle: 'Add audio files',
           addAudioBody: 'Multiple files are supported. Added audio is not sent outside this browser.',
           dropTitle: 'Drop audio files here',
+          dropAddedTitle: '{count} tracks added', dropLoadingTitle: 'Loading {count} tracks', dropCheckTitle: 'Check the added audio', addMoreFiles: 'Add tracks',
           dropHelp: 'MP3 / WAV / M4A / OGG / WebM / FLAC and more',
           chooseFiles: 'Choose files',
           cueSectionTitle: 'Playback buttons',
-          cueSectionBody: 'The number at top left shows playback order. Use the controls below each button to edit its range, volume, fades, loop, shortcut, and label.',
           reorderHint: 'Drag the handle, or focus it and press ArrowUp / ArrowDown to reorder',
           keyboardHint: '<kbd>Space</kbd> play/pause · <kbd>R</kbd> restart · <kbd>F</kbd> fade stop · <kbd>Esc</kbd> stop',
           emptyTitle: 'No tracks yet',
@@ -1264,11 +1294,11 @@
           playbackFailed: 'The audio could not be played. Check whether this browser supports the format.',
           selectedFiles: 'Checking {count} item(s)…',
           cueCount: '{count} buttons',
-          backupTitle: 'Export & backup', backupBody: 'Use .bkcue when you want to keep editing, or export one self-contained HTML file when you only need playback.', boardNameLabel: 'Board name', boardNamePlaceholder: 'Example: Summer Festival 2026', exportBackup: 'Export backup', importBackup: 'Import backup', playerExportTitle: 'Export playback HTML', playerExportBody: 'Bundle the current audio and cues into one HTML file that can be opened on another device for playback.', playerFilenameLabel: 'Output filename', playerFilenameHint: 'The .html extension is added automatically', exportPlayer: 'Export playback HTML', playerExportNote: 'Audio is embedded in the HTML. Above 100 MiB of source audio you will be asked to confirm; above 250 MiB use a .bkcue backup instead.', playerExportEstimate: 'Audio {audio} → about {html} HTML. Confirm above 100 MiB; use .bkcue above 250 MiB.', playerExportPreparing: 'Preparing playback HTML…', playerExportEncoding: 'Embedding audio {current}/{total}', playerExportWriting: 'Creating HTML…', playerExported: 'Exported the playback HTML.', playerExportTooLarge: 'The source audio exceeds 250 MiB, so it cannot be exported as one HTML file. Use a .bkcue backup instead.', playerExportLargeTitle: 'Export a large HTML file?', playerExportLargeMessage: 'The source audio exceeds 100 MiB. The generated HTML will be even larger and may take time to create or open on some devices.', playerExportLargeConfirm: 'Export', backupNote: '.bkcue is a ZIP container for Music Cue Pad. Its contents are validated before import, and the current board is left unchanged if validation fails.', backupPreparing: 'Preparing backup…', backupHashing: 'Checking audio {current}/{total}', backupWriting: 'Creating backup…', backupExported: 'Exported a backup of “{name}”.', backupEmpty: 'There are no cues to back up.', backupReading: 'Checking backup…', backupVerifying: 'Verifying audio {current}/{total}', backupInvalid: 'This backup could not be read. It may be damaged or not use a Music Cue Pad format supported by this version.', backupUnsupportedVersion: 'This backup format is not supported by this version.', backupReplaceTitle: 'Replace the current board?', backupReplaceMessage: 'Importing “{name}” replaces the current audio and cue settings. Export a backup first if you need the current board.', backupReplaceConfirm: 'Replace', backupImported: 'Imported “{name}”.', backupImportFailed: 'The backup could not be imported. The current board was left unchanged.', backupSaveFailed: 'The imported board could not be saved on this device, so the current board was left unchanged.', backupNoManifest: 'manifest.json is missing.', backupNoAudio: 'Audio referenced by the backup is missing.', backupChecksumFailed: 'Audio in this backup is damaged.', backupStoreOnly: 'This .bkcue uses a ZIP compression method that is not supported.', backupNameFallback: 'Music Cue Pad Board', backupProgressDone: 'Done', boardNameSaved: 'Board name saved.',
+          backupTitle: 'Export & backup', backupBody: 'Use .bkcue when you want to keep editing, or export one self-contained HTML file when you only need playback.', boardNameLabel: 'Board name', boardNamePlaceholder: 'Example: Summer Festival 2026', exportBackup: 'Save backup', importBackup: 'Load backup', exportBackupFull: 'Export board backup', importBackupFull: 'Import board backup', playerExportTitle: 'Export playback HTML', playerExportBody: 'Bundle the current audio and cues into one HTML file that can be opened on another device for playback.', playerFilenameLabel: 'Output filename', playerFilenameHint: 'The .html extension is added automatically', exportPlayer: 'Export playback HTML', playerExportNote: 'Audio is embedded in the HTML. Above 100 MiB of source audio you will be asked to confirm; above 250 MiB use a .bkcue backup instead.', playerExportEstimate: 'Audio {audio} → about {html} HTML. Confirm above 100 MiB; use .bkcue above 250 MiB.', playerExportPreparing: 'Preparing playback HTML…', playerExportEncoding: 'Embedding audio {current}/{total}', playerExportWriting: 'Creating HTML…', playerExported: 'Exported the playback HTML.', playerExportTooLarge: 'The source audio exceeds 250 MiB, so it cannot be exported as one HTML file. Use a .bkcue backup instead.', playerExportLargeTitle: 'Export a large HTML file?', playerExportLargeMessage: 'The source audio exceeds 100 MiB. The generated HTML will be even larger and may take time to create or open on some devices.', playerExportLargeConfirm: 'Export', backupNote: '.bkcue is a ZIP container for Music Cue Pad.', backupPreparing: 'Preparing backup…', backupHashing: 'Checking audio {current}/{total}', backupWriting: 'Creating backup…', backupExported: 'Exported a backup of “{name}”.', backupEmpty: 'There are no cues to back up.', backupIncomplete: 'Some audio is still loading or could not be read. Remove unavailable tracks or finish loading before backing up.', backupReading: 'Checking backup…', backupVerifying: 'Verifying audio {current}/{total}', backupInvalid: 'This backup could not be read. It may be damaged or not use a Music Cue Pad format supported by this version.', backupUnsupportedVersion: 'This backup format is not supported by this version.', backupReplaceTitle: 'Replace the current board?', backupReplaceMessage: 'Importing “{name}” replaces the current audio and cue settings. Export a backup first if you need the current board.', backupReplaceConfirm: 'Replace', backupImported: 'Imported “{name}”.', backupImportFailed: 'The backup could not be imported. The current board was left unchanged.', backupSaveFailed: 'The imported board could not be saved on this device, so the current board was left unchanged.', backupNoManifest: 'manifest.json is missing.', backupNoAudio: 'Audio referenced by the backup is missing.', backupChecksumFailed: 'Audio in this backup is damaged.', backupStoreOnly: 'This .bkcue uses a ZIP compression method that is not supported.', backupNameFallback: 'Music Cue Pad Board', backupProgressDone: 'Done', boardNameSaved: 'Board name saved.',
           restoringSaved: 'Loading saved data…', restoredSaved: 'Restored {count} playback buttons.', storageTitle: 'On-device storage', storageBody: 'Audio and cue settings are saved automatically in this browser.', storageLoading: 'Checking saved data', storageSaved: 'Saved', storageSaving: 'Saving…', storageSessionOnly: 'This session only', storageError: 'Storage needs attention', storageUsageLabel: 'Site storage usage', storageProtectionLabel: 'Storage protection', storageProtected: 'Protected', storageNotProtected: 'Normal browser management', storageUnavailable: 'Unavailable', requestPersistence: 'Protect saved data', persistenceGranted: 'Asked the browser to protect this saved data.', persistenceDenied: 'This browser did not grant protected storage. Normal local storage still works.', retrySave: 'Retry save', retrySaveSuccess: 'Retried saving the current board.', resetAll: 'Delete all', resetTitle: 'Delete saved audio and settings?', resetMessage: 'This deletes all audio, cues, and volume settings saved by Music Cue Pad in this browser. This cannot be undone.', resetConfirm: 'Delete all', resetDone: 'Deleted the saved audio and settings.', resetFailed: 'Saved data could not be deleted. The current board was left unchanged.', persistenceUnavailableWarning: 'On-device storage is unavailable in this browser. Playback still works, but added content will be lost when this page is closed.', persistenceQuotaWarning: 'Browser storage is full, so some changes could not be saved on this device. Playback still works, but unsaved changes will be lost after reload.', persistenceWriteWarning: 'Saving to this device failed. Playback still works, but unsaved changes may be lost after reload.',
           cueEditTitle: 'Edit playback button', cueNameLabel: 'Button label', cueNameHelp: 'This is the label shown on the playback button. The source audio filename is not changed.', save: 'Save',
           renameCue: 'Edit', duplicateCue: 'Duplicate', deleteCue: 'Delete', moveUp: 'Move up', moveDown: 'Move down', dragCue: 'Reorder cue', dragMoveHere: 'Move here', dragMoved: 'Order updated.',
-          renamedCue: 'Cue updated.', duplicatedCue: 'Duplicated “{name}”.', deletedCue: 'Deleted “{name}”.', undo: 'Undo', emptyCueName: 'Enter a cue name.', copySuffix: '{name} copy',
+          renamedCue: 'Cue updated.', duplicatedCue: 'Duplicated “{name}”.', deletedCue: 'Deleted “{name}”.', deleteCueConfirmTitle: 'Delete “{name}”?', deleteCueConfirmMessage: 'This removes the playback button. You can undo the deletion for a short time.', undo: 'Undo', emptyCueName: 'Enter a cue name.', copySuffix: '{name} copy',
           shortcutTitle: 'Keyboard shortcut', shortcutLabel: 'Key to play this cue', shortcutPlaceholder: 'Not set', shortcutClear: 'Clear', shortcutHelp: 'Focus this field and press one key from 0–9 or A–Z. R and F are reserved for global playback controls.', shortcutCapture: 'Press a key', shortcutReserved: 'R and F are reserved for global playback controls.', shortcutConflict: 'This key is already assigned to “{name}”.', shortcutInvalid: 'Choose one key from 0–9 or A–Z.', shortcutAssigned: 'Shortcut {key}',
           previewTitle: 'Check position', previewPlay: 'Preview', previewPause: 'Pause preview', previewPosition: 'Preview position', previewRangeLabel: 'Adjust playback range', cueRangeStartAria: 'Playback range start', cueRangeEndAria: 'Playback range end', previewHelp: 'Use the upper bar to preview a position and the two handles below to adjust the playback range. Time fields stay in sync.',
           cuePointsTitle: 'Playback range', cueStartLabel: 'Start', cueEndLabel: 'End', useCurrentPosition: 'Use current position', jumpToPoint: 'Go', clearEnd: 'To end', untilEnd: 'To end of track', cuePointsHelp: 'You can enter a time such as “1:23.500”. Leave End blank to play to the end of the track.',
@@ -1278,7 +1308,7 @@
           helpTitle: 'How to use & notes', close: 'Close',
           helpBasicsTitle: 'Basics',
           helpStep1: 'Use Choose files or Drag & Drop to add audio. You can add multiple files at once.',
-          helpStep2: 'Press a cue button to play it. Pressing another cue stops the previous track and switches to the new one.',
+          helpStep2: 'Press a cue button to play. Press it again to pause, then press it once more to resume. Press another cue to switch tracks.',
           helpStep3: 'Use the bottom player to pause, resume, fade-stop, or stop. Play next manually starts the named next cue: the first when unselected, or the following cue after Stop or Finished. It never auto-advances, wraps, or skips unavailable cues. Deleting the selected cue resets Next to the first; Undo restores that selection stopped. Master volume is above the playback buttons.',
           helpStep4: 'Edit each playback button to set its label, start, end, volume, fades, loop behavior, and keyboard shortcut. Drag the handle below a card, or focus it with Tab and press ArrowUp / ArrowDown to reorder. Escape cancels a drag and also immediately stops any selected cue.', helpStep5: 'Playback view hides editing controls so you can focus on triggering audio. Hold the exit button to return to editing.', helpLiveTitle: 'Playback view', helpLiveBody: 'In Playback view, enable Fullscreen or Keep Screen On when useful. These controls appear only when the browser supports the required APIs.',
           helpPrivacyTitle: 'Privacy',
@@ -1286,9 +1316,9 @@
 
           helpShortPlayer: "Scroll the bottom player or press Tab to reach controls that are out of view.",
 
-          helpNotesTitle: 'v1.0.2 notes',
+          helpNotesTitle: 'Notes and limitations',
           helpNoteSession: 'Audio and cue settings are saved automatically in this browser and restored on the next launch. Clearing browser site data also removes this saved content.',
-          helpNoteStorage: 'Protect saved data is not a backup guarantee. Keep a .bkcue backup for important boards. Backups include the audio itself, so their size is close to the total source audio size.',
+          helpNoteStorage: 'Protect saved data is not a backup guarantee. Keep a .bkcue backup for important boards. A backup cannot be exported while referenced audio is loading or unavailable. Backups include the audio itself, so their size is close to the total source audio size.',
           helpNoteFormat: 'Playable formats depend on the browser. Use browser-supported audio such as MP3, WAV, M4A, OGG, WebM, or FLAC.',
           helpNoteSize: 'The per-file limit is 2 GiB. Large audio may take longer to inspect depending on the browser and device.',
           helpKeyboardTitle: 'Keyboard controls', helpKeyboardBody: 'When you are not typing in a field or using a dialog, Space plays/pauses, R restarts the active cue, F fade-stops it, and Esc stops immediately. Each cue can also use one key from 0–9 or A–Z.',
@@ -1314,6 +1344,7 @@
         masterVolume: 1,
         boardName: '',
         backupBusy: false,
+        boardMutationLocked: false,
         manualFadeActive: false,
         liveMode: false,
         wakeLockRequested: false,
@@ -1346,6 +1377,7 @@
       let liveExitHoldTimer = 0;
       let liveExitHoldFrame = 0;
       let liveExitHoldStartedAt = 0;
+      let wakeLockGeneration = 0;
       let language = readStorage(storageKeys.language) || detectLanguage();
 
       const $ = selector => document.querySelector(selector);
@@ -1357,6 +1389,18 @@
       const emptyState = $('#emptyState');
       const importStatus = $('#importStatus');
       const playerBar = $('#playerBar');
+      function updatePlayerClearance() {
+        // Use the actual transport height to leave every cue and backup reachable.
+        if (playerBar.hidden) return;
+        const actualHeight = Math.ceil(playerBar.getBoundingClientRect().height);
+        if (actualHeight > 0) {
+          document.documentElement.style.setProperty('--player-actual-height', `${actualHeight}px`);
+        }
+      }
+      if (typeof ResizeObserver === 'function') {
+        new ResizeObserver(updatePlayerClearance).observe(playerBar);
+      }
+      window.addEventListener('resize', updatePlayerClearance);
       const pauseResumeButton = $('#pauseResumeButton');
       const nextCueButton = $('#nextCueButton');
       const timelineSlider = $('#timelineSlider');
@@ -1475,8 +1519,10 @@
         state.persistence.saving = true;
         renderStorageStatus();
         const run = async () => {
-          if (generation !== persistenceGeneration) return false;
           try {
+            // Even a superseded, skipped write must drain the pending counter.
+            // Reset/restore changes this generation while earlier writes queue.
+            if (generation !== persistenceGeneration) return false;
             await task();
             if (clearErrorOnSuccess) state.persistence.errorType = '';
             return true;
@@ -1634,7 +1680,7 @@
         requestPersistenceButton.disabled = !state.persistence.ready || state.persistence.saving;
         retrySaveButton.hidden = !state.persistence.supported || !state.persistence.errorType;
         retrySaveButton.disabled = !state.persistence.ready || state.persistence.saving;
-        resetButton.disabled = !state.persistence.ready || state.persistence.saving;
+        resetButton.disabled = state.boardMutationLocked || state.backupBusy || !state.persistence.ready || state.persistence.saving;
         const warningKey = !state.persistence.supported ? 'persistenceUnavailableWarning' : state.persistence.errorType === 'quota' ? 'persistenceQuotaWarning' : state.persistence.errorType ? 'persistenceWriteWarning' : '';
         storageWarning.hidden = !warningKey;
         storageWarning.textContent = warningKey ? translate(warningKey) : '';
@@ -1718,7 +1764,9 @@
 
       async function resetAllData() {
         const confirmed = await AppConfirm.ask({ title: translate('resetTitle'), message: translate('resetMessage'), confirmLabel: translate('resetConfirm'), cancelLabel: translate('cancel'), tone: 'danger' });
-        if (!confirmed) return;
+        if (!confirmed || state.boardMutationLocked || state.backupBusy) return;
+        setBoardMutationLocked(true);
+        try {
         resetButton.disabled = true;
         clearTimeout(masterVolumeSaveTimer);
         clearTimeout(orphanCleanupTimer);
@@ -1753,15 +1801,26 @@
         updateCueCount(); renderCues(); renderPlayer(); refreshImportStatus();
         await refreshStorageEstimate();
         showToast(translate('resetDone'), { tone: 'success' });
+        } finally { setBoardMutationLocked(false); }
       }
 
+      function refreshBackupActionAvailability() {
+        // Cue count can change after an earlier operation disabled the exports.
+        // Always derive the controls from the current board, not the last
+        // backup operation (for example, Reset followed by adding audio).
+        const blocked = state.backupBusy || state.boardMutationLocked;
+        exportBackupButton.disabled = blocked || state.cues.length === 0;
+        exportPlayerButton.disabled = blocked || state.cues.length === 0;
+        importBackupButton.disabled = blocked;
+        boardNameInput.disabled = blocked;
+        playerFilenameInput.disabled = blocked;
+      }
       function setBackupBusy(busy, label = '', percent = 0) {
         state.backupBusy = Boolean(busy);
-        exportBackupButton.disabled = state.backupBusy || state.cues.length === 0;
-        exportPlayerButton.disabled = state.backupBusy || state.cues.length === 0;
-        importBackupButton.disabled = state.backupBusy;
-        boardNameInput.disabled = state.backupBusy;
-        playerFilenameInput.disabled = state.backupBusy;
+        refreshBackupActionAvailability();
+        // Reset is also destructive; it must be disabled for the entire
+        // backup import/export operation, not just during a board lock.
+        renderStorageStatus();
         backupProgress.hidden = !state.backupBusy;
         if (state.backupBusy) {
           backupProgressLabel.textContent = label || translate('backupPreparing');
@@ -1769,6 +1828,14 @@
           backupProgressBar.value = value;
           backupProgressValue.textContent = `${Math.round(value)}%`;
         }
+      }
+      function setBoardMutationLocked(locked) {
+        state.boardMutationLocked = Boolean(locked);
+        audioInput.disabled = state.boardMutationLocked;
+        dropZone.disabled = state.boardMutationLocked;
+        masterVolumeSlider.disabled = state.boardMutationLocked;
+        refreshBackupActionAvailability();
+        renderCues(); renderStorageStatus();
       }
       function captureExportFocus(opener) {
         let ownsFocus = document.activeElement === opener;
@@ -1842,17 +1909,17 @@
 <link rel="icon" href="${appIconHref}">
 <title>${escapeHtml(payload.boardName)} · Music Cue Pad</title>
 <style>
-:root{--bg:#f5f5f2;--surface:#fff;--muted:#666963;--text:#20211f;--line:#dadbd6;--line-strong:#bfc1ba;--accent:#16624f;--accent-hover:#0e503f;--accent-soft:#e1f0ea;--warning:#9a6412;--warning-soft:#fff3d6;--shadow:0 1px 2px rgba(25,28,24,.08),0 8px 24px rgba(25,28,24,.06)}*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;padding-bottom:calc(118px + env(safe-area-inset-bottom))}button,input{font:inherit}button:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,#4d8bc7 55%,transparent);outline-offset:2px}.header{position:sticky;top:0;z-index:20;border-bottom:1px solid color-mix(in srgb,var(--line) 82%,transparent);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(16px) saturate(1.2)}.header-in{width:min(1180px,100%);margin:auto;padding:11px clamp(14px,2.8vw,30px);display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:11px;overflow:hidden;box-shadow:var(--shadow)}.mark img{display:block;width:100%;height:100%}.title{min-width:0}.title h1{margin:0;font-size:17px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.title p{margin:2px 0 0;color:var(--muted);font-size:12px}.main{width:min(1180px,100%);margin:auto;padding:20px clamp(14px,2.8vw,30px) 48px}.top{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:13px}.top h2{margin:0;font-size:20px}.top p{margin:4px 0 0;color:var(--muted);font-size:12px}.master{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;font-weight:700}.master input{accent-color:var(--accent);width:140px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.cue{min-width:0;border:1px solid var(--line);border-radius:15px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}.cue.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent),var(--shadow)}.cue.ending{border-color:#c58a24}.cue button{width:100%;min-height:180px;padding:16px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer;display:grid;grid-template-rows:auto 1fr auto;gap:11px}.cue button:hover{background:color-mix(in srgb,#e9e9e5 45%,transparent)}.name{display:flex;justify-content:space-between;gap:10px}.name strong{min-width:0;font-size:17px;line-height:1.35;overflow-wrap:anywhere}.state{flex:0 0 auto;padding:4px 7px;border-radius:999px;background:#f0f0ed;color:var(--muted);font-size:10px;font-weight:800}.active .state{background:var(--accent-soft);color:var(--accent)}.center{display:grid;place-items:center;align-content:center;color:var(--accent)}.center svg{width:34px;height:34px}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.remaining{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:750}.remaining strong{font-size:19px;font-variant-numeric:tabular-nums}.shortcut{margin-top:6px;text-align:right;color:var(--muted);font-size:10px}.shortcut kbd{display:inline-flex;min-width:26px;justify-content:center;padding:2px 6px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;background:#fff;font-weight:800}.player{position:fixed;z-index:30;left:0;right:0;bottom:0;border-top:1px solid var(--line);background:color-mix(in srgb,#fff 95%,transparent);backdrop-filter:blur(16px);box-shadow:0 -12px 32px rgba(25,28,24,.08)}.player-in{width:min(1180px,100%);margin:auto;padding:10px clamp(14px,2.8vw,30px) calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:minmax(170px,1fr) minmax(240px,2fr) auto;align-items:center;gap:14px}.next-name{display:block;font-size:11px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}button:disabled{opacity:.5;cursor:default}.now{min-width:0}.now small{display:block;color:var(--muted);font-size:10px}.now strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.timeline input{width:100%;accent-color:var(--accent)}.times{display:grid;grid-template-columns:1fr auto 1fr;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}.times span:nth-child(2){text-align:center}.times span:last-child{text-align:right}.actions{display:flex;gap:7px}.actions button{min-height:42px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:750;cursor:pointer}.actions .primary{border-color:var(--accent);background:var(--accent);color:#fff}.empty{padding:28px;border:1px dashed var(--line-strong);border-radius:15px;text-align:center;color:var(--muted)}@media(max-width:1000px){.player-in{grid-template-columns:minmax(0,1fr) auto;gap:8px 12px}.timeline{grid-column:1 / -1;grid-row:2}}@media(max-width:760px){body{padding-bottom:calc(260px + env(safe-area-inset-bottom))}.top{display:block}.master{margin-top:12px}.grid{grid-template-columns:1fr}.cue button{min-height:170px}.player-in{grid-template-columns:1fr;gap:7px}.timeline{grid-column:1;grid-row:auto}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.actions button{min-width:0}.header-in{padding-inline:14px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+:root{--bg:#f5f5f2;--surface:#fff;--muted:#666963;--text:#20211f;--line:#dadbd6;--line-strong:#bfc1ba;--accent:#16624f;--accent-hover:#0e503f;--accent-soft:#e1f0ea;--warning:#9a6412;--warning-soft:#fff3d6;--shadow:0 1px 2px rgba(25,28,24,.08),0 8px 24px rgba(25,28,24,.06)}*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;padding-bottom:calc(118px + env(safe-area-inset-bottom))}button,input{font:inherit}button:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb,#4d8bc7 55%,transparent);outline-offset:2px}.header{position:sticky;top:0;z-index:20;border-bottom:1px solid color-mix(in srgb,var(--line) 82%,transparent);background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(16px) saturate(1.2)}.header-in{width:min(1180px,100%);margin:auto;padding:11px clamp(14px,2.8vw,30px);display:flex;align-items:center;gap:12px}.mark{width:38px;height:38px;border-radius:11px;overflow:hidden;box-shadow:var(--shadow)}.mark img{display:block;width:100%;height:100%}.title{min-width:0}.title h1{margin:0;font-size:17px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.title p{margin:2px 0 0;color:var(--muted);font-size:12px}.main{width:min(1180px,100%);margin:auto;padding:20px clamp(14px,2.8vw,30px) 48px}.top{display:flex;align-items:center;justify-content:flex-end;margin-bottom:13px}.master{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:12px;font-weight:700}.master input{accent-color:var(--accent);width:140px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:12px}.cue{display:flex;align-self:stretch;min-width:0;border:1px solid var(--line);border-radius:15px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}.cue.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 12%,transparent),var(--shadow)}.cue.ending{border-color:#c58a24}.cue button{width:100%;height:100%;min-height:192px;padding:16px;border:0;background:transparent;color:inherit;text-align:left;cursor:pointer;display:grid;grid-template-rows:minmax(44px,auto) minmax(42px,1fr) auto;gap:11px}.cue button:hover{background:color-mix(in srgb,#e9e9e5 45%,transparent)}.name{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.name strong{min-width:0;font-size:17px;line-height:1.35;overflow-wrap:anywhere}.state{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:4px 7px;border-radius:999px;background:#f0f0ed;color:var(--muted);font-size:10px;font-weight:800;line-height:1.5;white-space:nowrap}.active .state{background:var(--accent-soft);color:var(--accent)}.center{display:grid;place-items:center;align-content:center;color:var(--accent)}.center svg{width:34px;height:34px}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.remaining{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:flex;justify-content:space-between;align-items:baseline;font-size:11px;font-weight:750}.remaining strong{font-size:19px;font-variant-numeric:tabular-nums}.shortcut{min-height:24px;margin-top:6px;text-align:right;color:var(--muted);font-size:10px}.shortcut kbd{display:inline-flex;min-width:26px;justify-content:center;padding:2px 6px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;background:#fff;font-weight:800}.player{position:fixed;z-index:30;left:0;right:0;bottom:0;border-top:1px solid var(--line);background:color-mix(in srgb,#fff 95%,transparent);backdrop-filter:blur(16px);box-shadow:0 -12px 32px rgba(25,28,24,.08)}.player-in{width:min(1180px,100%);margin:auto;padding:10px clamp(14px,2.8vw,30px) calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:minmax(170px,1fr) minmax(240px,2fr) auto;align-items:center;gap:14px}.next-name{display:block;font-size:11px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}button:disabled{opacity:.5;cursor:default}.now{min-width:0}.now small{display:block;color:var(--muted);font-size:10px}.now strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.timeline input{width:100%;accent-color:var(--accent)}.times{display:grid;grid-template-columns:1fr auto 1fr;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}.times span:nth-child(2){text-align:center}.times span:last-child{text-align:right}.actions{display:flex;gap:7px}.actions button{min-height:42px;padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:750;cursor:pointer}.actions .primary{border-color:var(--accent);background:var(--accent);color:#fff}.empty{padding:28px;border:1px dashed var(--line-strong);border-radius:15px;text-align:center;color:var(--muted)}@media(max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.player-in{grid-template-columns:minmax(0,1fr) auto;gap:8px 12px}.timeline{grid-column:1 / -1;grid-row:2}}@media(max-width:760px){body{padding-bottom:calc(260px + env(safe-area-inset-bottom))}.top{display:block}.master{margin-top:0;display:grid;grid-template-columns:1fr;width:100%;gap:3px}.master input{width:100%;min-height:30px}.grid{grid-template-columns:1fr}.cue button{min-height:170px}.player-in{grid-template-columns:1fr;gap:7px}.timeline{grid-column:1;grid-row:auto}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.actions button{min-width:0}.header-in{padding-inline:14px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header class="header"><div class="header-in"><div class="mark" aria-hidden="true"><img src="${appIconHref}" alt=""></div><div class="title"><h1>${escapeHtml(payload.boardName)}</h1><p>Music Cue Pad · ${payload.language === 'en' ? 'Playback HTML · Fully local' : '再生用HTML・完全ローカル処理'}</p></div></div></header>
-<main class="main"><div class="top"><div><h2>${payload.language === 'en' ? 'Playback buttons' : '再生ボタン'}</h2><p>${payload.language === 'en' ? 'Audio and playback settings are embedded in this file.' : '音源と再生設定はこのHTML内に含まれています。'}</p></div><label class="master">${payload.language === 'en' ? 'Master volume' : 'マスター音量'} <input id="master" type="range" min="0" max="100" value="${Math.round(payload.masterVolume*100)}"></label></div><div class="grid" id="grid"></div></main>
+<header class="header"><div class="header-in"><div class="mark" aria-hidden="true"><img src="${appIconHref}" alt=""></div><div class="title"><h1>${escapeHtml(payload.boardName)}</h1><p>${payload.language === 'en' ? 'Audio and playback settings are included in this HTML file.' : '音源と再生設定はこのHTML内に含まれています。'}</p></div></div></header>
+<main class="main"><div class="top"><label class="master">${payload.language === 'en' ? 'Master volume' : 'マスター音量'} <input id="master" type="range" min="0" max="100" value="${Math.round(payload.masterVolume*100)}"></label></div><div class="grid" id="grid"></div></main>
 <section class="player" id="player" hidden><div class="player-in"><div class="now"><small>${payload.language === 'en' ? 'Now' : '再生対象'}</small><strong id="now">—</strong><span class="next-name" id="nextName" role="status" aria-live="polite">—</span></div><div class="timeline"><input id="seek" type="range" min="0" max="1" step="0.01" value="0"><div class="times"><span id="elapsed">0:00</span><span id="remaining">—</span><span id="total">0:00</span></div></div><div class="actions"><button type="button" id="next" aria-describedby="nextName">${payload.language === 'en' ? 'Play next' : '次を再生'}</button><button class="primary" id="pause">${payload.language === 'en' ? 'Pause' : '一時停止'}</button><button id="fade">${payload.language === 'en' ? 'Fade out' : 'フェード停止'}</button><button id="stop">${payload.language === 'en' ? 'Stop' : '停止'}</button></div></div></section>
 <script id="music-cue-pad-data" type="application/json">${dataJson}${scriptClose}
 <script>(()=>{
   const data=JSON.parse(document.getElementById('music-cue-pad-data').textContent),grid=document.getElementById('grid'),audio=new Audio(),master=document.getElementById('master'),player=document.getElementById('player'),seek=document.getElementById('seek'),pause=document.getElementById('pause'),fade=document.getElementById('fade'),stop=document.getElementById('stop'),now=document.getElementById('now'),elapsed=document.getElementById('elapsed'),remaining=document.getElementById('remaining'),total=document.getElementById('total'),next=document.getElementById('next'),nextName=document.getElementById('nextName');
-  let active=null,playState='stopped',fadeFrame=0,fadeToken=0,generation=0,wantsPlay=false,metadataController=null;
+  let active=null,playState='stopped',fadeFrame=0,fadeToken=0,generation=0,wantsPlay=false,metadataController=null,boundaryFrame=0;
   const lang=data.language==='en'?'en':'ja',t=(ja,en)=>lang==='en'?en:ja,assets=new Map(data.assets.map(a=>[a.id,a]));
   function fmt(v){v=Math.max(0,Number(v)||0);const m=Math.floor(v/60),s=Math.floor(v%60);return m+':'+String(s).padStart(2,'0')}
   function start(c){return Math.max(0,Number(c.startTime)||0)}
@@ -1862,7 +1929,21 @@
   function nextCue(){return data.cues[data.cues.findIndex(c=>c.id===active?.id)+1]||null}
   async function playNext(){const c=nextCue();if(available(c))await playCue(c)}
   function cancelFade(){fadeToken++;cancelAnimationFrame(fadeFrame);fadeFrame=0}
-  function invalidate(){generation++;wantsPlay=false;metadataController?.abort();metadataController=null;cancelFade()}
+  function invalidate(){generation++;wantsPlay=false;metadataController?.abort();metadataController=null;cancelFade();stopBoundaryMonitor()}
+  function stopBoundaryMonitor(){if(boundaryFrame){cancelAnimationFrame(boundaryFrame);boundaryFrame=0}}
+  function monitorBoundary(){
+    stopBoundaryMonitor();
+    let frames=0;
+    const tick=()=>{
+      boundaryFrame=0;
+      if(!wantsPlay||!active||playState!=='playing')return;
+      if(audio.currentTime>=end(active)-.012){finish();return}
+      applyGain();
+      if(++frames%6===0)render();
+      boundaryFrame=requestAnimationFrame(tick);
+    };
+    boundaryFrame=requestAnimationFrame(tick);
+  }
   function current(token,c){return token===generation&&wantsPlay&&active===c}
   function gain(c,time=audio.currentTime){const e=Math.max(0,time-start(c)),r=Math.max(0,end(c)-time),fi=Math.max(0,Number(c.fadeIn)||0),fo=Math.max(0,Number(c.fadeOut)||0);let g=Math.max(0,Math.min(1,c.volume??1));g*=Math.min(fi>0?Math.min(1,e/fi):1,fo>0?Math.min(1,r/fo):1);return g*(Number(master.value)/100)}
   function applyGain(){if(active)audio.volume=Math.max(0,Math.min(1,gain(active)))}
@@ -1881,7 +1962,7 @@
     invalidate();const token=generation;wantsPlay=true;const controller=new AbortController();metadataController=controller;
     const position=!restart&&active===c&&audio.currentTime>=start(c)&&audio.currentTime<end(c)?audio.currentTime:start(c);
     playState='stopped';audio.pause();active=c;const src=assets.get(c.assetId).src;if(audio.src!==src)audio.src=src;render();
-    try{await metadata(controller.signal);if(!current(token,c))return;audio.currentTime=position;applyGain();await audio.play();if(!current(token,c))return;playState='playing'}
+    try{await metadata(controller.signal);if(!current(token,c))return;audio.currentTime=position;applyGain();await audio.play();if(!current(token,c))return;playState='playing';monitorBoundary()}
     catch{if(!current(token,c))return;invalidate();audio.pause();playState='error'}
     render();
   }
@@ -1891,6 +1972,7 @@
     if(active.loop){playCue(active);return}
     invalidate();audio.pause();audio.currentTime=end(active);playState='ended';render();
   }
+  function pauseNow(){if(!active||!(['playing','fading'].includes(playState)||wantsPlay))return;invalidate();audio.pause();playState='paused';render()}
   function stopNow(){invalidate();audio.pause();if(active){audio.currentTime=start(active);applyGain()}playState='stopped';render()}
   function fadeStop(){
     if(!active||audio.paused||playState!=='playing'){stopNow();return}
@@ -1905,7 +1987,12 @@
     pause.disabled=!active||playState==='fading';fade.disabled=!active||playState!=='playing';stop.disabled=!active;seek.disabled=!active;
     for(const el of grid.children){
       const cue=data.cues.find(x=>x.id===el.dataset.id),is=active&&cue.id===active.id;
-      el.classList.toggle('active',!!is);el.querySelector('button').setAttribute('aria-pressed',String(!!is&&['playing','paused','fading'].includes(playState)));
+      el.classList.toggle('active',!!is);
+      const btn=el.querySelector('button'),canPause=!!is&&(['playing','fading'].includes(playState)||(playState==='stopped'&&wantsPlay));
+      btn.setAttribute('aria-pressed',String(canPause));
+      btn.setAttribute('aria-label',cue.name+': '+(canPause?t('一時停止','Pause'):t('再生','Play')));
+      const center=el.querySelector('.center'),icon=canPause?'pause':'play';
+      if(center.dataset.icon!==icon){center.dataset.icon=icon;center.innerHTML=canPause?'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>':'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg>'}
       const st=el.querySelector('.state');st.textContent=!available(cue)?t('再生不可','Unavailable'):is?(playState==='playing'?t('再生中','Playing'):playState==='fading'?t('フェード中','Fading'):playState==='paused'?t('一時停止','Paused'):playState==='ended'?t('再生完了','Ended'):playState==='error'?t('再生できません','Playback failed'):t('停止','Stopped')):t('再生','Play');
       const rem=el.querySelector('.remaining strong');if(rem)rem.textContent=is?fmt(Math.max(0,end(cue)-audio.currentTime)):fmt(dur(cue));
       el.classList.toggle('ending',!!(is&&!cue.loop&&end(cue)-audio.currentTime<=10&&playState==='playing'));
@@ -1916,11 +2003,11 @@
   }
   data.cues.forEach(c=>{
     const card=document.createElement('article');card.className='cue';card.dataset.id=c.id;
-    const shortcut=c.shortcut?'<div class="shortcut"><kbd>'+c.shortcut+'</kbd></div>':'';
+    const shortcut='<div class="shortcut">'+(c.shortcut?'<kbd>'+c.shortcut+'</kbd>':'')+'</div>';
     card.innerHTML='<button type="button"><span class="name"><strong></strong><span class="state">'+t('再生','Play')+'</span></span><span class="center"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7L8 5Z"/></svg></span><span><span class="meta"><span>'+fmt(dur(c))+'</span><span>'+Math.round((c.volume??1)*100)+'%</span></span><span class="remaining"><span>'+t('残り','Remaining')+'</span><strong>'+fmt(dur(c))+'</strong></span>'+shortcut+'</span></button>';
     card.querySelector('strong').textContent=c.name;
     const button=card.querySelector('button');if(c.shortcut)button.setAttribute('aria-keyshortcuts',c.shortcut);
-    button.addEventListener('click',()=>{if(active!==c||!['playing','fading'].includes(playState))playCue(c,{restart:active!==c||playState!=='paused'})});grid.append(card);
+    button.addEventListener('click',()=>{if(active===c&&(['playing','fading'].includes(playState)||(playState==='stopped'&&wantsPlay)))pauseNow();else playCue(c,{restart:active!==c||playState!=='paused'})});grid.append(card);
   });
   master.addEventListener('input',()=>{applyGain();render()});
   audio.addEventListener('timeupdate',()=>{if(!active)return;if(wantsPlay&&['playing','fading'].includes(playState)&&audio.currentTime>=end(active)-.025)finish();else{if(playState!=='fading')applyGain();render()}});
@@ -1928,7 +2015,7 @@
   audio.addEventListener('play',()=>{if(!wantsPlay)audio.pause()});
   audio.addEventListener('pause',()=>{if(audio.paused&&!audio.ended&&['playing','fading'].includes(playState)){invalidate();playState='paused';render()}});
   audio.addEventListener('error',()=>{if(!active||!audio.error)return;assets.get(active.assetId).status='error';stopNow()});
-  pause.addEventListener('click',()=>{if(!active)return;if(playState==='playing'){invalidate();audio.pause();playState='paused';render()}else playCue(active,{restart:playState!=='paused'})});
+  pause.addEventListener('click',()=>{if(!active)return;if(['playing','fading'].includes(playState)||wantsPlay)pauseNow();else playCue(active,{restart:playState!=='paused'})});
   stop.addEventListener('click',stopNow);fade.addEventListener('click',fadeStop);next.addEventListener('click',playNext);
   seek.addEventListener('input',()=>{if(!active)return;audio.currentTime=start(active)+Number(seek.value);applyGain();render()});
   document.addEventListener('keydown',e=>{
@@ -1947,7 +2034,12 @@
       }
       async function exportPlaybackHtml() {
         if (!state.cues.length) { showToast(translate('backupEmpty'), { tone:'warning' }); return; }
-        const usedIds = Array.from(new Set(state.cues.map(cue => cue.assetId)));
+        // Freeze the board before any confirmation or asynchronous Base64 encoding.
+        const exportCues = state.cues.map(cue => ({ ...cue }));
+        const exportBoardName = String(state.boardName || translate('backupNameFallback'));
+        const exportMasterVolume = state.masterVolume;
+        const exportLanguage = language;
+        const usedIds = Array.from(new Set(exportCues.map(cue => cue.assetId)));
         const assets = usedIds.map(id => state.assets.get(id)).filter(asset => asset?.blob instanceof Blob && asset.status === 'ready');
         const totalBytes = assets.reduce((sum, asset) => sum + asset.blob.size, 0);
         if (assets.length !== usedIds.length) { showToast(translate('playerExportTooLarge'), { tone:'warning', duration:6200 }); return; }
@@ -1968,7 +2060,7 @@
             await new Promise(resolve => setTimeout(resolve, 0));
           }
           setBackupBusy(true, translate('playerExportWriting'), 94);
-          const payload = { schemaVersion:1, app:'Music Cue Pad', appVersion:APP_CONFIG.version, boardName:String(state.boardName || translate('backupNameFallback')), language, masterVolume:state.masterVolume, assets:embedded, cues:state.cues.map(cue => ({ id:cue.id, assetId:cue.assetId, name:cue.name, startTime:cue.startTime, endTime:cue.endTime, loop:cue.loop, volume:cue.volume, fadeIn:cue.fadeIn, fadeOut:cue.fadeOut, shortcut:cue.shortcut || '' })) };
+          const payload = { schemaVersion:1, app:'Music Cue Pad', appVersion:APP_CONFIG.version, boardName:exportBoardName, language:exportLanguage, masterVolume:exportMasterVolume, assets:embedded, cues:exportCues.map(cue => ({ id:cue.id, assetId:cue.assetId, name:cue.name, startTime:cue.startTime, endTime:cue.endTime, loop:cue.loop, volume:cue.volume, fadeIn:cue.fadeIn, fadeOut:cue.fadeOut, shortcut:cue.shortcut || '' })) };
           const html = playerExportDocument(payload);
           const filename = `${safePlayerBaseName(playerFilenameInput.value)}${outputFilenameRules.extension}`;
           downloadBlob(new Blob([html], { type:'text/html;charset=utf-8' }), filename);
@@ -2044,7 +2136,8 @@
       }
       function backupManifest() {
         const usedAssetIds = [...new Set(state.cues.map(cue => cue.assetId))];
-        const assets = usedAssetIds.map(id => state.assets.get(id)).filter(asset => asset?.status === 'ready' && asset.blob instanceof Blob);
+        const assets = usedAssetIds.map(id => state.assets.get(id)).filter(asset => asset?.status === 'ready' && asset.blob instanceof Blob && Number.isFinite(asset.duration) && asset.duration > 0);
+        if (assets.length !== usedAssetIds.length) return null;
         const assetMeta = assets.map(asset => {
           const ext = fileExtension(asset.fileName) || 'bin';
           return { id: asset.id, path: `audio/${asset.id}.${ext}`, fileName: asset.fileName, mimeType: asset.mimeType || asset.blob.type || '', size: asset.blob.size, duration: asset.duration };
@@ -2062,7 +2155,8 @@
       async function exportBoardBackup() {
         if (!state.cues.length) { showToast(translate('backupEmpty'), { tone: 'warning' }); return; }
         const manifest = backupManifest();
-        if (!manifest.assets.length) { showToast(translate('backupEmpty'), { tone: 'warning' }); return; }
+        if (!manifest) { showToast(translate('backupIncomplete'), { tone: 'warning', duration: 6200 }); return; }
+        const backupAudioBlobs = new Map(manifest.assets.map(meta => [meta.id, state.assets.get(meta.id).blob]));
         const restoreExportFocus = captureExportFocus(exportBackupButton);
         setBackupBusy(true, translate('backupPreparing'), 1);
         try {
@@ -2070,11 +2164,11 @@
           const manifestBytes = encoder.encode(JSON.stringify(manifest, null, 2));
           const entries = [{ name: 'manifest.json', data: new Blob([manifestBytes], { type: 'application/json' }), crc: crc32Bytes(manifestBytes) }];
           for (let i = 0; i < manifest.assets.length; i++) {
-            const meta = manifest.assets[i]; const asset = state.assets.get(meta.id);
+            const meta = manifest.assets[i]; const audioBlob = backupAudioBlobs.get(meta.id);
             const base = 5 + (i / Math.max(1, manifest.assets.length)) * 75;
             setBackupBusy(true, translate('backupHashing', { current: i + 1, total: manifest.assets.length }), base);
-            const crc = await crc32Blob(asset.blob, (done, total) => setBackupBusy(true, translate('backupHashing', { current: i + 1, total: manifest.assets.length }), base + (total ? done / total : 0) * (75 / manifest.assets.length)));
-            entries.push({ name: meta.path, data: asset.blob, crc });
+            const crc = await crc32Blob(audioBlob, (done, total) => setBackupBusy(true, translate('backupHashing', { current: i + 1, total: manifest.assets.length }), base + (total ? done / total : 0) * (75 / manifest.assets.length)));
+            entries.push({ name: meta.path, data: audioBlob, crc });
           }
           setBackupBusy(true, translate('backupWriting'), 84);
           const parts = []; const central = []; let offset = 0; const dos = zipDosDateTime(); const encoder2 = new TextEncoder();
@@ -2169,14 +2263,18 @@
         boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard({ force:true }); setMasterVolume(state.masterVolume, { persist: false }); updateCueCount(); renderCues(); renderPlayer(); refreshImportStatus(); renderStorageStatus(); refreshStorageEstimate();
       }
       async function importBoardBackup(file) {
-        if (!file) return;
+        if (!file || state.backupBusy || state.boardMutationLocked) return;
         setBackupBusy(true, translate('backupReading'), 1);
         let snapshot;
         try { snapshot = await parseBoardBackup(file); }
-        catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); showToast(translate(error?.message === 'unsupported version' ? 'backupUnsupportedVersion' : 'backupInvalid'), { tone:'warning', duration:6200 }); return; }
+        catch (error) { console.error('Backup validation failed', error); setBackupBusy(false); backupFileInput.value = ''; showToast(translate(error?.message === 'unsupported version' ? 'backupUnsupportedVersion' : 'backupInvalid'), { tone:'warning', duration:6200 }); return; }
         setBackupBusy(false);
         const confirmed = await AppConfirm.ask({ title: translate('backupReplaceTitle'), message: translate('backupReplaceMessage', { name: snapshot.boardName }), confirmLabel: translate('backupReplaceConfirm'), cancelLabel: translate('cancel'), tone: 'danger' });
-        if (!confirmed) return;
+        if (!confirmed || state.boardMutationLocked) { backupFileInput.value = ''; return; }
+        setBoardMutationLocked(true);
+        clearTimeout(masterVolumeSaveTimer);
+        clearTimeout(orphanCleanupTimer);
+        persistenceGeneration += 1;
         setBackupBusy(true, translate('backupWriting'), 92);
         try {
           await persistenceWriteChain.catch(() => {});
@@ -2184,7 +2282,7 @@
           applyImportedSnapshot(snapshot); setBackupBusy(true, translate('backupProgressDone'), 100);
           showToast(translate('backupImported', { name: snapshot.boardName }), { tone:'success', duration:4800 });
         } catch (error) { console.error('Backup import failed', error); showToast(translate('backupSaveFailed'), { tone:'warning', duration:6200 }); }
-        finally { backupFileInput.value = ''; setTimeout(() => setBackupBusy(false), 250); }
+        finally { setBoardMutationLocked(false); backupFileInput.value = ''; setTimeout(() => setBackupBusy(false), 250); }
       }
 
       function detectLanguage() {
@@ -2479,6 +2577,7 @@
         updatePreviewUi();
       }
       function openCueEditor(cueId) {
+        if (state.boardMutationLocked) return;
         const cue = cueForId(cueId);
         const asset = cue ? state.assets.get(cue.assetId) : null;
         if (!cue || !asset || asset.status !== 'ready') return;
@@ -2527,6 +2626,7 @@
         updateCueEditDialog();
       }
       async function saveCueEditor() {
+        if (state.boardMutationLocked) return;
         const values = cueEditValues();
         if (!values.cue) { closeCueEditor(); return; }
         if (!values.valid) {
@@ -2558,6 +2658,7 @@
         showToast(translate('renamedCue'), { tone: 'success' });
       }
       function duplicateCue(cueId) {
+        if (state.boardMutationLocked) return;
         const index = cueIndex(cueId);
         if (index < 0) return;
         const source = state.cues[index];
@@ -2569,7 +2670,23 @@
         enqueuePersistence(putAllCueMetadata);
         showToast(translate('duplicatedCue', { name: source.name }), { tone: 'success' });
       }
+      async function requestDeleteCue(cueId) {
+        if (state.boardMutationLocked) return;
+        const cue = cueForId(cueId);
+        if (!cue) return;
+        const generation = persistenceGeneration;
+        const confirmed = await AppConfirm.ask({
+          title: translate('deleteCueConfirmTitle', { name: cue.name }),
+          message: translate('deleteCueConfirmMessage'),
+          confirmLabel: translate('deleteCue'),
+          cancelLabel: translate('cancel'),
+          tone: 'danger'
+        });
+        if (!confirmed || state.boardMutationLocked || generation !== persistenceGeneration || cueForId(cueId) !== cue) return;
+        deleteCue(cueId);
+      }
       function deleteCue(cueId) {
+        if (state.boardMutationLocked) return;
         const index = cueIndex(cueId);
         if (index < 0) return;
         const cue = state.cues[index];
@@ -2582,8 +2699,10 @@
         renderPlayer();
         enqueuePersistence(() => deleteCueRecord(cue.id));
         scheduleOrphanCleanup();
+        const undoGeneration = persistenceGeneration;
         showToast(translate('deletedCue', { name: cue.name }), {
           tone: 'success', duration: 6000, actionLabel: translate('undo'), onAction: () => {
+            if (state.boardMutationLocked || undoGeneration !== persistenceGeneration) return;
             const restoreIndex = Math.min(index, state.cues.length);
             state.cues.splice(restoreIndex, 0, cue);
             reindexCues();
@@ -2605,6 +2724,7 @@
         });
       }
       function moveCue(cueId, delta) {
+        if (state.boardMutationLocked) return false;
         const index = cueIndex(cueId);
         const target = index + delta;
         if (index < 0 || target < 0 || target >= state.cues.length || target === index) return false;
@@ -2626,6 +2746,7 @@
         }
       }
       function reorderCue(sourceId, targetId, after = false) {
+        if (state.boardMutationLocked) return;
         if (!sourceId || !targetId || sourceId === targetId) return;
         const sourceIndex = cueIndex(sourceId);
         const targetIndexBefore = cueIndex(targetId);
@@ -2784,6 +2905,7 @@
         showToast(translate('liveModeEntered'), { tone: 'success' });
       }
       async function releaseWakeLock({ clearRequest = true } = {}) {
+        wakeLockGeneration += 1;
         if (clearRequest) state.wakeLockRequested = false;
         const sentinel = state.wakeLockSentinel;
         state.wakeLockSentinel = null;
@@ -2809,11 +2931,17 @@
       async function requestWakeLock() {
         if (!wakeLockSupported()) { showToast(translate('wakeLockUnavailable'), { tone: 'warning' }); return; }
         state.wakeLockRequested = true;
+        const generation = ++wakeLockGeneration;
         try {
           const sentinel = await navigator.wakeLock.request('screen');
+          if (generation !== wakeLockGeneration || !state.wakeLockRequested || !state.liveMode) {
+            try { await sentinel.release(); } catch {}
+            return;
+          }
           state.wakeLockSentinel = sentinel;
           sentinel.addEventListener('release', () => { if (state.wakeLockSentinel === sentinel) state.wakeLockSentinel = null; renderLiveModeUi(); }, { once: true });
         } catch {
+          if (generation !== wakeLockGeneration) return;
           state.wakeLockRequested = false;
           state.wakeLockSentinel = null;
           showToast(translate('wakeLockFailed'), { tone: 'warning', duration: 5000 });
@@ -2849,6 +2977,8 @@
       function updateCueCount() {
         $('#cueCount').textContent = translate('cueCount', { count: state.cues.length });
         $('#reorderHint').hidden = state.cues.length < 2;
+        // Re-enable exports when cues are added after Reset or an empty board.
+        refreshBackupActionAvailability();
         renderLiveModeUi();
       }
 
@@ -2862,6 +2992,7 @@
           if (state.playback === 'fading') return { key: 'stateFading', icon: 'playing' };
           if (state.playback === 'paused') return { key: 'statePaused', icon: 'play' };
           if (state.playback === 'ended') return { key: 'stateEnded', icon: 'play' };
+          if (state.playback === 'stopped' && playbackRequested) return { key: 'stateLoading', icon: 'playing' };
           if (state.playback === 'stopped') return { key: 'stateStopped', icon: 'play' };
         }
         return { key: 'stateReady', icon: 'play' };
@@ -2869,7 +3000,7 @@
 
       function cueIconMarkup(icon) {
         if (icon === 'loading') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v4"/></svg>';
-        if (icon === 'playing') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10v4h3l4 3V7L8 10H5Z"/><path d="M15 9.2c1.2 1.4 1.2 4.2 0 5.6"/><path d="M18 7c2.6 2.8 2.6 7.2 0 10"/></svg>';
+        if (icon === 'playing') return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
         if (icon === 'error') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 17h.01"/></svg>';
         return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.3v13.4L18.8 12 8 5.3Z"/></svg>';
       }
@@ -2978,7 +3109,7 @@
       function finishCuePointerDrag(cancelled = false) {
         const d = cueDragSession; if (!d) return;
         window.removeEventListener('pointermove', onCuePointerMove, true); window.removeEventListener('pointerup', onCuePointerUp, true); window.removeEventListener('pointercancel', onCuePointerCancel, true);
-        const insertAt = cancelled ? -1 : d.insertIndex;
+        const insertAt = cancelled || state.boardMutationLocked ? -1 : d.insertIndex;
         d.ghost.remove(); d.placeholder.remove(); d.card.classList.remove('is-drag-source'); document.body.classList.remove('cue-drag-active'); state.dragCueId = null; cueDragSession = null;
         const oldIndex = cueIndex(d.cueId);
         const target = Math.min(insertAt, state.cues.length - 1);
@@ -2993,6 +3124,7 @@
       function onCuePointerUp(event) { if (!cueDragSession || event.pointerId !== cueDragSession.pointerId) return; event.preventDefault(); finishCuePointerDrag(false); }
       function onCuePointerCancel(event) { if (!cueDragSession || event.pointerId !== cueDragSession.pointerId) return; finishCuePointerDrag(true); }
       function startCuePointerDrag(cueId, card, event) {
+        if (state.boardMutationLocked) return;
         if (state.liveMode || cueDragSession || event.button !== 0) return;
         event.preventDefault(); event.stopPropagation();
         const rect = card.getBoundingClientRect(), ghost = card.cloneNode(true), placeholder = document.createElement('div');
@@ -3015,6 +3147,15 @@
         const focusCueId = focusedCard?.dataset.cueId || '';
         const focusKind = focusedElement?.classList.contains('cue-play') ? 'play' : (focusedElement?.classList.contains('cue-tool-button') ? 'tool' : '');
         const focusLabel = focusKind === 'tool' ? focusedElement.getAttribute('aria-label') || '' : '';
+        const hasCues = state.cues.length > 0;
+        dropZone.classList.toggle('is-compact', hasCues);
+        dropZone.parentElement?.classList?.toggle('has-cues', hasCues);
+        const readyCount = state.cues.filter(cue => state.assets.get(cue.assetId)?.status === 'ready').length;
+        const loadingCount = state.cues.filter(cue => state.assets.get(cue.assetId)?.status === 'loading').length;
+        const dropHeading = dropZone.querySelector?.('.drop-title');
+        const dropAction = dropZone.querySelector?.('.drop-cta');
+        if (dropHeading) dropHeading.textContent = !hasCues ? translate('dropTitle') : loadingCount ? translate('dropLoadingTitle', { count: loadingCount }) : readyCount ? translate('dropAddedTitle', { count: readyCount }) : translate('dropCheckTitle');
+        if (dropAction) dropAction.textContent = translate(hasCues ? 'addMoreFiles' : 'chooseFiles');
         emptyState.hidden = state.cues.length > 0;
         cueGrid.hidden = state.cues.length === 0;
         cueGrid.replaceChildren();
@@ -3032,8 +3173,9 @@
           playButton.className = 'cue-play';
           playButton.disabled = asset?.status === 'loading' || isError;
           const shortcut = normalizeShortcutValue(cue.shortcut);
-          playButton.setAttribute('aria-label', `${index + 1}. ${cue.name}: ${translate(status.key)}${shortcut ? ` · ${translate('shortcutAssigned', { key: shortcut })}` : ''}`);
-          playButton.setAttribute('aria-pressed', isActive && (state.playback === 'playing' || state.playback === 'paused' || state.playback === 'fading') ? 'true' : 'false');
+          const canPause = isActive && (state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested));
+          playButton.setAttribute('aria-label', `${index + 1}. ${cue.name}: ${translate(canPause ? 'pause' : status.key)}${shortcut ? ` · ${translate('shortcutAssigned', { key: shortcut })}` : ''}`);
+          playButton.setAttribute('aria-pressed', canPause ? 'true' : 'false');
           if (shortcut) playButton.setAttribute('aria-keyshortcuts', shortcut);
           if (isActive) playButton.setAttribute('aria-current', 'true');
           const progress = isActive && asset?.status === 'ready' ? cueProgress(cue, asset, primaryAudio.currentTime) * 100 : 0;
@@ -3056,7 +3198,7 @@
             </span>
             <span>
               <span class="cue-bottom"><span>${metaLeft}</span><span>${metaRight}</span></span>
-              <span class="cue-progress-track" ${isActive ? '' : 'hidden'}><span class="cue-progress-fill" style="width:${progress.toFixed(2)}%"></span></span>
+              <span class="cue-progress-track${isActive ? '' : ' is-inactive'}" aria-hidden="true"><span class="cue-progress-fill" style="width:${progress.toFixed(2)}%"></span></span>
               <span class="cue-live-remaining"><span>${translate('remainingLabel')}</span><strong>—</strong></span>
               <span class="cue-shortcut"></span>
             </span>`;
@@ -3082,7 +3224,7 @@
           const duplicate = cueToolButton({ label: translate('duplicateCue'), icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>' });
           duplicate.addEventListener('click', () => duplicateCue(cue.id));
           const remove = cueToolButton({ className: 'danger', label: translate('deleteCue'), icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg>' });
-          remove.addEventListener('click', () => deleteCue(cue.id));
+          remove.addEventListener('click', () => requestDeleteCue(cue.id));
           tools.append(drag, rename, duplicate, remove);
 
           card.append(playButton, tools);
@@ -3102,8 +3244,11 @@
         const asset = activeAsset();
         renderNextCue();
         const visible = state.cues.length > 0;
+        const wasHidden = playerBar.hidden;
         playerBar.hidden = !visible;
         document.body.classList.toggle('player-visible', visible);
+        // Measure at first reveal; ResizeObserver handles subsequent height changes.
+        if (wasHidden && visible) updatePlayerClearance();
         const selected = Boolean(cue && asset?.status === 'ready');
         pauseResumeButton.disabled = !selected;
         $('#stopButton').disabled = !selected;
@@ -3148,7 +3293,10 @@
         }
         renderLiveModeUi();
         const isFading = state.playback === 'fading';
-        const isPausedLike = state.playback !== 'playing' && !isFading;
+        // A pending audio.play() still counts as a play intent. Keep the
+        // transport's Pause label aligned with the active cue's pause icon.
+        const isPlayingIntent = state.playback === 'playing' || (state.playback === 'stopped' && playbackRequested);
+        const isPausedLike = !isPlayingIntent && !isFading;
         $('#pauseResumeLabel').textContent = translate(isPausedLike ? 'resume' : 'pause');
         $('#pauseResumeIcon').innerHTML = isPausedLike ? '<path d="M8 5.3v13.4L18.8 12 8 5.3Z" fill="currentColor" stroke="none"/>' : '<path d="M9 5v14M15 5v14"/>';
         pauseResumeButton.setAttribute('aria-label', translate(isPausedLike ? 'resume' : 'pause'));
@@ -3190,7 +3338,8 @@
             resolve(ok);
           };
           probe.addEventListener('loadedmetadata', () => {
-            asset.duration = Number.isFinite(probe.duration) ? probe.duration : NaN;
+            if (!Number.isFinite(probe.duration) || probe.duration <= 0) { finish(false, 'decodeFailed'); return; }
+            asset.duration = probe.duration;
             asset.status = 'ready';
             renderCues();
             finish(true);
@@ -3202,6 +3351,8 @@
       }
 
       async function addFiles(fileList) {
+        if (state.boardMutationLocked) return;
+        const importGeneration = persistenceGeneration;
         const files = Array.from(fileList || []);
         if (!files.length) return;
         setImportStatus('selectedFiles', { count: files.length });
@@ -3245,7 +3396,8 @@
           return;
         }
         await Promise.allSettled(inspections);
-        const decodeFailures = state.cues.slice(-added).filter(cue => state.assets.get(cue.assetId)?.status === 'error').length;
+        if (importGeneration !== persistenceGeneration || state.boardMutationLocked) { audioInput.value = ''; return; }
+        const decodeFailures = newlyAddedCues.filter(cue => state.assets.get(cue.assetId)?.status === 'error').length;
         const failed = immediateFailures + decodeFailures;
         const readyAdded = added - decodeFailures;
         const summaryKey = failed > 0 ? 'addedWithFailures' : (readyAdded === 1 ? 'addedOne' : 'addedMany');
@@ -3256,7 +3408,10 @@
         updateCueCount();
         renderCues();
         const readyCues = newlyAddedCues.filter(cue => state.assets.get(cue.assetId)?.status === 'ready');
-        if (readyCues.length) enqueuePersistence(() => putImportedCues(readyCues));
+        if (readyCues.length) {
+          const importedAssetIds = new Set(readyCues.map(cue => cue.assetId));
+          enqueuePersistence(() => putImportedCues(state.cues.filter(cue => importedAssetIds.has(cue.assetId) && state.assets.get(cue.assetId)?.status === 'ready')));
+        }
         audioInput.value = '';
       }
 
@@ -3317,6 +3472,7 @@
         }
       }
       function setMasterVolume(value, { persist = true } = {}) {
+        if (persist && state.boardMutationLocked) return;
         state.masterVolume = Math.min(1, Math.max(0, Number(value)));
         masterVolumeSlider.value = String(Math.round(state.masterVolume * 100));
         $('#masterVolumeValue').textContent = `${Math.round(state.masterVolume * 100)}%`;
@@ -3357,6 +3513,9 @@
         const duration = Math.min(FADE_STOP_SECONDS, remaining);
         const base = cueVolume(cue) * fadeFactor(cue, asset, primaryAudio.currentTime);
         const graphReady = await ensureAudioGraph();
+        // AudioContext.resume() can be pending while another cue starts.
+        // Never fade (or schedule a Stop for) the newer selection.
+        if (!state.manualFadeActive || token !== manualFadeToken || activeCue() !== cue || state.playback !== 'fading') return;
         if (graphReady && cueGainNode && audioContext) {
           const now = audioContext.currentTime;
           cueGainNode.gain.cancelScheduledValues(now);
@@ -3437,6 +3596,7 @@
         }
         if (asset.status !== 'ready') return;
         if (state.activeCueId === cue.id) {
+          if (state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested)) { pausePlayback(); return; }
           if (state.playback === 'paused') await resumePlayback();
           else if (state.playback === 'stopped' || state.playback === 'ended') await resumePlayback({ restart: true });
           return;
@@ -3486,7 +3646,7 @@
       }
 
       function pausePlayback() {
-        if (!activeCue() || state.playback !== 'playing') return;
+        if (!activeCue() || !(state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested))) return;
         invalidatePlayback();
         stopBoundaryMonitor();
         cancelManualFade({ restoreGain: true });
@@ -3601,7 +3761,8 @@
       dropZone.addEventListener('drop', event => addFiles(event.dataTransfer.files));
 
       pauseResumeButton.addEventListener('click', () => {
-        if (state.playback === 'playing') pausePlayback(); else resumePlayback();
+        if (state.playback === 'playing' || (state.playback === 'stopped' && playbackRequested)) pausePlayback();
+        else resumePlayback();
       });
       $('#fadeStopButton').addEventListener('click', fadeStopPlayback);
       $('#stopButton').addEventListener('click', stopPlayback);
@@ -3610,8 +3771,8 @@
       requestPersistenceButton.addEventListener('click', requestPersistentStorage);
       retrySaveButton.addEventListener('click', retrySaveCurrentBoard);
       resetButton.addEventListener('click', resetAllData);
-      boardNameInput.addEventListener('change', () => { state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); enqueuePersistence(putBoardName); });
-      boardNameInput.addEventListener('blur', () => { state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); });
+      boardNameInput.addEventListener('change', () => { if (state.boardMutationLocked) return; state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); enqueuePersistence(putBoardName); });
+      boardNameInput.addEventListener('blur', () => { if (state.boardMutationLocked) return; state.boardName = boardNameInput.value.trim().slice(0,120); boardNameInput.value = state.boardName; syncPlayerFilenameFromBoard(); });
       exportBackupButton.addEventListener('click', exportBoardBackup);
       exportPlayerButton.addEventListener('click', exportPlaybackHtml);
       playerFilenameInput.addEventListener('input', () => { playerFilenameInput.dataset.edited = 'true'; });
@@ -3658,7 +3819,9 @@
       });
       previewPlayButton.addEventListener('click', async () => {
         if (!editPreviewAudio.paused) { editPreviewAudio.pause(); updatePreviewUi(); return; }
-        if (state.playback === 'playing') pausePlayback();
+        // The main audio.play() promise may still be pending; cancel it
+        // before preview starts so two tracks cannot begin simultaneously.
+        if (state.playback === 'playing' || state.playback === 'fading' || (state.playback === 'stopped' && playbackRequested)) pausePlayback();
         try { await editPreviewAudio.play(); updatePreviewUi(); } catch { showToast(translate('playbackFailed'), { tone: 'warning' }); }
       });
       previewRange.addEventListener('input', () => setPreviewPosition(Number(previewRange.value)));
@@ -3709,10 +3872,11 @@
 
         // Preserve native Space activation on focused controls; otherwise Space is the global play/pause toggle.
         if (event.key === ' ') {
-          if (event.target instanceof Element && event.target.closest('button:not(.cue-play), input, select, textarea, summary, a[href]')) return;
+          if (event.target instanceof Element && event.target.closest('button, input, select, textarea, summary, a[href]')) return;
           if (!activeCue()) return;
           event.preventDefault();
-          if (state.playback === 'playing') pausePlayback(); else resumePlayback();
+          if (state.playback === 'playing' || (state.playback === 'stopped' && playbackRequested)) pausePlayback();
+          else resumePlayback();
           return;
         }
         if (event.key === 'Escape') {
@@ -3741,11 +3905,14 @@
         handleCuePress(cue.id);
       });
 
-      window.addEventListener('pagehide', () => {
+      window.addEventListener('pagehide', event => {
         invalidatePlayback();
         cancelLiveExitHold();
         releaseWakeLock();
         primaryAudio.pause();
+        // A page restored from the back/forward cache keeps its JS state.
+        // Revoking these URLs here would make every cue unplayable on Back.
+        if (event.persisted) return;
         primaryAudio.removeAttribute('src');
         clearTimeout(masterVolumeSaveTimer);
         clearTimeout(orphanCleanupTimer);

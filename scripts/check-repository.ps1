@@ -263,7 +263,7 @@ if (-not $webrtcReadyText.Contains("options.requireReadyChannelOpen!==false&&(!r
 
 
 # Playback behavior regression tests (Node.js is a development-only requirement).
-& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs") (Join-Path $Root "tests/cue-reorder.test.cjs") (Join-Path $Root "tests/header.test.cjs") (Join-Path $Root "tests/modal-scroll-contract.test.cjs") (Join-Path $Root "tests/player-scroll-contract.test.cjs") (Join-Path $Root "tests/export-focus.test.cjs")
+& node --test (Join-Path $Root "tests/next-cue.test.cjs") (Join-Path $Root "tests/exported-player.test.cjs") (Join-Path $Root "tests/cue-reorder.test.cjs") (Join-Path $Root "tests/header.test.cjs") (Join-Path $Root "tests/modal-scroll-contract.test.cjs") (Join-Path $Root "tests/player-scroll-contract.test.cjs") (Join-Path $Root "tests/export-focus.test.cjs") (Join-Path $Root "tests/cue-integrity.test.cjs") (Join-Path $Root "tests/cue-confirm-delete.test.cjs") (Join-Path $Root "tests/backup-availability.test.cjs") (Join-Path $Root "tests/persistence-audio-races.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Playback regression tests failed." }
 
 # Release synchronization and pre-build drift regression tests (isolated temporary copies).
@@ -273,6 +273,38 @@ if ($LASTEXITCODE -ne 0) { throw "Release parity regression tests failed." }
 # Run the same behavioral contracts on every distributed runtime, including decoded gzip.
 & node --test (Join-Path $Root "tests/runtime-artifacts.test.cjs")
 if ($LASTEXITCODE -ne 0) { throw "Distributed runtime regression tests failed." }
+
+# Prepare the release payload without publishing anything. Confirm file hashes and
+# archive integrity, including both standalone HTML formats.
+$releaseProbeRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("music-cue-release-probe-" + [Guid]::NewGuid().ToString("N"))
+try {
+  & (Join-Path $Root "scripts/prepare-release.ps1") -OutputDirectory $releaseProbeRoot
+  $version = [string]((Get-Content -Raw -Encoding UTF8 (Join-Path $Root "app.config.json") | ConvertFrom-Json).version)
+  $base = "htmlapps-music-cue-pad-v$version"
+  $assetNames = @("$base.html", "$base.self-extract.html", "$base.zip")
+  $checksums = @(Get-Content -Encoding UTF8 (Join-Path $releaseProbeRoot "SHA256SUMS.txt"))
+  foreach ($name in $assetNames) {
+    $file = Join-Path $releaseProbeRoot $name
+    if (-not (Test-Path -LiteralPath $file)) { throw "Release asset missing: $name" }
+    $algorithm = [System.Security.Cryptography.SHA256]::Create()
+    try {
+      $hex = [BitConverter]::ToString($algorithm.ComputeHash([System.IO.File]::ReadAllBytes($file))).Replace("-", "").ToLowerInvariant()
+    } finally {
+      $algorithm.Dispose()
+    }
+    if ($checksums -notcontains "$hex  $name") { throw "Invalid SHA256SUMS entry: $name" }
+  }
+  if (-not (Test-Path -LiteralPath (Join-Path $releaseProbeRoot "release-notes.md"))) {
+    throw "Versioned release notes were not generated."
+  }
+  $expanded = Join-Path $releaseProbeRoot "unpacked"
+  Expand-Archive -LiteralPath (Join-Path $releaseProbeRoot "$base.zip") -DestinationPath $expanded -Force
+  foreach ($file in @("$base.html", "$base.self-extract.html", "README.md", "README.ja.md", "LICENSE", "THIRD_PARTY_NOTICES.md")) {
+    if (-not (Test-Path -LiteralPath (Join-Path $expanded $file))) { throw "Release ZIP is missing $file" }
+  }
+} finally {
+  Remove-Item -LiteralPath $releaseProbeRoot -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 Write-Host "[OK] Repository check passed." -ForegroundColor Green
 

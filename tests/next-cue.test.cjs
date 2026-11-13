@@ -25,7 +25,7 @@ function fixture(count=3) {
  const state={cues:Array.from({length:count},(_,i)=>({id:`c${i}`,assetId:`a${i}`,name:`Cue ${i+1}`,order:i,startTime:2,endTime:8,volume:.6,fadeIn:1,fadeOut:1,loop:false})),assets:new Map(),activeCueId:null,playback:'idle',masterVolume:1};
  state.cues.forEach(c=>state.assets.set(c.assetId,{id:c.assetId,status:'ready',duration:10,url:`blob:${c.assetId}`}));
  const $=key=>{if(!elements.has(key))elements.set(key,element());return elements.get(key)};
- const context={state,primaryAudio:audio,editPreviewAudio:new AudioStub(),playbackGeneration:0,playbackRequested:false,playbackAbortController:null,playbackBoundaryFrame:0,AbortController,DOMException,Number,Math,Map,Set,Promise,CSS:{escape:x=>x},document:{body:element(),querySelectorAll:()=>[]},$,cueGrid:element(),playerBar:$('#playerBar'),pauseResumeButton:$('#pauseResumeButton'),timelineSlider:$('#timelineSlider'),nextCueButton:$('#nextCueButton'),cancelManualFade(){},ensureAudioGraph:async()=>{},applyAutomaticGain(){},renderLiveModeUi(){},translate:(k,v={})=>k+(v.name?':'+v.name:''),formatCueClock:String,isEndingSoon:()=>false,updateCueCount(){},enqueuePersistence(){},putAllCueMetadata(){},deleteCueRecord(){},scheduleOrphanCleanup(){},makeId:()=>`copy${state.cues.length}`,showToast:(text,options)=>context.toast={text,options},requestAnimationFrame:fn=>{frames.set(++frameId,fn);return frameId},cancelAnimationFrame:id=>frames.delete(id)};
+ const context={persistenceGeneration:0,state,primaryAudio:audio,editPreviewAudio:new AudioStub(),playbackGeneration:0,playbackRequested:false,playbackAbortController:null,playbackBoundaryFrame:0,AbortController,DOMException,Number,Math,Map,Set,Promise,CSS:{escape:x=>x},document:{body:element(),querySelectorAll:()=>[]},$,cueGrid:element(),playerBar:$('#playerBar'),pauseResumeButton:$('#pauseResumeButton'),timelineSlider:$('#timelineSlider'),nextCueButton:$('#nextCueButton'),cancelManualFade(){},ensureAudioGraph:async()=>{},applyAutomaticGain(){},renderLiveModeUi(){},updatePlayerClearance(){},translate:(k,v={})=>k+(v.name?':'+v.name:''),formatCueClock:String,isEndingSoon:()=>false,updateCueCount(){},enqueuePersistence(){},putAllCueMetadata(){},deleteCueRecord(){},scheduleOrphanCleanup(){},makeId:()=>`copy${state.cues.length}`,showToast:(text,options)=>context.toast={text,options},requestAnimationFrame:fn=>{frames.set(++frameId,fn);return frameId},cancelAnimationFrame:id=>frames.delete(id)};
  vm.createContext(context);
  const names=['cueForId','activeCue','activeAsset','cueStartTime','cueEndTime','cueDuration','cueIndex','reindexCues','nextCue','renderNextCue','playNextCue','invalidatePlayback','isCurrentPlayback','clearPlaybackSelection','waitForMetadata','stopBoundaryMonitor','monitorPlaybackBoundary','preparePrimaryCue','handleCuePress','resumePlayback','pausePlayback','stopPlayback','duplicateCue','deleteCue','moveCue','reorderCue','renderPlayer'];
  vm.runInContext(names.map(fn).join('\n'),context);
@@ -109,3 +109,101 @@ test('browser or OS media pause updates UI and selected cue can resume',async()=
 test('natural end during manual fade stops a looping cue instead of restarting',async()=>{const h=fixture();await h.playNextCue();h.state.cues[0].loop=true;h.state.playback='fading';h.audio.ended=true;h.audio.fire('ended');await h.flush();assert.equal(h.state.playback,'stopped');assert.equal(h.audio.paused,true);assert.equal(h.audio.plays.length,1);});
 
 for(const loop of [false,true])test(`natural end pause-before-ended event ordering (loop=${loop})`,async()=>{const h=fixture();await h.playNextCue();h.state.cues[0].loop=loop;h.audio.ended=true;h.audio.paused=true;h.audio.fire('pause');h.audio.fire('ended');await h.flush();assert.equal(h.state.playback,loop?'playing':'ended');assert.equal(h.audio.plays.length,loop?2:1);});
+
+test('pressing a playing cue pauses it; pressing the same cue again resumes at the saved position', async () => {
+  const h = fixture();
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'playing');
+  h.audio.currentTime = 4.25;
+  const before = h.audio.plays.length;
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'paused');
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.audio.currentTime, 4.25);
+  assert.equal(h.audio.plays.length, before);
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'playing');
+  assert.equal(h.audio.currentTime, 4.25);
+  assert.equal(h.audio.plays.length, before + 1);
+});
+
+test('pressing a cue a second time while play() is pending cancels that play', async () => {
+  const h = fixture(), deferredPlay = deferred();
+  h.audio.pending.push(deferredPlay);
+  const pending = h.handleCuePress('c0');
+  await h.flush();
+  assert.equal(h.state.activeCueId, 'c0');
+  await h.handleCuePress('c0');
+  assert.equal(h.state.playback, 'paused');
+  deferredPlay.resolve();
+  await pending;
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.state.playback, 'paused');
+  assert.equal(h.frames.size, 0);
+});
+
+test('playing cue uses pause icon while paused and stopped cues use play', async () => {
+  const h=fixture();
+  vm.runInContext(fn('cueIconMarkup') + '\n' + fn('statusForCue'),h);
+  await h.handleCuePress('c0');
+  assert.equal(h.statusForCue(h.state.cues[0]).icon, 'playing');
+  assert.match(h.cueIconMarkup(h.statusForCue(h.state.cues[0]).icon), /<rect/);
+  await h.handleCuePress('c0');
+  assert.equal(h.statusForCue(h.state.cues[0]).icon, 'play');
+  assert.match(h.cueIconMarkup('play'), /<path/);
+});
+
+
+test('transport button pauses a pending audio.play intent instead of starting it again', async () => {
+  const h = fixture(), pendingPlay = deferred();
+  h.audio.pending.push(pendingPlay);
+  const pending = h.handleCuePress('c0');
+  await h.flush();
+  assert.equal(h.playbackRequested, true);
+  assert.equal(h.state.playback, 'stopped', 'audio.play is still awaiting a promise');
+  assert.equal(h.$('#pauseResumeLabel').textContent, 'pause', 'transport advertises Pause during pending intent');
+  const match = source.match(/pauseResumeButton\.addEventListener\('click', \(\) => \{([\s\S]*?)\n      \}\);/);
+  assert.ok(match, 'transport click handler exists');
+  vm.runInContext('function clickTransport() {' + match[1] + '\n}', h);
+  h.clickTransport();
+  assert.equal(h.state.playback, 'paused');
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.$('#pauseResumeLabel').textContent, 'resume');
+  assert.equal(h.audio.plays.length, 1, 'no second play() call');
+  pendingPlay.resolve();
+  await pending;
+  assert.equal(h.state.playback, 'paused', 'late play() completion cannot resume');
+});
+
+test('focused native cue buttons keep native Space activation', () => {
+  const globalHandler = source.slice(
+    source.lastIndexOf("      document.addEventListener('keydown', event => {"),
+    source.indexOf("\n      window.addEventListener('pagehide'")
+  );
+  assert.ok(globalHandler.includes("event.target.closest('button, input"), 'native button keypress is excluded from global Space toggle');
+  assert.ok(!globalHandler.includes("button:not(.cue-play)"), 'cue buttons must not be special-cased as non-native buttons');
+});
+
+
+test('cue edit preview cancels main playback even when audio.play is pending', async () => {
+  const h = fixture(), pendingPlay = deferred();
+  h.audio.pending.push(pendingPlay);
+  const pending = h.handleCuePress('c0');
+  await h.flush();
+  assert.equal(h.playbackRequested, true);
+  assert.equal(h.state.playback, 'stopped', 'main media intent still pending');
+  h.previewPlayButton = { handler: null, addEventListener(name, handler) { if (name === 'click') this.handler = handler; } };
+  h.updatePreviewUi = () => {};
+  const start = source.indexOf("      previewPlayButton.addEventListener('click', async () => {");
+  const end = source.indexOf("\n      previewRange.addEventListener", start);
+  assert.ok(start >= 0 && end > start, 'preview handler exists');
+  vm.runInContext(source.slice(start, end), h);
+  await h.previewPlayButton.handler();
+  assert.equal(h.state.playback, 'paused', 'main player canceled before preview');
+  assert.equal(h.audio.paused, true);
+  assert.equal(h.editPreviewAudio.plays.length, 1);
+  pendingPlay.resolve();
+  await pending;
+  assert.equal(h.state.playback, 'paused', 'late main play completion remains canceled');
+  assert.equal(h.audio.paused, true);
+});

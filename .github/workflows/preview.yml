@@ -50,12 +50,17 @@ jobs:
         New-Item -ItemType Directory -Force -Path test-results/mobile-help | Out-Null
         node scripts/mobile-help.browser.cjs 2>&1 | Tee-Object -FilePath test-results/mobile-help/results.log
         if ($LASTEXITCODE -ne 0) { throw "Mobile Help browser regression failed." }
+        New-Item -ItemType Directory -Force -Path test-results/music-export | Out-Null
+        node scripts/music-export.browser.cjs 2>&1 | Tee-Object -FilePath test-results/music-export/results.log
+        if ($LASTEXITCODE -ne 0) { throw "Exported player browser regression failed." }
     - name: Upload mobile Help browser evidence
       if: always()
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
       with:
         name: mobile-help-browser-evidence
-        path: test-results/mobile-help/
+        path: |
+          test-results/mobile-help/
+          test-results/music-export/
         if-no-files-found: ignore
         retention-days: 7
     - name: Upload static preview site

@@ -304,8 +304,12 @@ Required behavior:
 - Internal audio entry names use `AudioAsset.id`, not the original filename, so duplicate source filenames cannot overwrite each other.
 - Manifest `schemaVersion` is independent from `appVersion`. v0.8.0 reads schema version 1 only.
 - Export calculates CRC32 for every entry locally and reports progress.
+- Refuse backup export if any cue references loading, failed, missing, or invalid-duration audio; never emit a manifest containing cues without corresponding audio. Freeze the selected audio Blobs and board metadata before asynchronous hashing.
+- Freeze the playback-HTML cues, settings, and audio references before asynchronous Base64 encoding; edits during export must not change the exported board.
+- When an audio metadata import resolves after reset/restore, discard its stale persistence continuation. Re-evaluate current cue membership when saving new assets so deleted cues are not resurrected and copies created during loading are saved.
 - Import validates ZIP directory/local-header bounds, manifest JSON, format identifier, schema version, asset metadata, referenced audio presence/size, entry CRC32, and cue time ranges before replacement confirmation.
 - Import does not mutate the working board during validation.
+- During the committed reset/restore transaction, block conflicting board edits, cancel pending import generations, and restore interaction state on success or failure.
 - When IndexedDB is available, replacement audio/cues/settings are written in one readwrite transaction before the in-memory board is replaced. Failure keeps the current board unchanged.
 - Import in a session-only browser still works for the current session, with the existing storage warning remaining visible.
 - Backups contain the source audio bytes, so backup size is expected to be close to total referenced audio size plus small ZIP/manifest overhead.
@@ -318,6 +322,27 @@ Required behavior:
 - MIDI or remote triggering.
 - User-remappable global keys.
 
+## Current v1.0.3 UX and release contract
+
+- Mobile (at or below 620 CSS px) hides the local-processing badge, stacks cue section controls, and gives Master volume a label/value row plus a full-width range input.
+- The cue editor and destructive confirmation dialogs remain horizontally centered on phones and within the viewport.
+- Backup actions use short single-line button text with full localized accessible names; drop only the redundant import-validation sentence from the backup note.
+- Fixed player clearance on phone screens uses the observed rendered transport height, including Live Mode, so the bottom of the backup panel or last cue remains scrollable above the transport.
+- Playback-only HTML's status badge is compact and top-aligned with wrapped titles, matching the primary cue card style.
+- Extremely short mobile edit viewports (up to 480 CSS px high and 620 CSS px wide) put the player into normal page flow so the fixed transport cannot cover edit buttons. Playback view retains its compact transport.
+- After at least one cue is present, the audio drop zone and its parent import panel become compact, show the localized ready/processing count, and keep file picking and drag-and-drop enabled. The import warning remains visible on failure.
+- The cue-list descriptive paragraph is removed as redundant; the grip's localized reordering explanation remains available to assistive technology, and full instructions remain in Help.
+- Cue deletion now opens a localized danger confirmation with the cue name. Cancel never changes the board, and pending confirmation cannot delete after board replacement; after confirmation, the existing time-limited Undo remains.
+- In-app Help uses an unversioned notes heading; hero title type sizes are fixed for both languages at each breakpoint.
+- The Reset action must stay disabled during ZIP/HTML export; busy-state updates must refresh the storage panel as well as export buttons.
+- Stale writes queued before board reset or restore must drain the saving counter even when they are skipped. The first queued write that has already begun may complete before the replacement transaction; the later generation must never execute stale queued tasks.
+- Fade Stop may suspend while AudioContext resumes. Upon completion, it must revalidate the selected cue, fade token and fading state before muting or scheduling a stop. Editing preview must cancel any pending main audio-play intent before starting.
+- Focused cue buttons preserve native keyboard Space activation; global Space toggles only when focus is not on a native interactive control. The bottom transport must offer Pause for in-progress play promises.
+- Back/forward-cache pagehide must pause playback without destroying reusable audio object URLs or persistence connections; normal unload still releases all resources.
+- The main app and exported playback HTML use the cue button as a play/pause toggle. While playing (or awaiting the play promise), the button shows a pause icon, and tapping it stops playback at the current position; tapping again resumes without resetting the cue start. Other cues still replace the current track. Browser/OS pauses remain recoverable.
+- The exported HTML keeps a common card height across different title lengths and shortcut presence, so its remaining-time panels align. Its header explains that audio and playback settings are included; the redundant main heading/description is omitted. Responsive player controls and local-only embedded audio are preserved.
+- The stable version is v1.0.3. A version change merged to main automatically starts a build-verified, checksum-verified release workflow that creates the matching Git tag and GitHub Release only after the checks succeed. Existing versions must not be overwritten.
+
 ## 7. Playback behavior
 
 - Use one primary `HTMLAudioElement` for playback.
@@ -325,6 +350,8 @@ Required behavior:
 - Object URLs point to local `File` / `Blob` data.
 - Audio is started only from a user gesture; do not autoplay on page load.
 - A newly selected cue replaces the currently active cue.
+- The playback-only HTML also monitors custom cue End on animation frames while visible, retaining `timeupdate` as a fallback when backgrounded; no guarantee of sample-accurate stopping is implied.
+- A delayed Screen Wake Lock grant after cancellation or exit must be released rather than re-enabling screen-on mode.
 - `play()` failures are handled as visible user-facing errors.
 - Stop pauses playback, resets the playback position, and leaves the cue available for replay.
 - Ended audio remains identified as the most recently selected cue, but the player state becomes ended.

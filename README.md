@@ -25,9 +25,10 @@ GitHub Pages delivers the initial HTML. After it loads, audio import, cue editin
 - **Stay focused during playback** — Switch to a playback-only view that hides editing controls, enlarges the buttons, shows remaining time, and can use Fullscreen / Keep Screen On where supported.
 - **Play the next cue manually** — The bottom player names the next cue in board order. Start with the first when nothing is selected; Stop/Finished retain the position. No automatic advance, wrap, or skipped unavailable cues. The exported player works the same way.
 - **Control playback quickly** — Pause/Resume, Restart, Fade Stop, Stop, Master volume, per-cue shortcuts, and desktop keyboard controls are available.
+- **Phone-friendly cue controls** — The import area shrinks to an added-track count and an Add tracks action. Master volume has room to use, and deleting a cue requires confirmation.
 - **Keep the board on this device** — Audio, cue settings, board name, and Master volume are saved in IndexedDB and restored on reload.
 - **Move an editable board between devices** — Export and import `.bkcue` backups containing the board settings and audio assets.
-- **Export one playback-only HTML file** — Embed the current audio and cue settings into a self-contained `.html` file for playback on another device without the editor.
+- **Export one playback-only HTML file** — Embed the current audio and cue settings into a self-contained `.html` file for playback on another device without the editor. Tap any exported cue again to pause or resume.
 - **Private, single-HTML operation** — No account, runtime CDN, analytics, telemetry, API, or remote font is required by the app.
 - **Japanese / English UI** — Both languages are included in the same HTML.
 
@@ -58,18 +59,18 @@ The current app has no third-party runtime dependency. Python, Node.js, and a lo
 
 Help, cue editing and confirmation dialogs keep the background page still while open. Closing a dialog lets you continue at the same page position.
 
-On narrow, short screens, scroll inside the bottom player or use Tab to reach every playback control while keeping the page header and Undo accessible.
+On phones, scrolling remains possible through the final cue and backup controls, with clearance based on the actual player height. On editing screens 480px tall or less, the player joins the page flow so it cannot cover cue controls. The compact fixed player in Playback view remains scrollable when needed.
 After a keyboard-started export, continue with Tab from the export button unless you have moved to another control.
 
 1. Add one or more audio files with the file picker or Drag & Drop.
-2. Each audio file becomes a numbered playback button. Press a button to play it; selecting another button switches playback to that cue.
+2. Each audio file becomes a numbered playback button. Press the same button again to pause or resume; pressing another button switches tracks.
 3. Use **Edit cue** to change the display name and set Start / End. In the preview section, drag the two handles to adjust the playback range or type an exact time.
 4. Set cue volume, Fade In, Fade Out, Loop, and an optional trigger key when needed.
-5. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
-6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop.
+5. The red trash icon opens a confirmation dialog before removing a cue; Undo remains briefly available after deletion. Drag a card's handle to reorder it, or focus the handle with Tab and press ArrowUp / ArrowDown. The same cue stays focused; the first and last positions do not wrap. Escape cancels a drag and also stops any selected cue. Dropping without changing the order preserves Delete Undo.
+6. Use the Master volume and bottom player for seeking, Pause/Resume, Fade Stop, or immediate Stop. When a cue button has keyboard focus, Space activates that cue rather than the previously selected one.
 7. Use **Playback view** when you want only the large playback controls on screen. Remaining time is shown, and non-looping cues display an ending-soon notice during the final 10 seconds.
 8. The board is saved automatically in the browser. Use the storage panel to review usage, request persistent storage where supported, retry a failed save, or delete all saved app data.
-9. Use **Export & backup** to save a `.bkcue` file when you want to continue editing the board on another device.
+9. Use **Export & backup** to save a `.bkcue` file when you want to continue editing the board on another device. If any referenced audio is still loading or failed, wait for it to finish or remove that cue before exporting.
 10. Use **Export playback HTML** when you want a single playback-only `.html` file with the referenced audio embedded inside it.
 
 Supported audio formats depend on the browser and operating system. The app accepts common browser audio formats including MP3, WAV, M4A/AAC, OGG/Opus, WebM audio, and FLAC where supported.
@@ -119,6 +120,12 @@ The repository includes a workflow that builds the standalone HTML and deploys i
 4. After a successful deployment, the app is available at `https://ttomohisa.github.io/htmlapps-music-cue-pad/`.
 
 The deployed page still performs user-audio processing locally in the browser.
+
+### Releases after merge
+
+When changing versions, update `app.config.json` and add a matching version section in `CHANGELOG.md` in the PR.
+
+Merging the PR into `main` triggers `release-on-merge.yml`. After the standalone build and tests pass, it creates the matching tag and GitHub Release with the readable HTML, self-extracting HTML, ZIP, and SHA256 checksums. Re-running an already published version skips release creation. Nothing is tagged or released before merging.
 
 ## Development and build layout
 

@@ -43,7 +43,7 @@ function fixture(kind, fail = false) {
   const context = vm.createContext({ ...elements, document, state, Blob, TextEncoder, btoa, language: 'en',
     APP_CONFIG: { version: '1.0.2' }, BOARD_SCHEMA_VERSION: 1,
     outputFilenameRules: { extension: '.html', fallback: 'music-cue-pad-player' },
-    translate: key => key, showToast() {}, console: { error: (...args) => errors.push(args.at(-1)) },
+    translate: key => key, showToast() {}, renderStorageStatus() {}, console: { error: (...args) => errors.push(args.at(-1)) },
     cueRecord: cue => ({ ...cue }),
     getComputedStyle: node => ({ visibility: node.visibility }),
     setTimeout(fn, delay) { if (delay === 0) queueMicrotask(fn); else timers.push({ fn, delay }); },
@@ -51,8 +51,10 @@ function fixture(kind, fail = false) {
     downloadBlob(blob, filename) { if (fail) throw new Error('synthetic export failure'); downloads.push({ blob, filename }); },
     parseBoardBackup: async () => ({ boardName: 'Imported' }), AppConfirm: { ask: async () => true },
     persistenceWriteChain: Promise.resolve(), applyImportedSnapshot() {},
+    persistenceGeneration:0, masterVolumeSaveTimer:0, orphanCleanupTimer:0,
+    clearTimeout() {}, setBoardMutationLocked(locked) { state.boardMutationLocked = locked; },
   });
-  const functions = ['setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
+  const functions = ['refreshBackupActionAvailability', 'setBackupBusy', 'safeBackupBaseName', 'safePlayerBaseName', 'blobToBase64', 'fileExtension', 'escapeHtml', 'exportPlaybackHtml', 'anyDialogOpen', 'importBoardBackup'];
   if (source.includes('      function captureExportFocus(')) functions.push('captureExportFocus');
   const playerBuilder = source.slice(source.indexOf('      function playerExportDocument('), source.indexOf('      async function exportPlaybackHtml('));
   const backupBuilder = source.slice(source.indexOf('      const crc32Table = '), source.indexOf('      async function readZipDirectory('));

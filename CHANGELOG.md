@@ -1,11 +1,47 @@
 # Changelog
 
-## Unreleased — mobile Help layout
+## v1.0.3 — 2026-11-12
+
+### Final race-condition and lifecycle audit
+
+- Drain canceled persistence tasks on reset/restore, so "Saving" does not remain stuck and storage actions unlock after a new generation.
+- Recheck cue selection and fade tokens after an asynchronous audio-graph resume, preventing a canceled Fade Stop from fading the next track.
+- Keep the bottom transport's Pause intent accurate while an audio play is pending; use native Space on focused cue buttons, and prevent cue-edit preview from overlapping pending main playback.
+- Preserve Blob audio URLs, WebAudio graph and local persistence connections when the browser puts the page in its back/forward cache; keep full cleanup for a real page exit.
+- Add focused race regression tests and a Chromium WAV-backed .bkcue download → board reset → import → playback roundtrip.
+- Keep the destructive Reset button disabled while a backup or playback-HTML export is busy, then restore its availability on completion.
+
+- Keep `.bkcue` and playback HTML export buttons in sync with the current cue count so they are re-enabled after a board reset, deleting the final cue, or loading audio again.
+
+- Prevent incomplete .bkcue backups when an audio file is still loading or has failed; snapshot audio and cue settings before export.
+- Ignore stale audio imports after reset/restore, preserve duplicates created while audio metadata loads, and exclude deleted cues from late saves.
+- Block conflicting board mutations while reset/restore commits, and allow reselecting a canceled or invalid backup.
+- Reject audio with invalid or non-finite duration and prevent a late Wake Lock grant from reactivating screen-on mode after cancellation.
+- Monitor playback-only HTML cue ends using animation frames when visible, with timeupdate retained for background fallback.
+
+### Mobile UI and cue controls
+
+- Shorten the backup buttons to single-line Save/Load wording while retaining descriptive accessible labels; remove the redundant validation sentence from backup notes.
+- Keep the final backup controls and last cue reachable behind the fixed mobile transport (including Live Mode) by allocating padding based on its rendered height.
+- Align the playback-only HTML's status badges with the compact main-app cue badges and pin badges to the top when titles wrap.
+
+- Collapse the import panel into a concise added-track count and add action; retain file selection and drag-and-drop, and distinguish loading and error states.
+- Toggle the original and exported player cue buttons between play and pause (including pending playback), retaining playback position across pause/resume.
+- Keep exported cue cards and remaining-time panels aligned across long/short names and optional shortcuts. Replace the exported header subtitle with a clear local-file explanation, removing the redundant page hero.
+- Make the original board's cue cards equal-height in every playback state; anchor edit controls at a shared bottom edge, reserve equal progress space, and prevent active outlines from changing visual card size.
+
+- Tighten the bilingual introduction, keep heading typography stable across languages, and remove redundant visible cue guidance while keeping screen-reader hints.
+- Hide the local-processing badge on phones; give Master volume a full-width, two-row control and center mobile edit/confirmation sheets.
+- Compact the drop target after the first cue without disabling drag-and-drop or file picking.
+- Keep cue edit controls reachable in extremely short mobile viewports by placing the player in document flow outside Playback view.
+- Show the delete icon in red and require a localized, dangerous-action confirmation before deletion; keep short-lived Undo.
+
+### Existing mobile Help improvements
 
 - Hide the informational footer at 620px and below; move existing build information to the end of Help without changing functional bottom controls.
 - Preserve localized build values, keyboard access, and existing visibility policies; standardize the exact local-processing label.
 
-## Unreleased
+### Help text updates
 
 - Clarify Japanese and English help by removing internal layout, implementation, and audit commentary while preserving usage guidance and cautions.
 
