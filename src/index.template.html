@@ -102,7 +102,7 @@
       border-radius: 999px;
       color: var(--muted);
       background: var(--surface-muted);
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 650;
       vertical-align: 2px;
     }
@@ -161,7 +161,7 @@
     .page-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 0 2px 18px; }
     .page-intro h1 { margin: 0; font-size: 28px; line-height: 1.28; letter-spacing: -.025em; }
     .page-intro p { margin: 6px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
-    .local-badge { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 10px; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line)); border-radius: 999px; color: var(--accent); background: var(--accent-soft); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .local-badge { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; margin-top: 3px; padding: 7px 0; border: 0; border-radius: 0; color: var(--accent); background: transparent; font-size: 12px; font-weight: 500; white-space: nowrap; }
     .local-badge svg { width: 15px; height: 15px; }
     .panel { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-sm); }
     .import-panel { padding: 18px; }
@@ -430,7 +430,7 @@
     .app-confirm-dialog { width: min(420px, calc(100% - 24px)); max-width: 100%; }
     .app-confirm-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px 13px; border-bottom: 1px solid var(--line); }
     .app-confirm-title { margin: 0; font-size: 17px; }
-    .app-confirm-close { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; }
+    .app-confirm-close { display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 10px; background: transparent; cursor: pointer; } .dialog-close { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 9px; background: transparent; cursor: pointer; } .dialog-close svg { width: 18px; height: 18px; }
     .app-confirm-close:hover { background: var(--surface-hover); }
     .app-confirm-close svg { width: 19px; height: 19px; }
     .app-confirm-body { padding: 18px; }
@@ -879,7 +879,7 @@
     <!-- APP:END -->
   </main>
 
-  <footer><span id="footerName">Music Cue Pad</span> · MIT License · <span data-i18n="footer">音声はこのブラウザ内で処理されます</span></footer>
+  <footer><span id="footerName">Music Cue Pad</span> · MIT License · <span data-i18n="footer">音声の処理はブラウザー内で完結</span></footer>
 
   <section class="player-bar" id="playerBar" aria-label="Player" hidden>
     <div class="player-inner">
@@ -922,8 +922,8 @@
   <dialog class="app-confirm-dialog" id="appConfirmDialog" aria-labelledby="appConfirmTitle" aria-describedby="appConfirmMessage">
     <div class="app-confirm-header">
       <h2 class="app-confirm-title" id="appConfirmTitle">確認</h2>
-      <button class="app-confirm-close" id="appConfirmClose" type="button" data-i18n-aria-label="close" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      <button class="dialog-close" id="appConfirmClose" type="button" data-i18n-aria-label="close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="app-confirm-body">
@@ -938,8 +938,8 @@
   <dialog id="cueEditDialog" aria-labelledby="cueEditTitle">
     <div class="dialog-header">
       <h2 id="cueEditTitle" data-i18n="cueEditTitle">再生ボタンを編集</h2>
-      <button class="icon-button" id="closeCueEditButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      <button class="dialog-close" id="closeCueEditButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="edit-form">
@@ -1050,8 +1050,8 @@
   <dialog id="helpDialog" aria-labelledby="helpTitle">
     <div class="dialog-header">
       <h2 id="helpTitle" data-i18n="helpTitle">使い方と注意事項</h2>
-      <button class="icon-button" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      <button class="dialog-close" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="dialog-body">
@@ -1241,7 +1241,7 @@
           cuePointsTitle: '再生区間', cueStartLabel: '開始位置', cueEndLabel: '終了位置', useCurrentPosition: '現在位置を使う', jumpToPoint: '移動', clearEnd: '末尾まで', untilEnd: '曲の最後まで', cuePointsHelp: '「1:23.500」のように入力できます。終了位置を空欄にすると曲の最後まで再生します。',
           audioControlTitle: '音量とフェード', cueVolume: 'このボタンの音量', fadeIn: 'フェードイン', fadeOut: 'フェードアウト', fadeNone: 'なし', audioControlHelp: 'ここで設定した音量はマスター音量と組み合わせて適用されます。フェードは設定した再生区間の先頭・末尾に適用されます。', volumeShort: '音量 {value}%', fadeInShort: 'IN {value}s', fadeOutShort: 'OUT {value}s', loopLabel: 'この区間をループ', loopHelp: '終了位置に達したら開始位置へ戻って再生を続けます。', loopShort: 'ループ', fullRange: '全体', invalidStart: '開始位置を正しい時刻で入力してください。', startOutside: '開始位置は曲の長さより前にしてください。', invalidEnd: '終了位置を正しい時刻で入力してください。', endBeforeStart: '終了位置は開始位置より後にしてください。', endOutside: '終了位置は曲の長さ以内にしてください。',
           buildInfo: 'ビルド情報', appVersion: 'アプリバージョン', builtAt: '生成日時', dependencies: '内包依存数',
-          footer: '音声はこのブラウザ内で処理されます',
+          footer: '音声の処理はブラウザー内で完結',
           helpTitle: '使い方と注意事項', close: '閉じる',
           helpBasicsTitle: '基本操作',
           helpStep1: '「ファイルを選択」またはドラッグ＆ドロップで音声ファイルを追加します。複数のファイルをまとめて追加できます。',
@@ -1304,7 +1304,7 @@
           cuePointsTitle: 'Playback range', cueStartLabel: 'Start', cueEndLabel: 'End', useCurrentPosition: 'Use current position', jumpToPoint: 'Go', clearEnd: 'To end', untilEnd: 'To end of track', cuePointsHelp: 'You can enter a time such as “1:23.500”. Leave End blank to play to the end of the track.',
           audioControlTitle: 'Volume & fades', cueVolume: 'Cue volume', fadeIn: 'Fade in', fadeOut: 'Fade out', fadeNone: 'None', audioControlHelp: 'Cue volume is combined with Master volume. Fades apply to the beginning and end of the configured cue range.', volumeShort: 'Vol {value}%', fadeInShort: 'IN {value}s', fadeOutShort: 'OUT {value}s', loopLabel: 'Loop this range', loopHelp: 'When the cue reaches its end, return to the start and keep playing.', loopShort: 'Loop', fullRange: 'Full track', invalidStart: 'Enter a valid start time.', startOutside: 'Start must be before the end of the track.', invalidEnd: 'Enter a valid end time.', endBeforeStart: 'End must be after Start.', endOutside: 'End must be within the track duration.',
           buildInfo: 'Build information', appVersion: 'App version', builtAt: 'Built at', dependencies: 'Embedded dependencies',
-          footer: 'Audio is processed inside this browser',
+          footer: 'Audio processing stays in the browser',
           helpTitle: 'How to use & notes', close: 'Close',
           helpBasicsTitle: 'Basics',
           helpStep1: 'Use Choose files or Drag & Drop to add audio. You can add multiple files at once.',
